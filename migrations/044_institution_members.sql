@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS institution_members (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), institution_id uuid NOT NULL REFERENCES institutional_profiles(id) ON DELETE CASCADE, member_id text NOT NULL, member_role text NOT NULL DEFAULT 'analyst', status text NOT NULL DEFAULT 'active', created_at timestamptz NOT NULL DEFAULT now(), UNIQUE(institution_id,member_id));

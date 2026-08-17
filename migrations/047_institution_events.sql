@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS institution_events (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), institution_id uuid NOT NULL REFERENCES institutional_profiles(id) ON DELETE CASCADE, event_type text NOT NULL, actor text, entity_type text, entity_id uuid, details jsonb NOT NULL DEFAULT '{}'::jsonb, created_at timestamptz NOT NULL DEFAULT now());

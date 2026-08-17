@@ -1,0 +1,4 @@
+import { db } from 'hatchable';
+export const access = 'admin';
+export const methods = ['POST'];
+export default async function(req,res){const id=req.params.id,b=req.body||{};if(!b.memberId)return res.status(400).json({error:'memberId is required'});const r=await db.query('INSERT INTO institution_members(institution_id,member_id,member_role) VALUES($1,$2,$3) ON CONFLICT(institution_id,member_id) DO UPDATE SET member_role=EXCLUDED.member_role,status=\'active\' RETURNING id,institution_id AS "institutionId",member_id AS "memberId",member_role AS "memberRole",status',[id,b.memberId,b.memberRole||'analyst']);res.status(201).json(r.rows[0])}
