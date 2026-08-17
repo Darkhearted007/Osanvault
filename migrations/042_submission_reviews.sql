@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS submission_reviews (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), submission_id uuid NOT NULL REFERENCES asset_submissions(id) ON DELETE CASCADE, reviewer text, decision text NOT NULL, notes text, created_at timestamptz NOT NULL DEFAULT now());

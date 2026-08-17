@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS submission_evidence (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), submission_id uuid NOT NULL REFERENCES asset_submissions(id) ON DELETE CASCADE, evidence_type text NOT NULL, title text NOT NULL, source text, description text, storage_url text, document_hash text, status text NOT NULL DEFAULT 'received', created_at timestamptz NOT NULL DEFAULT now());
