@@ -18,10 +18,10 @@ export default async function(req, res) {
   if (type === 'asset') {
     const ev = await db.query(`SELECT COUNT(*)::int AS count, AVG(confidence) AS confidence FROM asset_evidence WHERE asset_id=$1`, [id]);
     const ver = await db.query(`SELECT COUNT(*)::int AS count FROM verification_cases WHERE asset_id=$1 AND status='closed'`, [id]);
-    const rd = await db.query(`SELECT overall_score FROM asset_readiness_assessments WHERE asset_id=$1 ORDER BY created_at DESC LIMIT 1`, [id]);
+    const rd = await db.query(`SELECT overall_score, project_readiness_score FROM asset_intelligence_assessments WHERE asset_id=$1 ORDER BY assessed_at DESC LIMIT 1`, [id]);
     evidenceScore = Math.min(100, (ev.rows[0]?.count || 0) * 20);
     verificationScore = ver.rows[0]?.count ? 80 : 20;
-    capitalScore = rd.rows[0]?.overall_score != null ? Number(rd.rows[0].overall_score) : 20;
+    capitalScore = rd.rows[0]?.project_readiness_score != null ? Number(rd.rows[0].project_readiness_score) : 20;
     if (ev.rows[0]?.count) strengths.push(`${ev.rows[0].count} evidence record(s) are attached`); else { risks.push('No asset evidence is currently attached'); missingEvidence.push('asset evidence'); nextActions.push('Attach primary asset evidence'); }
     if (ver.rows[0]?.count) strengths.push('A closed verification case exists'); else { risks.push('Verification has not reached a closed decision'); missingEvidence.push('closed verification decision'); nextActions.push('Complete asset verification'); }
   } else if (type === 'entity') {
@@ -33,9 +33,12 @@ export default async function(req, res) {
     if (cf.rows[0]?.count) strengths.push(`${cf.rows[0].count} cash-flow record(s) are available`); else { risks.push('No cash-flow records are currently available'); missingEvidence.push('cash-flow evidence'); nextActions.push('Capture operating cash-flow evidence'); }
     if (claims.rows[0]?.count) strengths.push(`${claims.rows[0].count} economic claim(s) have provenance records`); else { missingEvidence.push('economic claims with supporting evidence'); nextActions.push('Document key economic claims and sources'); }
   } else if (type === 'project') {
-    const rd = await db.query(`SELECT overall_score FROM project_readiness_assessments WHERE project_id=$1 ORDER BY created_at DESC LIMIT 1`, [id]);
-    capitalScore = rd.rows[0]?.overall_score != null ? Number(rd.rows[0].overall_score) : 20;
-    if (rd.rows[0]) strengths.push('A project-readiness assessment is available'); else { risks.push('Project readiness has not been assessed'); missingEvidence.push('project readiness assessment'); nextActions.push('Run project readiness assessment'); }
+    const rd = await db.query(`SELECT legal_ready,evidence_ready,valuation_ready,risk_ready,economics_ready,governance_ready,readiness_state FROM project_capital_readiness WHERE project_id=$1 ORDER BY assessed_at DESC LIMIT 1`, [id]);
+    if (rd.rows[0]) {
+      const flags = ['legal_ready','evidence_ready','valuation_ready','risk_ready','economics_ready','governance_ready'];
+      capitalScore = Math.round(flags.reduce((sum, key) => sum + (rd.rows[0][key] ? 1 : 0), 0) / flags.length * 100);
+      if (capitalScore >= 70) strengths.push(`Project capital-readiness is ${capitalScore}%`);
+    } else { risks.push('Project readiness has not been assessed'); missingEvidence.push('project readiness assessment'); nextActions.push('Run project readiness assessment'); }
   } else {
     strengths.push('Institutional subject is available for network analysis');
     nextActions.push('Connect institutional mandate and diligence relationships');
