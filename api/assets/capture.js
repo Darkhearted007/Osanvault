@@ -1,7 +1,9 @@
 import { db } from 'hatchable';
-export const access = 'admin';
+export const access = 'user';
 export const methods = ['POST'];
 export default async function (req, res) {
+  const role = await db.query('SELECT role FROM app_user_roles WHERE user_id = $1', [req.user.id]);
+  if (!['contributor','operator','institution'].includes(role.rows[0]?.role)) return res.status(403).json({ error: 'Asset capture requires contributor, operator, or institution role' });
   const b = req.body || {};
   if (!b.name || !b.assetTypeCode) return res.status(400).json({ error: 'name and assetTypeCode are required' });
   const type = await db.query('SELECT id FROM asset_types WHERE code = $1 AND active = true', [b.assetTypeCode]);
@@ -10,5 +12,6 @@ export default async function (req, res) {
   const asset = await db.query('INSERT INTO assets (asset_identifier, asset_type_id, name, description, status, jurisdiction_code, current_state) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, asset_identifier AS "assetIdentifier"', [identifier, type.rows[0].id, b.name, b.description || null, 'captured', b.jurisdictionCode || null, 'captured']);
   if (b.location || b.latitude != null || b.longitude != null) await db.query('INSERT INTO asset_locations (asset_id, address, latitude, longitude, is_primary) VALUES ($1, $2, $3, $4, true)', [asset.rows[0].id, b.location || null, b.latitude ?? null, b.longitude ?? null]);
   const verification = await db.query('INSERT INTO verification_cases (asset_id, verification_level) VALUES ($1, $2) RETURNING id', [asset.rows[0].id, 'basic']);
+  await db.query('INSERT INTO asset_events (asset_id, event_type, actor, payload) VALUES ($1, $2, $3, $4)', [asset.rows[0].id, 'asset_captured', req.user.id, JSON.stringify({ role: role.rows[0].role })]);
   res.status(201).json({ ...asset.rows[0], verificationCaseId: verification.rows[0].id });
 }
