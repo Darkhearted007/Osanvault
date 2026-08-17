@@ -1,0 +1,1 @@
+ALTER TABLE economic_evidence_vault ADD CONSTRAINT economic_evidence_source_type_check CHECK (source_type IN ('self_reported','uploaded','third_party','system_generated'));

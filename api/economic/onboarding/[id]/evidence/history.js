@@ -1,0 +1,4 @@
+import { db } from 'hatchable';
+export const access='member';
+export const methods=['GET'];
+export default async function(req,res){const id=req.params.id;const p=await db.query('SELECT id,owner_id FROM economic_onboarding_profiles WHERE id=$1',[id]);if(!p.rows.length)return res.status(404).json({error:'economic_profile_not_found'});if(p.rows[0].owner_id!==req.member.id)return res.status(403).json({error:'forbidden'});const r=await db.query(`SELECT id,activity_id AS "activityId",evidence_category AS "evidenceCategory",title,source_type AS "sourceType",verification_status AS "verificationStatus",reviewed_at AS "reviewedAt",created_at AS "createdAt",updated_at AS "updatedAt" FROM economic_evidence_vault WHERE profile_id=$1 ORDER BY updated_at DESC`,[id]);res.json({profileId:id,evidence:r.rows})}

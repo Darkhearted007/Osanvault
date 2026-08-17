@@ -1,0 +1,1 @@
+ALTER TABLE economic_evidence_vault ADD CONSTRAINT economic_evidence_verification_status_check CHECK (verification_status IN ('submitted','reviewed','verified','rejected'));

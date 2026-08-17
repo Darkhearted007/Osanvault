@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_economic_evidence_reviewed_by ON economic_evidence_vault(reviewed_by,reviewed_at);

@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_economic_evidence_status ON economic_evidence_vault(profile_id,verification_status);

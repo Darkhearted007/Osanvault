@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS idx_economic_identity_assessments_profile ON economic_identity_assessments(profile_id);

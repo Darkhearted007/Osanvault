@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_economic_identity_stage ON economic_identity_assessments(identity_stage,readiness_score);

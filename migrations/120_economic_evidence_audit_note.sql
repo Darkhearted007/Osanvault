@@ -1,0 +1,1 @@
+ALTER TABLE economic_evidence_vault ADD COLUMN IF NOT EXISTS review_note text;

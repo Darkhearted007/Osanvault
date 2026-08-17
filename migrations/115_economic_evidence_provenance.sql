@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_economic_evidence_activity ON economic_evidence_vault(activity_id);
