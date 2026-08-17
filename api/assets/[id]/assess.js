@@ -6,7 +6,7 @@ export default async function (req, res) {
   const exists = await db.query('SELECT id FROM assets WHERE id = $1', [id]);
   if (!exists.rows.length) return res.status(404).json({ error: 'Asset not found' });
   const [reqs, docs, evidence, verification, risk, valuation] = await Promise.all([
-    db.query('SELECT COUNT(*) FILTER (WHERE required) AS total, COUNT(*) FILTER (WHERE required AND status = $2) AS complete FROM verification_requirements vr JOIN verification_cases vc ON vc.id = vr.case_id WHERE vc.asset_id = $1', [id, 'verified']),
+    db.query('SELECT COUNT(*) FILTER (WHERE vr.required) AS total, COUNT(*) FILTER (WHERE vr.required AND vr.status = $2) AS complete FROM verification_requirements vr JOIN verification_cases vc ON vc.id = vr.case_id WHERE vc.asset_id = $1', [id, 'verified']),
     db.query('SELECT COUNT(*) AS count FROM asset_documents WHERE asset_id = $1', [id]),
     db.query('SELECT COUNT(*) AS count, AVG(confidence) AS confidence FROM asset_evidence WHERE asset_id = $1', [id]),
     db.query('SELECT status FROM verification_cases WHERE asset_id = $1 ORDER BY opened_at DESC LIMIT 1', [id]),
