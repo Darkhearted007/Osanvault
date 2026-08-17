@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS submission_events (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), submission_id uuid NOT NULL REFERENCES asset_submissions(id) ON DELETE CASCADE, event_type text NOT NULL, actor text, details jsonb NOT NULL DEFAULT '{}'::jsonb, created_at timestamptz NOT NULL DEFAULT now());

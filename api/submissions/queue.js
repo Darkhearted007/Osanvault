@@ -1,0 +1,4 @@
+import { db } from 'hatchable';
+export const access = 'admin';
+export const methods = ['GET'];
+export default async function(req,res){const r=await db.query(`SELECT s.id,s.submission_identifier AS "submissionIdentifier",s.name,s.asset_type_code AS "assetTypeCode",s.contributor_type AS "contributorType",s.jurisdiction_code AS "jurisdictionCode",s.location_text AS location,s.status,s.created_at AS "createdAt",COUNT(e.id)::int AS "evidenceCount" FROM asset_submissions s LEFT JOIN submission_evidence e ON e.submission_id=s.id WHERE s.status NOT IN ('accepted','rejected') GROUP BY s.id ORDER BY s.created_at ASC`);res.json(r.rows)}
