@@ -8,7 +8,7 @@ export default async function(req,res){
  if(req.method==='GET'){
   const cases=await db.query('SELECT id,institution_id AS "institutionId",project_id AS "projectId",asset_id AS "assetId",status,scope,findings,opened_by AS "openedBy",opened_at AS "openedAt",completed_at AS "completedAt" FROM institutional_due_diligence WHERE project_id=$1 ORDER BY opened_at DESC',[projectId]);
   const reviews=await db.query('SELECT r.id,r.submission_id AS "submissionId",r.reviewer,r.decision,r.notes,r.created_at AS "createdAt" FROM submission_reviews r JOIN institutional_submissions s ON s.id=r.submission_id WHERE s.project_id=$1 ORDER BY r.created_at DESC',[projectId]);
-  const requests=await db.query('SELECT r.id,r.submission_id AS "submissionId",r.request_type AS "requestType",r.title,r.description,r.required_evidence AS "requiredEvidence",r.status,r.requested_by AS "requestedBy",r.resolved_at AS "resolvedAt" FROM data_room_requests r JOIN institutional_data_rooms d ON d.id=r.room_id WHERE d.asset_id=(SELECT asset_id FROM projects WHERE id=$1) ORDER BY r.created_at DESC',[projectId]);
+  const requests=await db.query('SELECT r.id,r.room_id AS "roomId",r.request_type AS "requestType",r.title,r.description,r.required_evidence AS "requiredEvidence",r.status,r.requested_by AS "requestedBy",r.resolved_at AS "resolvedAt" FROM data_room_requests r JOIN institutional_data_rooms d ON d.id=r.room_id WHERE d.asset_id=(SELECT asset_id FROM projects WHERE id=$1) ORDER BY r.created_at DESC',[projectId]);
   return res.json({projectId,cases:cases.rows,reviews:reviews.rows,requests:requests.rows});
  }
  if(req.method==='POST'){
