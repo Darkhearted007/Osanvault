@@ -5,7 +5,7 @@ const outcomes=['pending','interested','more_information','diligence','approved'
 export default async function(req,res){
  const projectId=req.params.id;
  if(req.method==='GET'){
-  const submissions=await db.query('SELECT s.id AS "submissionId",s.status AS "submissionStatus",s.outcome,s.notes,s.decision_at AS "decisionAt",m.institution_id AS "institutionId" FROM institutional_submissions s JOIN institutional_matches m ON m.id=s.match_id WHERE s.project_id=$1 ORDER BY s.created_at DESC',[projectId]);
+  const submissions=await db.query('SELECT s.id AS "submissionId",s.status AS "submissionStatus",s.outcome,s.notes,s.decision_at AS "decisionAt",s.match_id AS "matchId" FROM institutional_submissions s WHERE s.project_id=$1 ORDER BY s.created_at DESC',[projectId]);
   const diligence=await db.query('SELECT id,institution_id AS "institutionId",status,findings,scope,completed_at AS "completedAt" FROM institutional_due_diligence WHERE project_id=$1 ORDER BY opened_at DESC',[projectId]);
   const remediation=await db.query('SELECT blocker_code AS "blockerCode",title,status,priority,required_evidence AS "requiredEvidence" FROM intelligence_remediation_items WHERE subject_id=$1 AND subject_type=\'project\' ORDER BY priority DESC,created_at',[projectId]);
   const capital=await db.query('SELECT capital_readiness_score AS "capitalReadinessScore",development_stage,use_of_funds FROM canonical_capital_profiles WHERE project_id=$1',[projectId]);
