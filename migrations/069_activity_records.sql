@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS economic_activities (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), entity_id uuid NOT NULL REFERENCES economic_entities(id) ON DELETE CASCADE, activity_type text NOT NULL, description text, start_date date, status text NOT NULL DEFAULT 'reported', created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());
