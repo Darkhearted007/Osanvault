@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS legacy_property_mappings (legacy_property_id integer PRIMARY KEY, asset_id uuid NOT NULL REFERENCES assets(id) ON DELETE CASCADE, source_repo text NOT NULL DEFAULT 'Darkhearted007/osanvault-africa', migrated_at timestamptz NOT NULL DEFAULT now());

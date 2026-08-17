@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS asset_valuations (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), asset_id uuid NOT NULL REFERENCES assets(id) ON DELETE CASCADE, valuation_date date NOT NULL, methodology text, valuer text, currency text NOT NULL DEFAULT 'NGN', value numeric(20,2), confidence numeric(5,2), evidence_notes text, created_at timestamptz NOT NULL DEFAULT now());

@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS asset_documents (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), asset_id uuid NOT NULL REFERENCES assets(id) ON DELETE CASCADE, document_type text NOT NULL, title text NOT NULL, storage_url text, document_hash text, version integer NOT NULL DEFAULT 1, status text NOT NULL DEFAULT 'received', created_at timestamptz NOT NULL DEFAULT now());

@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS verification_actions (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), case_id uuid NOT NULL REFERENCES verification_cases(id) ON DELETE CASCADE, action_type text NOT NULL, actor text, notes text, status text NOT NULL DEFAULT 'completed', created_at timestamptz NOT NULL DEFAULT now());

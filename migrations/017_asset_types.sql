@@ -1,0 +1,1 @@
+INSERT INTO asset_types (code, name, asset_class, description) VALUES ('INFRASTRUCTURE', 'Infrastructure', 'PRODUCTIVE_ASSET', 'Productive infrastructure and development assets') ON CONFLICT (code) DO NOTHING;

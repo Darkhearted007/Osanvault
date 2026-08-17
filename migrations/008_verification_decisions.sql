@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS verification_decisions (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), case_id uuid NOT NULL REFERENCES verification_cases(id) ON DELETE CASCADE, decision text NOT NULL, rationale text, reviewer text, decided_at timestamptz NOT NULL DEFAULT now());

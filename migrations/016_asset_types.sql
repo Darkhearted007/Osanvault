@@ -1,0 +1,1 @@
+INSERT INTO asset_types (code, name, asset_class, description) VALUES ('AGRICULTURE', 'Agriculture', 'PRODUCTIVE_ASSET', 'Agricultural land and productive farming assets') ON CONFLICT (code) DO NOTHING;

@@ -1,0 +1,1 @@
+INSERT INTO asset_types (code, name, asset_class, description) VALUES ('MINERAL', 'Mineral', 'NATURAL_RESOURCE', 'Verified mineral-resource opportunities') ON CONFLICT (code) DO NOTHING;

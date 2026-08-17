@@ -1,0 +1,1 @@
+INSERT INTO asset_types (code, name, asset_class, description) VALUES ('LAND', 'Land', 'REAL_ESTATE', 'Land parcels and land-bank opportunities') ON CONFLICT (code) DO NOTHING;

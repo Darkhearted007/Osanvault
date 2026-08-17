@@ -1,0 +1,1 @@
+INSERT INTO asset_types (code, name, asset_class, description) VALUES ('CARBON', 'Carbon', 'ENVIRONMENTAL_ASSET', 'Verified carbon projects and environmental assets') ON CONFLICT (code) DO NOTHING;

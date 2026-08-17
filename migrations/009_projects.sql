@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS projects (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), project_identifier text UNIQUE NOT NULL, name text NOT NULL, description text, project_type text NOT NULL, status text NOT NULL DEFAULT 'planned', jurisdiction text, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());

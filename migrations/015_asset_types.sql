@@ -1,0 +1,1 @@
+INSERT INTO asset_types (code, name, asset_class, description) VALUES ('HOUSING', 'Housing', 'REAL_ESTATE', 'Residential housing and development projects') ON CONFLICT (code) DO NOTHING;

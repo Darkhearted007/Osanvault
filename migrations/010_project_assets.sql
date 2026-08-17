@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS project_assets (project_id uuid NOT NULL REFERENCES projects(id) ON DELETE CASCADE, asset_id uuid NOT NULL REFERENCES assets(id) ON DELETE CASCADE, relationship text NOT NULL DEFAULT 'primary', PRIMARY KEY (project_id, asset_id));
