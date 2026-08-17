@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS transaction_diligence_gates (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), opportunity_id uuid NOT NULL REFERENCES capital_opportunities(id) ON DELETE CASCADE, gate_code text NOT NULL, status text NOT NULL DEFAULT 'pending', evidence_required text, completed_at timestamptz, UNIQUE(opportunity_id,gate_code));

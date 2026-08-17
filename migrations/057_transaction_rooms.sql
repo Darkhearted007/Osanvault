@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS transaction_rooms (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), opportunity_id uuid NOT NULL REFERENCES capital_opportunities(id) ON DELETE CASCADE, room_code text UNIQUE NOT NULL, status text NOT NULL DEFAULT 'pre_diligence', access_policy text NOT NULL DEFAULT 'invitation', opened_at timestamptz NOT NULL DEFAULT now(), closed_at timestamptz);
