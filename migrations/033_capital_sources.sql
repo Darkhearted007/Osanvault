@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS project_capital_sources (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), project_id uuid NOT NULL REFERENCES projects(id) ON DELETE CASCADE, source_type text NOT NULL, name text, mandate text, status text NOT NULL DEFAULT 'identified', notes text, created_at timestamptz NOT NULL DEFAULT now());

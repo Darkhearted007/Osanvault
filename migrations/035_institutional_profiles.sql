@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS institutional_profiles (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_name text NOT NULL, organization_type text NOT NULL, jurisdiction text, website text, mandate text, status text NOT NULL DEFAULT 'prospect', created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());

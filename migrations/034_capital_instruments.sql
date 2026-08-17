@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS project_capital_instruments (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), project_id uuid NOT NULL REFERENCES projects(id) ON DELETE CASCADE, instrument_type text NOT NULL, amount numeric(20,2), currency text NOT NULL DEFAULT 'NGN', terms_summary text, status text NOT NULL DEFAULT 'proposed', created_at timestamptz NOT NULL DEFAULT now());
