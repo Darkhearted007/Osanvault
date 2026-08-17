@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS asset_events (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), asset_id uuid NOT NULL REFERENCES assets(id) ON DELETE CASCADE, event_type text NOT NULL, actor text, payload jsonb NOT NULL DEFAULT '{}'::jsonb, created_at timestamptz NOT NULL DEFAULT now());

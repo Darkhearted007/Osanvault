@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS asset_events_asset_id_created_at_idx ON asset_events(asset_id, created_at DESC);

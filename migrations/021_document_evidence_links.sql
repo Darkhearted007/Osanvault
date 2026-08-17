@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS evidence_links (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), evidence_id uuid NOT NULL REFERENCES asset_evidence(id) ON DELETE CASCADE, document_id uuid REFERENCES asset_documents(id) ON DELETE SET NULL, url text, label text, created_at timestamptz NOT NULL DEFAULT now());
