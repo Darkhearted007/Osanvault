@@ -1,0 +1,1 @@
+INSERT INTO asset_types (code, name, asset_class, description) SELECT 'LAND', 'Land', 'REAL_ASSET', 'Land and land-banking opportunities' WHERE NOT EXISTS (SELECT 1 FROM asset_types WHERE code = 'LAND');

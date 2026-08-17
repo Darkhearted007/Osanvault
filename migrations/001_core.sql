@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS asset_types (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), code text UNIQUE NOT NULL, name text NOT NULL, asset_class text NOT NULL, description text, active boolean NOT NULL DEFAULT true, created_at timestamptz NOT NULL DEFAULT now());

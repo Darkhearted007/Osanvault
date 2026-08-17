@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS asset_locations (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), asset_id uuid NOT NULL REFERENCES assets(id) ON DELETE CASCADE, address text, latitude numeric, longitude numeric, is_primary boolean NOT NULL DEFAULT true, created_at timestamptz NOT NULL DEFAULT now());
