@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS economic_claim_evidence (claim_id uuid NOT NULL REFERENCES economic_claims(id) ON DELETE CASCADE, evidence_type text NOT NULL, source_ref text, description text, evidence_status text NOT NULL DEFAULT 'unverified', confidence numeric(6,2), PRIMARY KEY(claim_id,evidence_type,source_ref));
