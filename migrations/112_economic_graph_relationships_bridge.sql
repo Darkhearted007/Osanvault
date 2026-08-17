@@ -1,0 +1,3 @@
+CREATE TABLE IF NOT EXISTS economic_graph_relationships (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), from_type text NOT NULL, from_id uuid NOT NULL, relationship_type text NOT NULL, to_type text NOT NULL, to_id uuid NOT NULL, status text NOT NULL DEFAULT 'reported', confidence numeric, evidence_ref text, notes text, created_by uuid NOT NULL, created_at timestamptz NOT NULL DEFAULT now(), UNIQUE(from_type,from_id,relationship_type,to_type,to_id));
+CREATE INDEX IF NOT EXISTS economic_graph_relationships_from_idx ON economic_graph_relationships(from_type,from_id);
+CREATE INDEX IF NOT EXISTS economic_graph_relationships_to_idx ON economic_graph_relationships(to_type,to_id);

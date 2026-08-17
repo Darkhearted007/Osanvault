@@ -1,0 +1,2 @@
+CREATE TABLE IF NOT EXISTS economic_graph_nodes (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), node_type text NOT NULL, source_type text NOT NULL, source_id uuid NOT NULL, label text, created_at timestamptz NOT NULL DEFAULT now(), UNIQUE(source_type,source_id));
+CREATE INDEX IF NOT EXISTS economic_graph_nodes_type_idx ON economic_graph_nodes(node_type);
