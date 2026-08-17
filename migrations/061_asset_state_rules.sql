@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS canonical_state_rules (entity_type text NOT NULL, from_state text NOT NULL, to_state text NOT NULL, PRIMARY KEY(entity_type,from_state,to_state));

@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS canonical_lifecycle_events (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), entity_type text NOT NULL, entity_id uuid NOT NULL, from_state text, to_state text NOT NULL, actor text, reason text, metadata jsonb NOT NULL DEFAULT '{}'::jsonb, created_at timestamptz NOT NULL DEFAULT now());
