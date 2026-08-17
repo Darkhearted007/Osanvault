@@ -1,0 +1,4 @@
+import { db } from 'hatchable';
+export const access = 'member';
+export const methods = ['GET'];
+export default async function(req,res){const type=req.query?.type,id=req.query?.id;if(!type||!id)return res.status(400).json({error:'type and id are required'});const node=await db.query('SELECT id FROM economic_graph_relationships WHERE (from_type=$1 AND from_id=$2) OR (to_type=$1 AND to_id=$2) LIMIT 1',[type,id]);const rel=await db.query('SELECT status,confidence FROM economic_graph_relationships WHERE (from_type=$1 AND from_id=$2) OR (to_type=$1 AND to_id=$2)',[type,id]);const total=rel.rows.length;const trusted=rel.rows.filter(x=>['verified','trusted'].includes(x.status)).length;const networkScore=total?Math.min(100,Math.round((trusted/total)*100)):20;res.json({subjectType:type,subjectId:id,hasNetwork:!!node.rows.length,relationshipCount:total,trustedRelationshipCount:trusted,networkScore})}
