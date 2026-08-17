@@ -1,0 +1,32 @@
+import { db } from 'hatchable';
+export const access = 'admin';
+export const methods = ['POST'];
+export default async function (req, res) {
+  const id = req.params.id;
+  const exists = await db.query('SELECT id FROM assets WHERE id = $1', [id]);
+  if (!exists.rows.length) return res.status(404).json({ error: 'Asset not found' });
+  const [reqs, docs, evidence, verification, risk, valuation] = await Promise.all([
+    db.query('SELECT COUNT(*) FILTER (WHERE required) AS total, COUNT(*) FILTER (WHERE required AND status = $2) AS complete FROM verification_requirements vr JOIN verification_cases vc ON vc.id = vr.case_id WHERE vc.asset_id = $1', [id, 'verified']),
+    db.query('SELECT COUNT(*) AS count FROM asset_documents WHERE asset_id = $1', [id]),
+    db.query('SELECT COUNT(*) AS count, AVG(confidence) AS confidence FROM asset_evidence WHERE asset_id = $1', [id]),
+    db.query('SELECT status FROM verification_cases WHERE asset_id = $1 ORDER BY opened_at DESC LIMIT 1', [id]),
+    db.query('SELECT overall_score AS score FROM asset_risk_assessments WHERE asset_id = $1 ORDER BY assessed_at DESC LIMIT 1', [id]),
+    db.query('SELECT confidence, value FROM asset_valuations WHERE asset_id = $1 ORDER BY valuation_date DESC LIMIT 1', [id])
+  ]);
+  const total = Number(reqs.rows[0]?.total || 0), complete = Number(reqs.rows[0]?.complete || 0);
+  const evidenceScore = total ? (complete / total) * 100 : 0;
+  const confidence = Number(evidence.rows[0]?.confidence || 0);
+  const verificationStatus = verification.rows[0]?.status || 'open';
+  const verificationScore = verificationStatus === 'closed' ? 100 : verificationStatus === 'open' ? 40 : 20;
+  const riskScore = Number(risk.rows[0]?.score || 0);
+  const riskSafety = riskScore ? Math.max(0, 100 - riskScore) : 40;
+  const marketScore = valuation.rows[0]?.value ? Math.min(100, Number(valuation.rows[0].confidence || 50)) : 20;
+  const trustScore = Math.round(evidenceScore * 0.55 + verificationScore * 0.30 + Math.min(100, confidence) * 0.15);
+  const projectReadiness = Math.round(trustScore * 0.55 + marketScore * 0.25 + riskSafety * 0.20);
+  const overall = Math.round(trustScore * 0.45 + projectReadiness * 0.35 + riskSafety * 0.20);
+  const state = overall >= 80 ? 'institutional_ready' : overall >= 60 ? 'project_ready' : overall >= 35 ? 'developing' : 'insufficient_data';
+  const rationale = { method: 'OV-INTELLIGENCE-V1', inputs: { evidenceScore, verificationScore, riskSafety, marketScore, evidenceConfidence: confidence }, notes: ['Scores are decision-support indicators, not investment advice.','Human verification and legal due diligence remain authoritative.'] };
+  const saved = await db.query('INSERT INTO asset_intelligence_assessments (asset_id, trust_score, evidence_score, verification_score, risk_score, market_score, project_readiness_score, overall_score, intelligence_state, rationale) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id, overall_score AS "overallScore", intelligence_state AS "intelligenceState", assessed_at AS "assessedAt"', [id, trustScore, evidenceScore, verificationScore, riskScore, marketScore, projectReadiness, overall, state, JSON.stringify(rationale)]);
+  await db.query('INSERT INTO intelligence_events (asset_id, event_type, actor, payload) VALUES ($1,$2,$3,$4)', [id, 'asset_assessed', req.member?.handle || 'admin', JSON.stringify({ assessmentId: saved.rows[0].id, overallScore: overall, state })]);
+  res.status(201).json({ ...saved.rows[0], trustScore, evidenceScore, verificationScore, riskSafety, marketScore, projectReadinessScore: projectReadiness, rationale });
+}
