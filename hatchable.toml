@@ -2,3 +2,7 @@
 enabled = true
 providers = ["email"]
 signup = "open"
+
+[db.tables.app_user_roles]
+read = "own"
+write = "own"
