@@ -1,0 +1,1 @@
+INSERT INTO institutional_source_requirements(source_id,requirement_code,title,description,category,required,weight,evidence_type) SELECT p.id,'project_readiness','Project readiness','Project must have sufficient development and execution readiness for institutional review.','readiness',true,20,'project' FROM institutional_profiles p WHERE p.status <> 'inactive';
