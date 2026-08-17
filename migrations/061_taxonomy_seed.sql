@@ -1,0 +1,1 @@
+INSERT INTO asset_taxonomy(code,name,category,description,requires_rights_evidence) VALUES ('MINERAL','Mineral','NATURAL_RESOURCE','Mineral-resource opportunities and associated rights',true) ON CONFLICT(code) DO NOTHING;

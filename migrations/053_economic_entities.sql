@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS economic_entities (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), entity_identifier text UNIQUE NOT NULL, entity_type text NOT NULL, name text NOT NULL, jurisdiction_code text, description text, status text NOT NULL DEFAULT 'captured', created_by text, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());

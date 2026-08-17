@@ -1,0 +1,1 @@
+INSERT INTO asset_taxonomy(code,name,category,description,requires_rights_evidence) VALUES ('COOPERATIVE','Cooperative','ECONOMIC_ENTITY','Cooperatives and community productive organizations',false) ON CONFLICT(code) DO NOTHING;

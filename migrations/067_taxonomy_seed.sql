@@ -1,0 +1,1 @@
+INSERT INTO asset_taxonomy(code,name,category,description,requires_rights_evidence) VALUES ('TOURISM','Tourism','PRODUCTIVE_ASSET','Tourism, hospitality and cultural assets',false) ON CONFLICT(code) DO NOTHING;

@@ -1,0 +1,1 @@
+INSERT INTO asset_taxonomy(code,name,category,description,requires_rights_evidence) VALUES ('AGRICULTURE','Agriculture','PRODUCTIVE_ASSET','Farms, agricultural projects and productive land',true) ON CONFLICT(code) DO NOTHING;

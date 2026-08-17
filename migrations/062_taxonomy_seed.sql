@@ -1,0 +1,1 @@
+INSERT INTO asset_taxonomy(code,name,category,description,requires_rights_evidence) VALUES ('ENERGY','Energy','PRODUCTIVE_ASSET','Energy generation and infrastructure opportunities',true) ON CONFLICT(code) DO NOTHING;

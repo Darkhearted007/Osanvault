@@ -1,0 +1,1 @@
+INSERT INTO asset_taxonomy(code,name,category,description,requires_rights_evidence) VALUES ('WATER','Water','NATURAL_RESOURCE','Water resources and infrastructure opportunities',true) ON CONFLICT(code) DO NOTHING;

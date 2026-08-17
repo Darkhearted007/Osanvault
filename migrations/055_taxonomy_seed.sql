@@ -1,0 +1,1 @@
+INSERT INTO asset_taxonomy(code,name,category,description,requires_rights_evidence) VALUES ('LAND','Land','REAL_ESTATE','Land parcels, estates and land-bank opportunities',true) ON CONFLICT(code) DO NOTHING;

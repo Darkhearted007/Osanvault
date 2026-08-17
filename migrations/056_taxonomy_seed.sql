@@ -1,0 +1,1 @@
+INSERT INTO asset_taxonomy(code,name,category,description,requires_rights_evidence) VALUES ('HOUSING','Housing','REAL_ESTATE','Residential housing and development assets',true) ON CONFLICT(code) DO NOTHING;

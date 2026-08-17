@@ -1,0 +1,1 @@
+INSERT INTO asset_taxonomy(code,name,category,description,requires_rights_evidence) VALUES ('MANUFACTURING','Manufacturing','PRODUCTIVE_ASSET','Manufacturing and industrial production assets',false) ON CONFLICT(code) DO NOTHING;

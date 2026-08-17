@@ -1,0 +1,1 @@
+INSERT INTO asset_taxonomy(code,name,category,description,requires_rights_evidence) VALUES ('BUSINESS','Business','ECONOMIC_ENTITY','Operating businesses and productive enterprises',false) ON CONFLICT(code) DO NOTHING;

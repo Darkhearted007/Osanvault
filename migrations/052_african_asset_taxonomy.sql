@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS asset_taxonomy (code text PRIMARY KEY, name text NOT NULL, category text NOT NULL, description text, requires_rights_evidence boolean NOT NULL DEFAULT false, active boolean NOT NULL DEFAULT true);

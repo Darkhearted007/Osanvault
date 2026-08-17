@@ -1,0 +1,1 @@
+INSERT INTO asset_taxonomy(code,name,category,description,requires_rights_evidence) VALUES ('LOGISTICS','Logistics','PRODUCTIVE_ASSET','Transport, logistics and distribution assets',false) ON CONFLICT(code) DO NOTHING;

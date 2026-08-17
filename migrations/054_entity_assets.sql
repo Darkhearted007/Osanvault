@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS economic_entity_assets (entity_id uuid NOT NULL REFERENCES economic_entities(id) ON DELETE CASCADE, asset_id uuid NOT NULL REFERENCES assets(id) ON DELETE CASCADE, relationship text NOT NULL DEFAULT 'operates', PRIMARY KEY(entity_id,asset_id));

@@ -1,0 +1,1 @@
+INSERT INTO asset_taxonomy(code,name,category,description,requires_rights_evidence) VALUES ('COMMUNITY_ASSET','Community Asset','COMMUNITY_ASSET','Community-owned or community-benefiting productive assets',false) ON CONFLICT(code) DO NOTHING;
