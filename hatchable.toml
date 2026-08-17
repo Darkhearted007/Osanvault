@@ -6,3 +6,18 @@ signup = "open"
 [db.tables.app_user_roles]
 read = "own"
 write = "own"
+
+[db.tables.economic_onboarding_profiles]
+read = "own"
+write = "own"
+owner_column = "owner_id"
+
+[db.tables.economic_activity_records]
+read = "own"
+write = "own"
+owner_column = "created_by"
+
+[db.tables.economic_evidence_vault]
+read = "own"
+write = "own"
+owner_column = "submitted_by"
