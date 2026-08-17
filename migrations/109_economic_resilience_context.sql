@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS economic_resilience_contexts (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), profile_id uuid NOT NULL, period_start date NOT NULL, period_end date NOT NULL, context_type text NOT NULL, description text, created_by uuid NOT NULL, created_at timestamptz NOT NULL DEFAULT now());
