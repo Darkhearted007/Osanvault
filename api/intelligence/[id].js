@@ -1,0 +1,4 @@
+import { db } from 'hatchable';
+export const access = 'public';
+export const methods = ['GET'];
+export default async function(req,res){const r=await db.query('SELECT * FROM intelligence_assessments WHERE id=$1',[req.params.id]);if(!r.rows.length)return res.status(404).json({error:'Assessment not found'});const a=r.rows[0];const s=await db.query('SELECT source_type AS "sourceType",source_ref AS "sourceRef",reliability_score AS "reliabilityScore",verified,independent,notes FROM intelligence_sources WHERE assessment_id=$1 ORDER BY created_at',[a.id]);const c=await db.query('SELECT consensus_type AS "consensusType",consensus_value AS "consensusValue",confidence,"source_count" AS "sourceCount",verified_source_count AS "verifiedSourceCount",conflict_count AS "conflictCount",rationale FROM intelligence_consensus WHERE assessment_id=$1 ORDER BY created_at DESC',[a.id]);res.json({...a,sources:s.rows,consensus:c.rows});}
