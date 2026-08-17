@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS app_user_roles (user_id text PRIMARY KEY, role text NOT NULL DEFAULT 'viewer', created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());
