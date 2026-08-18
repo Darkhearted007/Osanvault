@@ -14,7 +14,7 @@ function band(score) {
 export default async function(req, res) {
   const onboardingId = req.params.id;
   const { rows: owner } = await db.query(
-    `SELECT id FROM economic_onboarding WHERE id = $1 LIMIT 1`, [onboardingId]
+    `SELECT id FROM economic_onboarding_profiles WHERE id = $1 LIMIT 1`, [onboardingId]
   );
   if (!owner.length) return res.status(404).json({ error: 'Economic onboarding record not found' });
 
