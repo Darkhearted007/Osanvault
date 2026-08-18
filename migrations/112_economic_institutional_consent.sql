@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS economic_institutional_consents (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), profile_id uuid NOT NULL, institution_id uuid NOT NULL, status text NOT NULL DEFAULT 'pending', scope text NOT NULL DEFAULT 'verified_network', requested_by uuid NOT NULL, decided_by uuid, created_at timestamptz NOT NULL DEFAULT now(), decided_at timestamptz);
