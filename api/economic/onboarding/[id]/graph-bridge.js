@@ -1,20 +1,4 @@
 import { db } from 'hatchable';
 export const access='member';
 export const methods=['GET','POST'];
-export default async function(req,res){
- const id=req.params.id;
- const p=await db.query('SELECT id,owner_id,display_name FROM economic_onboarding_profiles WHERE id=$1',[id]);
- if(!p.rows.length)return res.status(404).json({error:'economic_profile_not_found'});
- if(p.rows[0].owner_id!==req.member.id)return res.status(403).json({error:'forbidden'});
- await db.query(`INSERT INTO economic_graph_nodes(node_type,source_type,source_id,label) VALUES('economic_business','economic_onboarding_profile',$1,$2) ON CONFLICT(source_type,source_id) DO UPDATE SET label=EXCLUDED.label`,[id,p.rows[0].display_name||'Economic Business']);
- if(req.method==='POST'){
-  const b=req.body||{};
-  if(!b.toType||!b.toId||!b.relationshipType)return res.status(400).json({error:'toType, toId and relationshipType are required'});
-  const allowed=['entity','asset','project','institution'];
-  if(!allowed.includes(b.toType))return res.status(400).json({error:'Unsupported destination node type'});
-  const r=await db.query('INSERT INTO economic_graph_relationships(from_type,from_id,relationship_type,to_type,to_id,status,confidence,evidence_ref,notes,created_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT(from_type,from_id,relationship_type,to_type,to_id) DO UPDATE SET status=EXCLUDED.status,confidence=EXCLUDED.confidence,evidence_ref=EXCLUDED.evidence_ref,notes=EXCLUDED.notes RETURNING id,relationship_type AS "relationshipType",to_type AS "toType",to_id AS "toId",status,confidence,evidence_ref AS "evidenceRef",notes',["economic_business",id,b.relationshipType,b.toType,b.toId,b.status||'reported',b.confidence??null,b.evidenceRef||null,b.notes||null,req.member.id]);
-  return res.status(201).json(r.rows[0]);
- }
- const r=await db.query('SELECT id,relationship_type AS "relationshipType",to_type AS "toType",to_id AS "toId",status,confidence,evidence_ref AS "evidenceRef",notes,created_at AS "createdAt" FROM economic_graph_relationships WHERE from_type=$1 AND from_id=$2 ORDER BY created_at DESC',['economic_business',id]);
- return res.json({profileId:id,nodeType:'economic_business',relationships:r.rows});
-}
+export default async function(req,res){const id=req.params.id;const p=await db.query('SELECT id,owner_id,display_name FROM economic_onboarding_profiles WHERE id=$1',[id]);if(!p.rows.length)return res.status(404).json({error:'economic_profile_not_found'});if(p.rows[0].owner_id!==req.member.id)return res.status(403).json({error:'forbidden'});await db.query(`INSERT INTO economic_graph_nodes(node_type,source_type,source_id,label) VALUES('economic_business','economic_onboarding_profile',$1,$2) ON CONFLICT(source_type,source_id) DO UPDATE SET label=EXCLUDED.label`,[id,p.rows[0].display_name||'Economic Business']);if(req.method==='POST'){const b=req.body||{};if(!b.toType||!b.toId||!b.relationshipType)return res.status(400).json({error:'toType, toId and relationshipType are required'});const allowed=['entity','asset','project','institution'];if(!allowed.includes(b.toType))return res.status(400).json({error:'Unsupported destination node type'});const r=await db.query('INSERT INTO economic_graph_relationships(from_type,from_id,relationship_type,to_type,to_id,status,confidence,evidence_ref,notes,created_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT(from_type,from_id,relationship_type,to_type,to_id) DO UPDATE SET status=EXCLUDED.status,confidence=EXCLUDED.confidence,evidence_ref=EXCLUDED.evidence_ref,notes=EXCLUDED.notes RETURNING id,relationship_type AS "relationshipType",to_type AS "toType",to_id AS "toId",status,confidence,evidence_ref AS "evidenceRef",notes',['economic_business',id,b.relationshipType,b.toType,b.toId,b.status||'reported',b.confidence??null,b.evidenceRef||null,b.notes||null,req.member.id]);return res.status(201).json(r.rows[0])}const r=await db.query('SELECT id,relationship_type AS "relationshipType",to_type AS "toType",to_id AS "toId",status,confidence,evidence_ref AS "evidenceRef",notes,created_at AS "createdAt" FROM economic_graph_relationships WHERE from_type=$1 AND from_id=$2 ORDER BY created_at DESC',['economic_business',id]);res.json({profileId:id,nodeType:'economic_business',relationships:r.rows})}
