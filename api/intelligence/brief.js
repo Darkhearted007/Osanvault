@@ -6,6 +6,7 @@ export default async function(req, res) {
   const type = req.query?.type;
   const id = req.query?.id;
   if (!type || !id) return res.status(400).json({ error: 'type and id are required' });
+  if (!/^[0-9a-fA-F-]{16,}$/.test(String(id))) return res.status(400).json({ error: 'Invalid subject id' });
   if (!['asset','entity','project','institution'].includes(type)) return res.status(400).json({ error: 'Unsupported subject type' });
 
   const rel = await db.query(`SELECT status, confidence, relationship_type FROM economic_graph_relationships WHERE (from_type=$1 AND from_id=$2) OR (to_type=$1 AND to_id=$2)`, [type, id]);
