@@ -1,0 +1,1 @@
+ALTER TABLE platform_e2e_test_runs ALTER COLUMN owner_id TYPE text USING owner_id::text;

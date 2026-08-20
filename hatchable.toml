@@ -21,3 +21,8 @@ owner_column = "created_by"
 read = "own"
 write = "own"
 owner_column = "submitted_by"
+
+[db.tables.platform_e2e_test_runs]
+read = "own"
+write = "own"
+owner_column = "owner_id"

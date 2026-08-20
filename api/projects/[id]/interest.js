@@ -1,5 +1,5 @@
 import { db } from 'hatchable';
-export const access = 'public';
+export const access = 'member';
 export const methods = ['POST'];
 export default async function(req,res){
  const id=req.params.id,b=req.body||{}; if(!b.institutionId||!b.interestType)return res.status(400).json({error:'institutionId and interestType are required'});

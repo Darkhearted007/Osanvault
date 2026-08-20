@@ -1,5 +1,5 @@
 import { db } from 'hatchable';
-export const access = 'public';
+export const access = 'member';
 export const methods = ['GET'];
 const weights = { OWNERSHIP: 30, LOCATION: 20, JURISDICTION: 20, LEGAL: 30 };
 export default async function (req, res) {
