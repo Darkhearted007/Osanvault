@@ -1,0 +1,2 @@
+CREATE TABLE IF NOT EXISTS economic_readiness_checks (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), check_key text NOT NULL, status text NOT NULL, details jsonb NOT NULL DEFAULT '{}'::jsonb, checked_by text NOT NULL, checked_at timestamptz NOT NULL DEFAULT now());
+CREATE INDEX IF NOT EXISTS idx_readiness_checks_key_time ON economic_readiness_checks(check_key,checked_at DESC);
