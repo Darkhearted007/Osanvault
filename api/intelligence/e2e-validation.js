@@ -13,7 +13,7 @@ export default async function(req,res){
   const e=await db.query(`INSERT INTO economic_evidence_vault(profile_id,evidence_category,source_type,verification_status,title,description,submitted_by) VALUES($1,'validation','system_generated','verified','E2E Validation Evidence','Synthetic evidence for isolated validation',$2) RETURNING id`,[profileId,owner]);
   const evidenceId=e.rows[0].id; steps.push({step:'evidence',status:'pass'});
   await db.query(`UPDATE economic_evidence_vault SET trust_score=90,verified_by=$1,verified_at=now() WHERE id=$2`,[owner,evidenceId]); steps.push({step:'verification',status:'pass'});
-  await db.query(`INSERT INTO economic_graph_relationships(from_id,status,confidence) VALUES($1,'verified',0.9)`,[profileId]); steps.push({step:'network_input',status:'pass'});
+  await db.query(`INSERT INTO economic_graph_relationships(from_type,from_id,relationship_type,to_type,to_id,status,confidence,evidence_ref,created_by) VALUES('economic_business',$1,'validation_signal','economic_business',$1,'verified',0.9,$2,$3)`,[profileId,evidenceId,owner]); steps.push({step:'network_input',status:'pass'});
   const n=await db.query(`SELECT COALESCE(AVG(confidence),0)::numeric AS confidence,COUNT(*)::int AS total FROM economic_graph_relationships WHERE from_id=$1`,[profileId]);
   const network=Math.round((100*0.5)+(Number(n.rows[0].confidence)*100*0.2)+(90*0.3));
   await db.query(`INSERT INTO economic_network_intelligence(profile_id,relationship_count,verified_relationship_count,trusted_evidence_count,network_score,risk_level,drivers) VALUES($1,1,1,1,$2,'low','["E2E validated"]'::jsonb)`,[profileId,network]); steps.push({step:'network',status:'pass',score:network});
