@@ -3,8 +3,8 @@ export const access='member';
 export const methods=['GET','POST'];
 
 async function exists(name){
- const r=await db.query(`SELECT to_regclass($1) AS table_name`,[`public.${name}`]);
- return !!r.rows[0]?.table_name;
+ const r=await db.query(`SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_name=$1`,[name]);
+ return r.rows.length>0;
 }
 
 async function run(){
