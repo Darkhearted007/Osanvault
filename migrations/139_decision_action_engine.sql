@@ -1,0 +1,2 @@
+CREATE TABLE IF NOT EXISTS economic_decision_actions (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), profile_id uuid NOT NULL, consensus_id uuid NOT NULL, decision_state text NOT NULL, approval_state text NOT NULL DEFAULT 'pending', rationale jsonb NOT NULL DEFAULT '[]'::jsonb, recommended_actions jsonb NOT NULL DEFAULT '[]'::jsonb, decided_by text, decided_at timestamptz, created_at timestamptz NOT NULL DEFAULT now());
+CREATE INDEX IF NOT EXISTS idx_decision_actions_profile ON economic_decision_actions(profile_id,created_at DESC);
