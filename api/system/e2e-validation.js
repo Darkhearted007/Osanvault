@@ -29,7 +29,6 @@ async function execute(member){
   const e=await db.query(`INSERT INTO economic_evidence_vault(${insertFields.join(',')}) VALUES(${placeholders}) RETURNING id`,values);
   evidenceId=e.rows[0].id; stages.push(ok('evidence',evidenceId));
   await db.query(`UPDATE economic_graph_relationships SET evidence_ref=$1,status='verified',confidence=0.95 WHERE id=$2`,[evidenceId,relationshipId]); stages.push(ok('verification','relationship verified and evidence linked'));
-  const feedback=await db.query(`/api/economic/onboarding/${profileId}/network-feedback`); // intentionally not executable; handled below
   stages.push(ok('network_precondition','network records prepared'));
   const net=await db.query(`SELECT COUNT(*)::int AS relationships,COUNT(*) FILTER(WHERE status='verified')::int AS verified FROM economic_graph_relationships WHERE from_id=$1`,[profileId]);
   if(Number(net.rows[0].relationships)<1||Number(net.rows[0].verified)<1)throw new Error('network verification stage failed');
