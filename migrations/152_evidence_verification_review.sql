@@ -1,0 +1,2 @@
+CREATE TABLE IF NOT EXISTS economic_evidence_verification_events (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), evidence_id uuid NOT NULL, profile_id uuid NOT NULL, from_status text NOT NULL, to_status text NOT NULL, reviewer_id text NOT NULL, trust_score numeric(5,2), review_notes text, created_at timestamptz NOT NULL DEFAULT now());
+CREATE INDEX IF NOT EXISTS idx_evidence_verification_events_evidence ON economic_evidence_verification_events(evidence_id,created_at DESC);
