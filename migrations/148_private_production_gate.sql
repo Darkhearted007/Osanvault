@@ -1,0 +1,2 @@
+CREATE TABLE IF NOT EXISTS economic_private_production_gates (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), gate_key text NOT NULL, status text NOT NULL, checks jsonb NOT NULL DEFAULT '[]'::jsonb, production_profiles integer NOT NULL DEFAULT 0, public_exposure boolean NOT NULL DEFAULT false, approved_by text NOT NULL, created_at timestamptz NOT NULL DEFAULT now());
+CREATE INDEX IF NOT EXISTS idx_private_production_gate_time ON economic_private_production_gates(created_at DESC);
