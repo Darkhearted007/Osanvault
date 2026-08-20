@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS platform_uat_runs (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), test_key text NOT NULL UNIQUE, status text NOT NULL DEFAULT 'running', checks jsonb NOT NULL DEFAULT '[]'::jsonb, passed_count integer NOT NULL DEFAULT 0, failed_count integer NOT NULL DEFAULT 0, created_at timestamptz NOT NULL DEFAULT now(), completed_at timestamptz)
