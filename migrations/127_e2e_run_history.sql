@@ -1,0 +1,1 @@
+ALTER TABLE platform_e2e_test_runs DROP CONSTRAINT IF EXISTS platform_e2e_test_runs_test_key_key;
