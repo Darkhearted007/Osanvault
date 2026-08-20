@@ -1,0 +1,2 @@
+ALTER TABLE economic_onboarding_profiles ADD COLUMN IF NOT EXISTS data_environment text NOT NULL DEFAULT 'production';
+CREATE INDEX IF NOT EXISTS idx_economic_onboarding_owner_environment ON economic_onboarding_profiles(owner_id,data_environment);
