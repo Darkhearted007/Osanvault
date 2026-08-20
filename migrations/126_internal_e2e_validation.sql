@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS platform_e2e_test_runs (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), test_key text NOT NULL UNIQUE, owner_id uuid NOT NULL, status text NOT NULL DEFAULT 'running', stages jsonb NOT NULL DEFAULT '[]'::jsonb, started_at timestamptz NOT NULL DEFAULT now(), completed_at timestamptz, cleanup_status text NOT NULL DEFAULT 'pending')
