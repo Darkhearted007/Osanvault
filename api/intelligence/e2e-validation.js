@@ -10,7 +10,7 @@ export default async function(req,res){
  try{
   const p=await db.query(`INSERT INTO economic_onboarding_profiles(owner_id,display_name,data_environment,business_type,sector,location,description,onboarding_status) VALUES($1,$2,'test','validation','controlled','internal','OV-21.4 isolated validation business','draft') RETURNING id`,[owner,`E2E Validation ${key}`]);
   profileId=p.rows[0].id; steps.push({step:'profile',status:'pass'});
-  const e=await db.query(`INSERT INTO economic_evidence_vault(profile_id,evidence_category,source_type,verification_status,title,description,submitted_by) VALUES($1,'validation','internal','verified','E2E Validation Evidence','Synthetic evidence for isolated validation',$2) RETURNING id`,[profileId,owner]);
+  const e=await db.query(`INSERT INTO economic_evidence_vault(profile_id,evidence_category,source_type,verification_status,title,description,submitted_by) VALUES($1,'validation','system_generated','verified','E2E Validation Evidence','Synthetic evidence for isolated validation',$2) RETURNING id`,[profileId,owner]);
   const evidenceId=e.rows[0].id; steps.push({step:'evidence',status:'pass'});
   await db.query(`UPDATE economic_evidence_vault SET trust_score=90,verified_by=$1,verified_at=now() WHERE id=$2`,[owner,evidenceId]); steps.push({step:'verification',status:'pass'});
   await db.query(`INSERT INTO economic_graph_relationships(from_id,status,confidence) VALUES($1,'verified',0.9)`,[profileId]); steps.push({step:'network_input',status:'pass'});
