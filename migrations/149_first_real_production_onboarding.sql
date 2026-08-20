@@ -1,0 +1,2 @@
+CREATE TABLE IF NOT EXISTS economic_production_onboarding_gate (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), profile_id uuid NOT NULL, gate_key text NOT NULL, status text NOT NULL DEFAULT 'pending', checks jsonb NOT NULL DEFAULT '[]'::jsonb, created_by text NOT NULL, created_at timestamptz NOT NULL DEFAULT now(), completed_at timestamptz);
+CREATE INDEX IF NOT EXISTS idx_prod_onboarding_profile ON economic_production_onboarding_gate(profile_id,created_at DESC);
