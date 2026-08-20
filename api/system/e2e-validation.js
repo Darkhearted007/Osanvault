@@ -19,12 +19,14 @@ async function execute(member){
   const target=await db.query(`SELECT gen_random_uuid() AS id`); const targetId=target.rows[0].id;
   const r=await db.query(`INSERT INTO economic_graph_relationships(from_type,from_id,to_type,to_id,relationship_type,status,confidence) VALUES('economic_business',$1,'test_counterparty',$2,'supplier','evidenced',0.9) RETURNING id`,[profileId,targetId]);
   relationshipId=r.rows[0].id; stages.push(ok('relationship',relationshipId));
-  const eCols=await db.query(`SELECT column_name FROM information_schema.columns WHERE table_name='economic_evidence_vault' ORDER BY ordinal_position`);
-  const eNames=new Set(eCols.rows.map(x=>x.column_name));
+  const eCols=await db.query(`SELECT column_name,is_nullable,column_default FROM information_schema.columns WHERE table_name='economic_evidence_vault' ORDER BY ordinal_position`);
+  const eRows=eCols.rows; const eNames=new Set(eRows.map(x=>x.column_name));
   if(!eNames.has('profile_id'))throw new Error('evidence vault missing profile_id');
-  const evidenceFields=eNames.has('verification_status')?'profile_id,verification_status':'profile_id';
-  const evidenceValues=eNames.has('verification_status')?"$1,'verified'":"$1";
-  const e=await db.query(`INSERT INTO economic_evidence_vault(${evidenceFields}) VALUES(${evidenceValues}) RETURNING id`,[profileId]);
+  const required=eRows.filter(x=>x.is_nullable==='NO' && x.column_default===null).map(x=>x.column_name);
+  const requiredValues={profile_id:profileId,evidence_category:'controlled_validation',evidence_type:'test_record',source_type:'internal_test',verification_status:'verified',title:'OV-19.11 controlled validation evidence'};
+  const missing=required.filter(x=>requiredValues[x]===undefined); if(missing.length)throw new Error('evidence schema requires additional fields: '+missing.join(', '));
+  const insertFields=required.filter(x=>requiredValues[x]!==undefined); const placeholders=insertFields.map((_,i)=>'$'+(i+1)).join(','); const values=insertFields.map(x=>requiredValues[x]);
+  const e=await db.query(`INSERT INTO economic_evidence_vault(${insertFields.join(',')}) VALUES(${placeholders}) RETURNING id`,values);
   evidenceId=e.rows[0].id; stages.push(ok('evidence',evidenceId));
   await db.query(`UPDATE economic_graph_relationships SET evidence_ref=$1,status='verified',confidence=0.95 WHERE id=$2`,[evidenceId,relationshipId]); stages.push(ok('verification','relationship verified and evidence linked'));
   const feedback=await db.query(`/api/economic/onboarding/${profileId}/network-feedback`); // intentionally not executable; handled below
@@ -69,7 +71,8 @@ export default async function(req,res){
   return res.json({status:'cleaned',cleanupStatus});
  }
  const result=await execute(req.member);
- const run=await db.query(`INSERT INTO platform_e2e_test_runs(test_key,owner_id,status,stages,completed_at,cleanup_status) VALUES($1,$2,$3,$4,now(),'pending') RETURNING id`,[TEST_KEY,req.member.id,result.status,JSON.stringify(result.stages)]);
+ const ownerId=(req.member.id&&/^[0-9a-f-]{36}$/i.test(req.member.id))?req.member.id:null;
+ const run=await db.query(`INSERT INTO platform_e2e_test_runs(test_key,owner_id,status,stages,completed_at,cleanup_status) VALUES($1,$2,$3,$4,now(),'pending') RETURNING id`,[TEST_KEY,ownerId||'00000000-0000-0000-0000-000000000000',result.status,JSON.stringify(result.stages)]);
  const cleanupStatus=await cleanup(result.profileId);
  await db.query(`UPDATE platform_e2e_test_runs SET cleanup_status=$1 WHERE id=$2`,[cleanupStatus,run.rows[0].id]);
  res.status(result.status==='passed'?201:500).json({phase:'OV-19.11',runId:run.rows[0].id,result:{...result,cleanupStatus},releaseGate:result.status==='passed'&&cleanupStatus==='cleaned'?'eligible_for_internal_system_testing':'blocked',principle:'Controlled test records are deleted after execution; no test evidence is retained as production evidence.'});
