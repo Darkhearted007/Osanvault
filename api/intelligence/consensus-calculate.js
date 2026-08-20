@@ -1,0 +1,31 @@
+import { db } from 'hatchable';
+export const access='member';
+export const methods=['POST'];
+const clean=v=>typeof v==='string'?v.trim().slice(0,80):'';
+export default async function(req,res){
+ const profileId=clean(req.body?.profileId);
+ if(!profileId)return res.status(400).json({ok:false,error:'profileId is required.'});
+ const p=await db.query(`SELECT id,display_name FROM economic_onboarding_profiles WHERE id=$1 AND owner_id=$2 AND data_environment='production' LIMIT 1`,[profileId,req.member.id]);
+ if(!p.rows.length)return res.status(404).json({ok:false,error:'Production profile not found.'});
+ const n=await db.query(`SELECT network_score FROM economic_network_intelligence WHERE profile_id=$1 ORDER BY calculated_at DESC LIMIT 1`,[profileId]);
+ const a=await db.query(`SELECT score FROM graph_assessments WHERE node_type='economic_business' AND node_id=$1 ORDER BY created_at DESC LIMIT 1`,[profileId]);
+ const e=await db.query(`SELECT COALESCE(AVG(trust_score),0)::numeric AS trust FROM economic_evidence_vault WHERE profile_id=$1 AND verification_status='verified'`,[profileId]);
+ if(!n.rows.length||!a.rows.length)return res.status(409).json({ok:false,error:'Network intelligence and assessment are required before consensus.'});
+ const network=Number(n.rows[0].network_score||0),assessment=Number(a.rows[0].score||0),evidence=Number(e.rows[0].trust||0);
+ const consensus=Math.round(network*0.4+assessment*0.35+evidence*0.25);
+ const confidence=consensus>=75?'high':consensus>=50?'moderate':'low';
+ const decision=consensus>=75?'favorable':consensus>=50?'conditional':'needs_review';
+ const rationale=[];
+ rationale.push(`Network intelligence contributes ${network}/100.`);
+ rationale.push(`Explainable assessment contributes ${assessment}/100.`);
+ rationale.push(`Verified evidence trust contributes ${evidence}/100.`);
+ if(evidence<50)rationale.push('Evidence trust is below the strong-confidence threshold.');
+ if(network<50)rationale.push('Network strength requires additional verified relationships.');
+ const actions=[];
+ if(evidence<70)actions.push('Increase verified evidence quality and coverage.');
+ if(network<70)actions.push('Strengthen and verify key economic relationships.');
+ if(consensus>=75)actions.push('Proceed to the next decision workflow with normal controls.');
+ else actions.push('Keep the decision conditional until supporting signals improve.');
+ const r=await db.query(`INSERT INTO economic_decision_consensus(profile_id,assessment_score,network_score,evidence_trust,consensus_score,confidence,decision_state,rationale,recommended_actions,created_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id,consensus_score AS "consensusScore",confidence,decision_state AS "decisionState",rationale,"recommended_actions" AS "recommendedActions",created_at AS "createdAt"`,[profileId,assessment,network,evidence,consensus,confidence,decision,JSON.stringify(rationale),JSON.stringify(actions),req.member.id]);
+ res.status(201).json({ok:true,profile:p.rows[0],consensus:r.rows[0],inputs:{networkScore:network,assessmentScore:assessment,evidenceTrust:evidence},formula:'40% network + 35% assessment + 25% verified evidence trust',next:'decision'});
+}
