@@ -19,13 +19,12 @@ const expected=[
 async function inspect(){
  const results=[];
  for(const [table,columns] of expected){
-  const t=await db.query(`SELECT EXISTS(SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name=$1) AS exists`,[table]);
-  if(!t.rows[0].exists){results.push({table,status:'missing',missingColumns:columns});continue;}
-  const c=await db.query(`SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name=$1`,[table]);
-  const have=new Set(c.rows.map(x=>x.column_name));
-  const missing=columns.filter(x=>!have.has(x));
-  const count=await db.query(`SELECT COUNT(*)::int AS count FROM ${table}`);
-  results.push({table,status:missing.length?'schema_drift':'ok',missingColumns:missing,rowCount:count.rows[0].count});
+  let rowCount=0;
+  try { const count=await db.query(`SELECT COUNT(*)::int AS count FROM ${table}`); rowCount=count.rows[0].count; }
+  catch(e){ results.push({table,status:'missing_or_unqueryable',missingColumns:columns,error:String(e?.message||e)}); continue; }
+  const missing=[];
+  for(const column of columns){ try { await db.query(`SELECT ${column} FROM ${table} LIMIT 0`); } catch(e){ missing.push(column); } }
+  results.push({table,status:missing.length?'schema_drift':'ok',missingColumns:missing,rowCount});
  }
  return results;
 }
