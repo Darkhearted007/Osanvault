@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS platform_business_simulation_runs (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), simulation_key text NOT NULL UNIQUE, status text NOT NULL DEFAULT 'running', stages jsonb NOT NULL DEFAULT '[]'::jsonb, created_at timestamptz NOT NULL DEFAULT now(), completed_at timestamptz, cleanup_status text NOT NULL DEFAULT 'pending')
