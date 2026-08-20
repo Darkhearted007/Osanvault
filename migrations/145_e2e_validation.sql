@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS economic_e2e_validation_runs (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), run_key text NOT NULL, status text NOT NULL DEFAULT 'running', steps jsonb NOT NULL DEFAULT '[]'::jsonb, started_at timestamptz NOT NULL DEFAULT now(), completed_at timestamptz, created_by text NOT NULL);
