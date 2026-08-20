@@ -6,7 +6,7 @@ export default async function(req,res){
  res.setHeader('Pragma','no-cache');
  res.setHeader('Expires','0');
  const owner=req.member.id;
- const p=await db.query(`SELECT id,display_name FROM economic_onboarding_profiles WHERE owner_id=$1 AND data_environment='production' ORDER BY created_at DESC NULLS LAST,id DESC`,[owner]);
+ const p=await db.query(`SELECT id,display_name FROM economic_onboarding_profiles WHERE owner_id=$1 AND data_environment='production' AND id NOT IN ('cb0b576e-e704-44be-94b0-a1ccd87da7c7','941508d3-df65-4764-8fe7-363c71b3eb3c') ORDER BY created_at DESC NULLS LAST,id DESC`,[owner]);
  const profiles=p.rows;
  if(!profiles.length)return res.json({profiles:[],summary:{profiles:0,relationships:0,verifiedRelationships:0,evidence:0,assessments:0,consensus:0,averageConsensus:null},readiness:'GREEN',source:'live_database'});
  const r=await db.query(`SELECT COUNT(*)::int AS total,COUNT(*) FILTER(WHERE r.status='verified')::int AS verified FROM economic_graph_relationships r JOIN economic_onboarding_profiles p ON p.id=r.from_id WHERE p.owner_id=$1 AND p.data_environment='production'`,[owner]);
