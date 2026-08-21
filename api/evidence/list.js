@@ -1,3 +1,7 @@
 import { db } from 'hatchable';
-export const access='member'; export const methods=['GET'];
-export default async function(req,res){const r=await db.query(`SELECT id,profile_id,evidence_category AS category,title,description,source_type,storage_url AS sourceReference,verification_status AS verificationStatus,submitted_by AS submittedBy,reviewed_by AS reviewedBy,reviewed_at AS reviewedAt,trust_score AS trustScore,created_at AS createdAt FROM economic_evidence_vault WHERE profile_id=$1 ORDER BY created_at DESC`,[req.query?.profileId]);res.json({ok:true,evidence:r.rows,publicExposure:false});}
+export const access='member';
+export const methods=['GET'];
+export default async function(req,res){
+ const r=await db.query(`SELECT e.id,e.profile_id,e.evidence_category,e.title,e.description,e.source_type,e.storage_url,e.verification_status,e.trust_score,e.reviewed_by,e.reviewed_at,e.review_notes,e.created_at FROM economic_evidence_vault e JOIN economic_onboarding_profiles p ON p.id=e.profile_id WHERE e.profile_id=$1 AND p.owner_id=$2 ORDER BY e.created_at DESC`,[req.query?.profileId,req.member.id]);
+ res.json({ok:true,evidence:r.rows,publicExposure:false});
+}
