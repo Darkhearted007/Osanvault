@@ -1,0 +1,2 @@
+CREATE TABLE IF NOT EXISTS economic_intelligence_provenance (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), profile_id uuid NOT NULL, aggregate_id uuid NOT NULL, explanation text NOT NULL, contribution_breakdown jsonb NOT NULL DEFAULT '[]'::jsonb, source_signal_ids jsonb NOT NULL DEFAULT '[]'::jsonb, confidence text NOT NULL, created_by text NOT NULL, created_at timestamptz NOT NULL DEFAULT now());
+CREATE INDEX IF NOT EXISTS idx_intelligence_provenance_profile ON economic_intelligence_provenance(profile_id,created_at DESC);
