@@ -1,0 +1,2 @@
+CREATE TABLE IF NOT EXISTS economic_explainable_assessments (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), profile_id uuid NOT NULL, network_intelligence_id uuid NOT NULL, assessment_score numeric(5,2) NOT NULL, confidence text NOT NULL, drivers jsonb NOT NULL DEFAULT '[]'::jsonb, source_signal_ids jsonb NOT NULL DEFAULT '[]'::jsonb, explanation text NOT NULL, created_by text NOT NULL, created_at timestamptz NOT NULL DEFAULT now());
+CREATE INDEX IF NOT EXISTS idx_explainable_assessment_profile ON economic_explainable_assessments(profile_id,created_at DESC);
