@@ -1,0 +1,3 @@
+import { db } from 'hatchable';
+export const access='member'; export const methods=['GET'];
+export default async function(req,res){const r=await db.query(`SELECT id,profile_id,evidence_category,title,description,source_type,verification_status,storage_url,file_url,submitted_by,reviewed_by,reviewed_at,review_note,trust_score,created_at FROM economic_evidence_vault WHERE profile_id=$1 ORDER BY created_at DESC`,[req.query?.profileId]);res.json({ok:true,evidence:r.rows,publicExposure:false});}
