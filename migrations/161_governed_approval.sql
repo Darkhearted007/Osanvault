@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS economic_governed_approvals (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), decision_id uuid NOT NULL, profile_id uuid NOT NULL, status text NOT NULL DEFAULT 'pending', requested_by text NOT NULL, reviewer_id text, review_notes text, created_at timestamptz NOT NULL DEFAULT now(), reviewed_at timestamptz);
+CREATE TABLE IF NOT EXISTS economic_governance_events (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), approval_id uuid NOT NULL, decision_id uuid NOT NULL, profile_id uuid NOT NULL, event_type text NOT NULL, actor_id text NOT NULL, from_status text, to_status text NOT NULL, notes text, created_at timestamptz NOT NULL DEFAULT now());
+CREATE INDEX IF NOT EXISTS idx_governed_approval_decision ON economic_governed_approvals(decision_id,created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_governance_events_approval ON economic_governance_events(approval_id,created_at DESC);
