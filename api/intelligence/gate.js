@@ -1,0 +1,3 @@
+import { db } from 'hatchable';
+export const access='member'; export const methods=['GET'];
+export default async function(req,res){const profileId=req.query?.profileId;if(!profileId)return res.status(400).json({ok:false,error:'profileId is required.'});const r=await db.query(`SELECT COUNT(*)::int verified FROM economic_evidence_vault WHERE profile_id=$1 AND verification_status='verified'`,[profileId]);const verified=Number(r.rows[0].verified||0);res.status(verified>0?200:423).json({ok:verified>0,intelligenceUnlocked:verified>0,verifiedEvidenceCount:verified,minimumVerifiedEvidence:1,reason:verified>0?'Minimum verified evidence requirement satisfied.':'Intelligence is locked until at least one genuine evidence record is independently verified.',publicExposure:false});}

@@ -1,0 +1,3 @@
+import { db } from 'hatchable';
+export const access='member'; export const methods=['GET'];
+export default async function(req,res){const id=req.query?.evidenceId;if(!id)return res.status(400).json({ok:false,error:'evidenceId is required.'});const r=await db.query(`SELECT id,title,evidence_category,verification_status,trust_score,source_type,source_reference,submitted_by,reviewed_by,reviewed_at,review_note,created_at FROM economic_evidence_vault WHERE id=$1 LIMIT 1`,[id]);if(!r.rows.length)return res.status(404).json({ok:false,error:'Evidence not found.'});res.json({ok:true,evidence:r.rows[0],provenanceReady:true,publicExposure:false});}
