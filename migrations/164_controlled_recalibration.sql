@@ -1,0 +1,2 @@
+CREATE TABLE IF NOT EXISTS economic_recalibration_runs (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), profile_id uuid NOT NULL, outcome_id uuid NOT NULL, decision_id uuid NOT NULL, predicted_score numeric(5,2), actual_outcome_score numeric(5,2), accuracy_gap numeric(6,2), drift_level text NOT NULL, learning_recommendation text NOT NULL, applied_to_production boolean NOT NULL DEFAULT false, created_by text NOT NULL, created_at timestamptz NOT NULL DEFAULT now());
+CREATE INDEX IF NOT EXISTS idx_recalibration_profile ON economic_recalibration_runs(profile_id,created_at DESC);
