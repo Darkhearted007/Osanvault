@@ -1,0 +1,3 @@
+import { db } from 'hatchable';
+export const access = 'admin'; export const methods=['POST'];
+export default async function(req,res){const {title,version,status,effective_date,approved_by,content}=req.body||{};if(!title||!content)return res.status(400).json({ok:false,error:'title and content are required'});const {rows}=await db.query(`INSERT INTO governance_documents(document_type,title,version,status,effective_date,approved_by,content) VALUES('company_constitution',$1,$2,$3,$4,$5,$6) RETURNING id,title,version,status,effective_date,approved_by,content,updated_at`,[title,version||'1.0',status||'draft',effective_date||null,approved_by||null,content]);res.status(201).json({ok:true,constitution:rows[0]});}

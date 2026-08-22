@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS governance_documents (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), document_type text NOT NULL, title text NOT NULL, version text NOT NULL DEFAULT '1.0', status text NOT NULL DEFAULT 'draft', effective_date date, approved_by text, content text NOT NULL, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());
+CREATE INDEX IF NOT EXISTS idx_employee_documents_person ON employee_documents(person_id);
+CREATE INDEX IF NOT EXISTS idx_employee_documents_expiry ON employee_documents(expires_on);
+CREATE INDEX IF NOT EXISTS idx_governance_documents_type ON governance_documents(document_type);

@@ -1,0 +1,3 @@
+import { db } from 'hatchable';
+export const access = 'admin'; export const methods=['GET'];
+export default async function(req,res){const [d,e]=await Promise.all([db.query(`SELECT document_type,status,COUNT(*)::int count FROM employee_documents GROUP BY document_type,status ORDER BY document_type`),db.query(`SELECT COUNT(*)::int count FROM employee_documents WHERE expires_on IS NOT NULL AND expires_on BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '60 days' AND status='active'`)]);res.json({ok:true,documents:d.rows,expiring_60_days:e.rows[0]?.count||0});}
