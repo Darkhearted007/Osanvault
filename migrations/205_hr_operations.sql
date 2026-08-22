@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS employee_contracts (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), employee_id uuid NOT NULL REFERENCES workforce_employees(id) ON DELETE CASCADE, contract_type text NOT NULL, start_date date, end_date date, status text NOT NULL DEFAULT 'draft', salary_basis text, notes text, created_at timestamptz NOT NULL DEFAULT now());

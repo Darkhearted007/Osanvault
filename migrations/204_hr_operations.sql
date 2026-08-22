@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS employee_documents (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), employee_id uuid NOT NULL REFERENCES workforce_employees(id) ON DELETE CASCADE, document_type text NOT NULL, title text NOT NULL, storage_key text, status text NOT NULL DEFAULT 'active', issued_at date, expires_at date, notes text, created_at timestamptz NOT NULL DEFAULT now());

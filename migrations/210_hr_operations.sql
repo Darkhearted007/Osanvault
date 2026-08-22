@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS employee_disciplinary_records (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), employee_id uuid NOT NULL REFERENCES workforce_employees(id) ON DELETE CASCADE, incident_date date, category text NOT NULL, summary text NOT NULL, action_taken text, status text NOT NULL DEFAULT 'open', resolved_at date, created_at timestamptz NOT NULL DEFAULT now());

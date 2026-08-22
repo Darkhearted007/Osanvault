@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS employee_training (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), employee_id uuid NOT NULL REFERENCES workforce_employees(id) ON DELETE CASCADE, course_name text NOT NULL, provider text, start_date date, completion_date date, status text NOT NULL DEFAULT 'planned', certificate_reference text, notes text, created_at timestamptz NOT NULL DEFAULT now());
