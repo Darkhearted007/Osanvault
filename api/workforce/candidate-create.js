@@ -1,0 +1,3 @@
+import { db } from 'hatchable';
+export const access='admin'; export const methods=['POST'];
+export default async function(req,res){const b=req.body||{};if(!b.full_name||!b.position_id)return res.status(400).json({ok:false,error:'full_name and position_id are required'});const {rows}=await db.query(`INSERT INTO workforce_candidates(position_id,full_name,email,phone,stage,source,notes,consent_status) VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,[b.position_id,b.full_name,b.email||null,b.phone||null,b.stage||'prospect',b.source||null,b.notes||null,b.consent_status||null]);res.status(201).json({ok:true,candidate:rows[0]})}
