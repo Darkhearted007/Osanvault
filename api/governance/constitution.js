@@ -1,3 +1,3 @@
 import { db } from 'hatchable';
-export const access = 'admin'; export const methods=['GET'];
-export default async function(req,res){const {rows}=await db.query(`SELECT id,document_type,title,version,status,effective_date,approved_by,content,updated_at FROM governance_documents WHERE document_type='company_constitution' ORDER BY updated_at DESC LIMIT 1`);if(!rows.length)return res.json({ok:true,constitution:null});res.json({ok:true,constitution:rows[0]});}
+export const access='admin'; export const methods=['GET'];
+export default async function(req,res){const {rows}=await db.query(`SELECT id,document_type,title,version,status,effective_date,approved_by,content,created_at,updated_at FROM governance_documents WHERE document_type='company_constitution' ORDER BY created_at DESC LIMIT 1`);if(!rows[0])return res.status(404).json({ok:false,error:'Constitution draft not found'});res.json({ok:true,constitution:rows[0]})}

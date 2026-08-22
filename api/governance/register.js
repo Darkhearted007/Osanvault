@@ -1,0 +1,3 @@
+import { db } from 'hatchable';
+export const access='admin'; export const methods=['GET'];
+export default async function(req,res){const [d,a]=await Promise.all([db.query(`SELECT id,document_type,title,version,status,effective_date,approved_by,created_at,updated_at FROM governance_documents ORDER BY document_type,title,version DESC`),db.query(`SELECT id,category,action,approval_level,threshold_amount,currency,notes,active FROM authority_rules WHERE active=true ORDER BY category,threshold_amount NULLS FIRST`)]);res.json({ok:true,documents:d.rows,authority_rules:a.rows})}

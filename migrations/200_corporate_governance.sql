@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS governance_documents (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), document_type text NOT NULL, title text NOT NULL, version text NOT NULL, status text NOT NULL DEFAULT 'draft', effective_date date, approved_by text, content text NOT NULL, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS authority_rules (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), category text NOT NULL, action text NOT NULL, approval_level text NOT NULL, threshold_amount numeric(14,2), currency text DEFAULT 'NGN', notes text, active boolean NOT NULL DEFAULT true, created_at timestamptz NOT NULL DEFAULT now());
+CREATE INDEX IF NOT EXISTS idx_governance_documents_type ON governance_documents(document_type,status);
+CREATE INDEX IF NOT EXISTS idx_authority_rules_category ON authority_rules(category,active);
