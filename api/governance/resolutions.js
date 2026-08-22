@@ -1,0 +1,4 @@
+import { db } from 'hatchable';
+export const access = 'admin';
+export const methods = ['GET'];
+export default async function(req,res){const [r,m,c]=await Promise.all([db.query(`SELECT id,resolution_number,resolution_type,title,status,meeting_date,effective_date,proposed_by,approved_by,approval_notes,resolution_text,created_at,updated_at FROM governance_resolutions ORDER BY meeting_date DESC NULLS LAST,created_at DESC`),db.query(`SELECT id,meeting_type,title,meeting_date,location_or_mode,chairperson,status,agenda,minutes,created_at,updated_at FROM governance_meetings ORDER BY meeting_date DESC,created_at DESC`),db.query(`SELECT id,register_type,item_name,reference_number,status,details,review_date,created_at,updated_at FROM corporate_register_items ORDER BY register_type,item_name`)]);res.json({ok:true,resolutions:r.rows,meetings:m.rows,corporate_register:c.rows})}

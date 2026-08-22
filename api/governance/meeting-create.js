@@ -1,0 +1,4 @@
+import { db } from 'hatchable';
+export const access = 'admin';
+export const methods = ['POST'];
+export default async function(req,res){const b=req.body||{};if(!b.title||!b.meeting_date||!b.meeting_type)return res.status(400).json({ok:false,error:'title, meeting_type and meeting_date are required'});const {rows}=await db.query(`INSERT INTO governance_meetings(meeting_type,title,meeting_date,location_or_mode,chairperson,status,agenda) VALUES ($1,$2,$3,$4,$5,'scheduled',$6) RETURNING *`,[b.meeting_type,b.title,b.meeting_date,b.location_or_mode||null,b.chairperson||null,b.agenda||null]);res.status(201).json({ok:true,meeting:rows[0]})}

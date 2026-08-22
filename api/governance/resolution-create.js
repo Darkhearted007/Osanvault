@@ -1,0 +1,4 @@
+import { db } from 'hatchable';
+export const access = 'admin';
+export const methods = ['POST'];
+export default async function(req,res){const b=req.body||{};if(!b.title||!b.resolution_text||!b.resolution_type)return res.status(400).json({ok:false,error:'title, resolution_type and resolution_text are required'});const {rows}=await db.query(`INSERT INTO governance_resolutions(resolution_number,resolution_type,title,status,meeting_date,effective_date,proposed_by,resolution_text) VALUES ($1,$2,$3,'draft',$4,$5,$6,$7) RETURNING *`,[b.resolution_number||`OSV-${new Date().getFullYear()}-${Date.now()}`,b.resolution_type,b.title,b.meeting_date||null,b.effective_date||null,b.proposed_by||req.member?.display_name||req.member?.email||'Project Admin',b.resolution_text]);res.status(201).json({ok:true,resolution:rows[0]})}
