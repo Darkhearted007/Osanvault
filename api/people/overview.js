@@ -1,0 +1,6 @@
+import { db } from 'hatchable';
+export const access='admin'; export const methods=['GET'];
+export default async function(req,res){
+ const [d,p,people]=await Promise.all([db.query('SELECT id,name,status FROM org_departments ORDER BY name'),db.query(`SELECT p.id,p.title,p.status,p.level,p.employment_type AS "employmentType",p.statutory_role AS "statutoryRole",d.name AS department,COUNT(pr.id)::int AS occupants FROM org_positions p LEFT JOIN org_departments d ON d.id=p.department_id LEFT JOIN people_records pr ON pr.position_id=p.id AND pr.lifecycle_status='active' GROUP BY p.id,d.name ORDER BY d.name,p.title`),db.query(`SELECT pr.id,pr.full_name AS "fullName",pr.email,pr.person_type AS "personType",pr.lifecycle_status AS "lifecycleStatus",p.title AS position,d.name AS department FROM people_records pr LEFT JOIN org_positions p ON p.id=pr.position_id LEFT JOIN org_departments d ON d.id=p.department_id ORDER BY pr.created_at DESC`)]);
+ res.json({ok:true,company:'OSANVAULT AFRICA LTD',departments:d.rows,positions:p.rows,people:people.rows,metrics:{departments:d.rows.length,positions:p.rows.length,vacant:p.rows.filter(x=>x.status==='planned'||x.status==='vacant').length,activePeople:people.rows.filter(x=>x.lifecycleStatus==='active').length,recruiting:people.rows.filter(x=>x.lifecycleStatus==='interview'||x.lifecycleStatus==='offer').length}});
+}
