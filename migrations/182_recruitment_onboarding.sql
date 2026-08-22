@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS candidate_profiles (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), person_id uuid UNIQUE REFERENCES people_records(id) ON DELETE CASCADE, source text, application_date date NOT NULL DEFAULT CURRENT_DATE, screening_score numeric(5,2), interview_score numeric(5,2), assessment_score numeric(5,2), reference_status text NOT NULL DEFAULT 'not_started', current_stage text NOT NULL DEFAULT 'application', recruiter_notes text, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS interview_records (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), candidate_id uuid REFERENCES candidate_profiles(id) ON DELETE CASCADE, interviewer text, interview_type text DEFAULT 'general', scheduled_at timestamptz, score numeric(5,2), recommendation text, notes text, created_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS employment_offers (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), candidate_id uuid REFERENCES candidate_profiles(id) ON DELETE CASCADE, position_id uuid REFERENCES org_positions(id), offer_status text NOT NULL DEFAULT 'draft', proposed_start_date date, salary_amount numeric(14,2), salary_currency text DEFAULT 'NGN', employment_type text DEFAULT 'full_time', expires_at date, notes text, created_at timestamptz NOT NULL DEFAULT now());
+ALTER TABLE employee_onboarding ADD COLUMN IF NOT EXISTS employee_number text UNIQUE;
+ALTER TABLE employee_onboarding ADD COLUMN IF NOT EXISTS contract_complete boolean NOT NULL DEFAULT false;
+ALTER TABLE employee_onboarding ADD COLUMN IF NOT EXISTS payroll_ready boolean NOT NULL DEFAULT false;
+ALTER TABLE employee_onboarding ADD COLUMN IF NOT EXISTS workspace_ready boolean NOT NULL DEFAULT false;
+ALTER TABLE employee_onboarding ADD COLUMN IF NOT EXISTS orientation_complete boolean NOT NULL DEFAULT false;
+CREATE INDEX IF NOT EXISTS idx_candidate_stage ON candidate_profiles(current_stage);
+CREATE INDEX IF NOT EXISTS idx_offer_status ON employment_offers(offer_status);
