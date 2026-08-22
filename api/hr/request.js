@@ -1,0 +1,3 @@
+import { db } from 'hatchable';
+export const access='member'; export const methods=['POST'];
+export default async function(req,res){const m=req.member;const {request_type,subject,details}=req.body||{};if(!request_type||!subject)return res.status(400).json({ok:false,error:'request_type and subject are required'});const p=await db.query(`SELECT id FROM people_records WHERE lower(email)=lower($1) LIMIT 1`,[m.email]);if(!p.rows.length)return res.status(404).json({ok:false,error:'Employee profile not found'});const {rows}=await db.query(`INSERT INTO employee_requests(person_id,request_type,subject,details) VALUES($1,$2,$3,$4) RETURNING *`,[p.rows[0].id,request_type,subject,details||null]);res.status(201).json({ok:true,request:rows[0]});}
