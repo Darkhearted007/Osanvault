@@ -1,0 +1,4 @@
+import { db } from 'hatchable';
+export const access = "admin";
+export const methods = ["GET"];
+export default async function(req,res){const [p,g,r,a,l]=await Promise.all([db.query(`SELECT lifecycle_status,COUNT(*)::int count FROM people_records WHERE person_type='employee' GROUP BY lifecycle_status`),db.query(`SELECT status,COUNT(*)::int count FROM performance_goals GROUP BY status`),db.query(`SELECT status,COUNT(*)::int count FROM performance_reviews GROUP BY status`),db.query(`SELECT status,COUNT(*)::int count FROM attendance_records WHERE work_date >= CURRENT_DATE - INTERVAL '30 days' GROUP BY status`),db.query(`SELECT COALESCE(SUM(entitled-used),0)::numeric days_available FROM leave_balances WHERE year=EXTRACT(YEAR FROM CURRENT_DATE)::int`)]);res.json({ok:true,employees:p.rows,goals:g.rows,reviews:r.rows,attendance:a.rows,leave:l.rows[0]||{days_available:0}})}

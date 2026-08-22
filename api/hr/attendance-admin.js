@@ -1,0 +1,4 @@
+import { db } from 'hatchable';
+export const access = "admin";
+export const methods = ["POST"];
+export default async function(req,res){const {person_id,work_date,check_in,check_out,status}=req.body||{};if(!person_id||!work_date)return res.status(400).json({ok:false,error:'person_id and work_date are required'});let hours=null;if(check_in&&check_out)hours=Math.max(0,(new Date(check_out)-new Date(check_in))/3600000);const {rows}=await db.query(`INSERT INTO attendance_records(person_id,work_date,check_in,check_out,status,hours) VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(person_id,work_date) DO UPDATE SET check_in=EXCLUDED.check_in,check_out=EXCLUDED.check_out,status=EXCLUDED.status,hours=EXCLUDED.hours RETURNING *`,[person_id,work_date,check_in||null,check_out||null,status||'present',hours]);res.status(201).json({ok:true,attendance:rows[0]})}

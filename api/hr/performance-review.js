@@ -1,0 +1,4 @@
+import { db } from 'hatchable';
+export const access = "admin";
+export const methods = ["POST"];
+export default async function(req,res){const {person_id,cycle_id,rating,strengths,development_areas,recommendation,status}=req.body||{};if(!person_id)return res.status(400).json({ok:false,error:'person_id is required'});const {rows}=await db.query(`INSERT INTO performance_reviews(person_id,cycle_id,rating,strengths,development_areas,recommendation,status,reviewed_at) VALUES($1,$2,$3,$4,$5,$6,$7,CASE WHEN $7='completed' THEN now() ELSE NULL END) RETURNING *`,[person_id,cycle_id||null,rating??null,strengths||null,development_areas||null,recommendation||null,status||'draft']);res.status(201).json({ok:true,review:rows[0]})}

@@ -1,0 +1,4 @@
+import { db } from 'hatchable';
+export const access = "admin";
+export const methods = ["POST"];
+export default async function(req,res){const {person_id,policy_id,year,entitled,used}=req.body||{};if(!person_id||!policy_id||!year)return res.status(400).json({ok:false,error:'person_id, policy_id and year are required'});const {rows}=await db.query(`INSERT INTO leave_balances(person_id,policy_id,year,entitled,used) VALUES($1,$2,$3,$4,$5) ON CONFLICT(person_id,policy_id,year) DO UPDATE SET entitled=EXCLUDED.entitled,used=EXCLUDED.used RETURNING *`,[person_id,policy_id,year,Number(entitled||0),Number(used||0)]);res.status(201).json({ok:true,balance:rows[0]})}
