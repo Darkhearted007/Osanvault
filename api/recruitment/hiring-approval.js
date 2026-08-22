@@ -1,0 +1,3 @@
+import { db } from 'hatchable';
+export const access='admin'; export const methods=['POST'];
+export default async function(req,res){const b=req.body||{};if(!b.position_id)return res.status(400).json({ok:false,error:'position_id is required'});const {rows}=await db.query(`INSERT INTO hiring_approvals(position_id,candidate_id,application_id,decision,approved_by,approval_notes,decided_at) VALUES($1,$2,$3,$4,$5,$6,CASE WHEN $4 <> 'pending' THEN now() ELSE NULL END) RETURNING *`,[b.position_id,b.candidate_id||null,b.application_id||null,b.decision||'pending',b.approved_by||null,b.approval_notes||null]);res.status(201).json({ok:true,approval:rows[0]})}
