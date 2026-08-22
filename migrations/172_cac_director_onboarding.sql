@@ -1,0 +1,22 @@
+CREATE TABLE cac_director_profiles (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  full_name text NOT NULL,
+  email text NOT NULL,
+  role_title text NOT NULL DEFAULT 'Director',
+  status text NOT NULL DEFAULT 'proposed',
+  date_of_birth date,
+  nationality text,
+  occupation text,
+  residential_address text,
+  service_address text,
+  phone text,
+  consent_status text NOT NULL DEFAULT 'pending',
+  consent_statement text,
+  consented_at timestamptz,
+  id_document_url text,
+  id_document_name text,
+  id_document_hash text,
+  id_document_status text NOT NULL DEFAULT 'pending',
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+)
