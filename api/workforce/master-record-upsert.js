@@ -1,0 +1,9 @@
+import { db } from "hatchable";
+export const access = "admin";
+export const methods = ["POST"];
+export default async function(req,res){
+ const b=req.body||{};
+ if(!b.employee_id||!b.legal_name) return res.status(400).json({error:"employee_id and legal_name are required"});
+ const {rows}=await db.query(`INSERT INTO employee_master_records (employee_id,employee_number,legal_name,preferred_name,job_title,department,employment_type,employment_status,hire_date,reporting_manager,work_email,phone,location,probation_end_date,emergency_contact_name,emergency_contact_phone,notes) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17) ON CONFLICT(employee_id) DO UPDATE SET employee_number=EXCLUDED.employee_number,legal_name=EXCLUDED.legal_name,preferred_name=EXCLUDED.preferred_name,job_title=EXCLUDED.job_title,department=EXCLUDED.department,employment_type=EXCLUDED.employment_type,employment_status=EXCLUDED.employment_status,hire_date=EXCLUDED.hire_date,reporting_manager=EXCLUDED.reporting_manager,work_email=EXCLUDED.work_email,phone=EXCLUDED.phone,location=EXCLUDED.location,probation_end_date=EXCLUDED.probation_end_date,emergency_contact_name=EXCLUDED.emergency_contact_name,emergency_contact_phone=EXCLUDED.emergency_contact_phone,notes=EXCLUDED.notes,updated_at=now() RETURNING *`,[b.employee_id,b.employee_number||null,b.legal_name,b.preferred_name||null,b.job_title||null,b.department||null,b.employment_type||"Full-time",b.employment_status||"Active",b.hire_date||null,b.reporting_manager||null,b.work_email||null,b.phone||null,b.location||null,b.probation_end_date||null,b.emergency_contact_name||null,b.emergency_contact_phone||null,b.notes||null]);
+ res.status(200).json(rows[0]);
+}
