@@ -1,0 +1,10 @@
+import { db } from 'hatchable';
+export const access='admin'; export const methods=['GET','POST','PUT'];
+export default async function(req,res){
+ if(req.method==='GET'){const {rows}=await db.query('SELECT id,delegation_code,role_name,authority_area,authority_level,approval_limit,currency,requires_secondary_approval,secondary_role,conditions,effective_date,expiry_date,status FROM authority_delegations ORDER BY role_name,authority_area'); return res.json(rows);}
+ const b=req.body||{};
+ if(!b.delegation_code||!b.role_name||!b.authority_area||!b.authority_level) return res.status(400).json({error:'delegation_code, role_name, authority_area and authority_level are required'});
+ if(req.method==='POST'){const {rows}=await db.query('INSERT INTO authority_delegations (delegation_code,role_name,authority_area,authority_level,approval_limit,currency,requires_secondary_approval,secondary_role,conditions,effective_date,expiry_date,status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *',[b.delegation_code,b.role_name,b.authority_area,b.authority_level,b.approval_limit||null,b.currency||'NGN',!!b.requires_secondary_approval,b.secondary_role||null,b.conditions||null,b.effective_date||null,b.expiry_date||null,b.status||'Active']); return res.status(201).json(rows[0]);}
+ if(!b.id) return res.status(400).json({error:'id is required for update'});
+ const {rows}=await db.query('UPDATE authority_delegations SET role_name=$1,authority_area=$2,authority_level=$3,approval_limit=$4,currency=$5,requires_secondary_approval=$6,secondary_role=$7,conditions=$8,effective_date=$9,expiry_date=$10,status=$11,updated_at=now() WHERE id=$12 RETURNING *',[b.role_name,b.authority_area,b.authority_level,b.approval_limit||null,b.currency||'NGN',!!b.requires_secondary_approval,b.secondary_role||null,b.conditions||null,b.effective_date||null,b.expiry_date||null,b.status||'Active',b.id]); if(!rows.length) return res.status(404).json({error:'delegation not found'}); return res.json(rows[0]);
+}

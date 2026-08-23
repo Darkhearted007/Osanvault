@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS authority_delegations (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), delegation_code text UNIQUE NOT NULL, role_name text NOT NULL, authority_area text NOT NULL, authority_level text NOT NULL, approval_limit numeric, currency text DEFAULT 'NGN', requires_secondary_approval boolean NOT NULL DEFAULT false, secondary_role text, conditions text, effective_date date, expiry_date date, status text NOT NULL DEFAULT 'Active', created_at timestamptz DEFAULT now(), updated_at timestamptz DEFAULT now());
+CREATE INDEX IF NOT EXISTS authority_delegations_role_idx ON authority_delegations(role_name);
+CREATE INDEX IF NOT EXISTS authority_delegations_area_idx ON authority_delegations(authority_area);
+CREATE INDEX IF NOT EXISTS authority_delegations_status_idx ON authority_delegations(status);
