@@ -1,0 +1,4 @@
+import { db } from 'hatchable';
+export const access='admin';
+export const methods=['GET'];
+export default async function(req,res){const [roles,committees,reserved]=await Promise.all([db.query("SELECT role_name,layer,authority_scope,accountability_to,status FROM governance_roles WHERE status='Active' ORDER BY role_name"),db.query("SELECT name,mandate,independence_level,status FROM governance_committees WHERE status='Planned' OR status='Active' ORDER BY name"),db.query("SELECT name,category,approval_level,description,protected,status FROM reserved_matters WHERE status='Active' ORDER BY protected DESC,category,name")]);res.json({roles:roles.rows,committees:committees.rows,reservedMatters:reserved.rows})}
