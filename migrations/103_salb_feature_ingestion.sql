@@ -1,0 +1,16 @@
+ALTER TABLE gis_spatial_features ADD COLUMN IF NOT EXISTS dataset_id uuid;
+ALTER TABLE gis_spatial_features ADD COLUMN IF NOT EXISTS area_code text;
+ALTER TABLE gis_spatial_features ADD COLUMN IF NOT EXISTS area_name text;
+ALTER TABLE gis_spatial_features ADD COLUMN IF NOT EXISTS parent_area_code text;
+ALTER TABLE gis_spatial_features ADD COLUMN IF NOT EXISTS geometry_hash text;
+ALTER TABLE gis_spatial_features ADD COLUMN IF NOT EXISTS geometry_valid boolean NOT NULL DEFAULT false;
+ALTER TABLE gis_spatial_features ADD COLUMN IF NOT EXISTS topology_status text NOT NULL DEFAULT 'Pending';
+ALTER TABLE gis_spatial_features ADD COLUMN IF NOT EXISTS code_crosswalk_status text NOT NULL DEFAULT 'Pending';
+ALTER TABLE gis_spatial_features ADD COLUMN IF NOT EXISTS source_feature_id text;
+ALTER TABLE gis_spatial_features ADD CONSTRAINT gis_spatial_features_dataset_fk FOREIGN KEY (dataset_id) REFERENCES gis_boundary_datasets(id) ON DELETE CASCADE;
+CREATE INDEX IF NOT EXISTS idx_gis_spatial_features_dataset ON gis_spatial_features(dataset_id,area_code);
+CREATE TABLE IF NOT EXISTS gis_cross_validation_results (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), primary_feature_id uuid NOT NULL REFERENCES gis_spatial_features(id) ON DELETE CASCADE, comparison_dataset_id uuid REFERENCES gis_boundary_datasets(id) ON DELETE SET NULL, comparison_feature_code text, comparison_feature_name text, geometry_relation text, overlap_ratio numeric(12,8), centroid_distance numeric(20,8), status text NOT NULL DEFAULT 'Pending', review_required boolean NOT NULL DEFAULT true, notes text, created_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS gis_import_runs (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), dataset_id uuid NOT NULL REFERENCES gis_boundary_datasets(id) ON DELETE CASCADE, run_type text NOT NULL, status text NOT NULL DEFAULT 'Started', source_url text, imported_features integer NOT NULL DEFAULT 0, hashed_features integer NOT NULL DEFAULT 0, valid_features integer NOT NULL DEFAULT 0, crosswalked_features integer NOT NULL DEFAULT 0, topology_failures integer NOT NULL DEFAULT 0, started_at timestamptz NOT NULL DEFAULT now(), completed_at timestamptz, summary text);
+CREATE INDEX IF NOT EXISTS idx_gis_spatial_features_dataset ON gis_spatial_features(dataset_id,area_code);
+CREATE INDEX IF NOT EXISTS idx_gis_cross_validation_primary ON gis_cross_validation_results(primary_feature_id,status);
+CREATE INDEX IF NOT EXISTS idx_gis_import_runs_dataset ON gis_import_runs(dataset_id,started_at DESC);
