@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS regulatory_review_actions (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), rule_id uuid NOT NULL REFERENCES regulatory_rules(id) ON DELETE CASCADE, reviewer_reference text NOT NULL, reviewer_type text NOT NULL, action text NOT NULL, rationale text NOT NULL, evidence_reference text, independence_declaration text, created_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS regulatory_activation_events (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), framework_version_id uuid NOT NULL REFERENCES regulatory_framework_versions(id) ON DELETE CASCADE, action text NOT NULL, actor_reference text NOT NULL, rationale text NOT NULL, created_at timestamptz NOT NULL DEFAULT now());
+CREATE INDEX IF NOT EXISTS idx_reg_review_actions_rule ON regulatory_review_actions(rule_id,created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_reg_activation_events_version ON regulatory_activation_events(framework_version_id,created_at DESC);
