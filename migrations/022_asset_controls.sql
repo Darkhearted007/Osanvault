@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS asset_events (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), asset_id uuid NOT NULL REFERENCES corporate_assets(id) ON DELETE CASCADE, event_type text NOT NULL, event_date date DEFAULT current_date, from_location text, to_location text, from_custodian text, to_custodian text, notes text, recorded_by text, created_at timestamptz DEFAULT now());
