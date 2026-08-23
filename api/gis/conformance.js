@@ -1,0 +1,3 @@
+export const access='public';
+export const methods=['GET'];
+export default async function(req,res){res.json({conformsTo:['http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/core'],notes:['GeoJSON-compatible asset feature responses are provided for public geometries.','Additional CRS support is planned through the OGC JSON-FG model.','Private, sensitive, disputed or community-protected geometry is not exposed by the public endpoint.']});}
