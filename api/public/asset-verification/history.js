@@ -1,0 +1,4 @@
+import { db } from 'hatchable';
+export const access='public';
+export const methods=['GET'];
+export default async function(req,res){const id=(req.query?.id||'').trim();if(!id)return res.status(400).json({error:'Public identifier is required'});const {rows}=await db.query(`SELECT e.event_type,e.public_message,e.passport_version,e.verification_reference,e.occurred_at FROM asset_registry_public_events e JOIN asset_registry_public_profiles p ON p.id=e.profile_id WHERE p.public_identifier=$1 AND p.public_status='Published' ORDER BY e.occurred_at DESC`,[id]);res.json({public_identifier:id,events:rows})}
