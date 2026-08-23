@@ -1,0 +1,17 @@
+ALTER TABLE gis_boundary_sources ADD COLUMN IF NOT EXISTS authority_verified boolean NOT NULL DEFAULT false;
+ALTER TABLE gis_boundary_datasets ADD COLUMN IF NOT EXISTS version_label text;
+ALTER TABLE gis_boundary_datasets ADD COLUMN IF NOT EXISTS crs text;
+ALTER TABLE gis_boundary_datasets ADD COLUMN IF NOT EXISTS format text;
+ALTER TABLE gis_boundary_datasets ADD COLUMN IF NOT EXISTS content_hash text;
+ALTER TABLE gis_boundary_datasets ADD COLUMN IF NOT EXISTS import_status text NOT NULL DEFAULT 'Discovered';
+ALTER TABLE gis_boundary_features ADD COLUMN IF NOT EXISTS geometry_json jsonb;
+ALTER TABLE gis_boundary_features ADD COLUMN IF NOT EXISTS topology_status text NOT NULL DEFAULT 'Pending';
+ALTER TABLE gis_boundary_features ADD COLUMN IF NOT EXISTS code_validation_status text NOT NULL DEFAULT 'Pending';
+CREATE TABLE IF NOT EXISTS gis_boundary_qa_runs (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), dataset_id uuid NOT NULL REFERENCES gis_boundary_datasets(id) ON DELETE CASCADE, qa_type text NOT NULL, status text NOT NULL DEFAULT 'Pending', feature_count integer NOT NULL DEFAULT 0, error_count integer NOT NULL DEFAULT 0, result_summary text, executed_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS gis_boundary_activation_events (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), dataset_id uuid NOT NULL REFERENCES gis_boundary_datasets(id) ON DELETE CASCADE, action text NOT NULL, actor_reference text NOT NULL, rationale text NOT NULL, created_at timestamptz NOT NULL DEFAULT now());
+UPDATE gis_boundary_datasets SET version_label=dataset_version WHERE version_label IS NULL;
+UPDATE gis_boundary_datasets SET crs=coordinate_reference_system WHERE crs IS NULL;
+UPDATE gis_boundary_datasets SET format=geometry_format WHERE format IS NULL;
+UPDATE gis_boundary_features SET geometry_json=geometry_geojson WHERE geometry_json IS NULL;
+CREATE INDEX IF NOT EXISTS idx_gis_boundary_qa_dataset ON gis_boundary_qa_runs(dataset_id,status);
+CREATE INDEX IF NOT EXISTS idx_gis_boundary_activation_dataset ON gis_boundary_activation_events(dataset_id,created_at DESC);
