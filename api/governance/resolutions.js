@@ -1,4 +1,6 @@
 import { db } from 'hatchable';
-export const access = 'admin';
-export const methods = ['GET'];
-export default async function(req,res){const [r,m,c]=await Promise.all([db.query(`SELECT id,resolution_number,resolution_type,title,status,meeting_date,effective_date,proposed_by,approved_by,approval_notes,resolution_text,created_at,updated_at FROM governance_resolutions ORDER BY meeting_date DESC NULLS LAST,created_at DESC`),db.query(`SELECT id,meeting_type,title,meeting_date,location_or_mode,chairperson,status,agenda,minutes,created_at,updated_at FROM governance_meetings ORDER BY meeting_date DESC,created_at DESC`),db.query(`SELECT id,register_type,item_name,reference_number,status,details,review_date,created_at,updated_at FROM corporate_register_items ORDER BY register_type,item_name`)]);res.json({ok:true,resolutions:r.rows,meetings:m.rows,corporate_register:c.rows})}
+export const access='admin'; export const methods=['POST'];
+export default async function(req,res){
+ const b=req.body||{}; if(!b.resolution_number||!b.title||!b.resolution_type) return res.status(400).json({error:'resolution_number, title and resolution_type are required'});
+ const {rows}=await db.query('INSERT INTO corporate_resolutions (resolution_number,resolution_type,title,proposed_date,effective_date,status,decision_summary,supporting_document,recorded_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *',[b.resolution_number,b.resolution_type,b.title,b.proposed_date||new Date().toISOString().slice(0,10),b.effective_date||null,b.status||'Draft',b.decision_summary||null,b.supporting_document||null,b.recorded_by||null]); res.status(201).json(rows[0]);
+}
