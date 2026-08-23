@@ -1,0 +1,2 @@
+CREATE TABLE IF NOT EXISTS employee_onboarding_checklist (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), employee_id uuid NOT NULL, item_key text NOT NULL, item_label text NOT NULL, item_order integer NOT NULL DEFAULT 0, status text NOT NULL DEFAULT 'Pending', completed_at timestamptz, notes text, created_at timestamptz DEFAULT now(), updated_at timestamptz DEFAULT now(), UNIQUE(employee_id,item_key));
+CREATE INDEX IF NOT EXISTS employee_onboarding_employee_idx ON employee_onboarding_checklist(employee_id);
