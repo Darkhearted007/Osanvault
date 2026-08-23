@@ -1,0 +1,3 @@
+CREATE TABLE IF NOT EXISTS asset_assignments (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), asset_id uuid NOT NULL REFERENCES corporate_assets(id) ON DELETE CASCADE, employee_id uuid NOT NULL, assigned_at timestamptz DEFAULT now(), returned_at timestamptz, assigned_by text, return_condition text, notes text, created_at timestamptz DEFAULT now());
+CREATE UNIQUE INDEX IF NOT EXISTS one_active_assignment_per_asset ON asset_assignments(asset_id) WHERE returned_at IS NULL;
+CREATE INDEX IF NOT EXISTS asset_assignments_employee_idx ON asset_assignments(employee_id);
