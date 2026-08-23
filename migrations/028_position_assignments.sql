@@ -1,0 +1,3 @@
+CREATE TABLE IF NOT EXISTS position_assignments (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), position_id uuid NOT NULL REFERENCES org_positions(id), employee_id uuid NOT NULL, assignment_type text NOT NULL DEFAULT 'Primary', employment_status text NOT NULL DEFAULT 'Active', start_date date NOT NULL DEFAULT CURRENT_DATE, end_date date, appointment_title text, appointment_scope text, reporting_position_id uuid REFERENCES org_positions(id), notes text, created_at timestamptz DEFAULT now(), updated_at timestamptz DEFAULT now(), UNIQUE(position_id, employee_id, start_date));
+CREATE INDEX IF NOT EXISTS position_assignments_employee_idx ON position_assignments(employee_id);
+CREATE INDEX IF NOT EXISTS position_assignments_position_idx ON position_assignments(position_id);
