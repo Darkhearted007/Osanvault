@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS employee_delegations (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), employee_id uuid REFERENCES employees(id) NOT NULL, authority_type text NOT NULL, scope text NOT NULL, limits_text text, effective_from date, effective_to date, status text NOT NULL DEFAULT 'Draft', approved_by text, created_at timestamptz NOT NULL DEFAULT now());
