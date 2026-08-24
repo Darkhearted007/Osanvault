@@ -7,7 +7,7 @@ export default async function(req,res){
  if(req.method==='GET'){const q=await db.query("SELECT category,status,count(*)::int count FROM gis_current_exception_queue GROUP BY category,status ORDER BY category,status");return res.json({summary:q.rows});}
  const v=String(req.body?.crosswalk_version||'phase323-current');
  const src=(await db.query("SELECT id,area_code,area_name,parent_area_code FROM gis_spatial_features WHERE provider='UN SALB' ORDER BY area_code")).rows;
- const locked=(await db.query("SELECT source_feature_id,target_feature_id,confidence,evidence FROM gis_spatial_identity_matches WHERE confidence='High'")).rows;
+ const locked=(await db.query("SELECT source_feature_id,target_provider_feature_id AS target_feature_id,confidence,evidence FROM gis_spatial_identity_matches WHERE confidence='High'")).rows;
  const decisions=(await db.query("SELECT source_feature_id,target_feature_id,decision,confidence,evidence FROM gis_final_identity_decisions WHERE decision IN ('EVIDENCE_APPROVED','REVIEWED_APPROVED')")).rows;
  const good=new Map();for(const r of locked)good.set(r.source_feature_id,r);for(const r of decisions)good.set(r.source_feature_id,r);
  let open=0,resolved=0;
