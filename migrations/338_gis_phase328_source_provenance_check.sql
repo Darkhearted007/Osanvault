@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_gis_geometry_features_validation_metadata ON gis_geometry_features USING GIN (validation_metadata)

@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_gis_geometry_sources_imported_grid3 ON gis_geometry_sources (provider,status,feature_count)

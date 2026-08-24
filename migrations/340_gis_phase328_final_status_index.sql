@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_gis_geometry_sources_phase328_final ON gis_geometry_sources (provider,dataset_version,status,imported_at)

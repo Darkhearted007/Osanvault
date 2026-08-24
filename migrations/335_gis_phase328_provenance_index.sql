@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_gis_geometry_features_provider_state ON gis_geometry_features (provider,state_code,feature_name)

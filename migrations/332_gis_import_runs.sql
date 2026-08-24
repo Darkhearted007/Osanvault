@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_gis_import_runs_phase328 ON gis_import_runs (run_type,status,started_at)

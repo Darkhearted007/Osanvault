@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_gis_geometry_sources_phase328_release_lock ON gis_geometry_sources (provider,status,dataset_name)

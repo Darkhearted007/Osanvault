@@ -1,0 +1,2 @@
+DROP INDEX IF EXISTS idx_gis_spatial_identity_evidence_large_evidence;
+CREATE INDEX IF NOT EXISTS idx_gis_spatial_identity_evidence_decision_confidence ON gis_spatial_identity_evidence (decision, confidence);

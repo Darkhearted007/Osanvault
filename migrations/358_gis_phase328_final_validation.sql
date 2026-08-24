@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_gis_geometry_features_phase328_final_validation ON gis_geometry_features (source_id,geometry_valid,normalized_geometry_available)

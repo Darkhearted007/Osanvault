@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_gis_geometry_features_phase328_release_final170 ON gis_geometry_features (provider,source_id,feature_id)

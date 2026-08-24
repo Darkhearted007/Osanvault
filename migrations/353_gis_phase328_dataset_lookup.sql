@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_gis_geometry_sources_phase328_dataset_lookup ON gis_geometry_sources (provider,dataset_name,dataset_version)

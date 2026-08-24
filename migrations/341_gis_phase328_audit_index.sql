@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_gis_geometry_features_phase328_audit ON gis_geometry_features (source_id,created_at)

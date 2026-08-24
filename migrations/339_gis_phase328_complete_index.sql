@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_gis_geometry_features_phase328_lookup ON gis_geometry_features (provider,feature_id,state_code)

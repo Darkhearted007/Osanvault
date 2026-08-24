@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_gis_geometry_sources_dataset_status ON gis_geometry_sources (dataset_name,status)
