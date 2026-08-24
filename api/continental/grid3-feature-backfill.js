@@ -1,6 +1,6 @@
 import { db } from 'hatchable';
 export const access='admin'; export const methods=['POST','GET'];
-const URL='https://services7.arcgis.com/lUdbtIChKxpnw5qG/ArcGIS/rest/services/GRID3_Nigeria_SHP/FeatureServer/1/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=geojson';
+const URL='https://services3.arcgis.com/BU6Aadhn6tbBEdyk/ArcGIS/rest/services/GRID3_Nigeria_Local_Government_Area_Boundaries_with_Names/FeatureServer/11/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=geojson';
 function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(16).padStart(8,'0')}
 function geomType(g){return g?.type||''}
 function pick(p){const keys=Object.keys(p||{});const find=terms=>{const k=keys.find(x=>terms.some(t=>x.toLowerCase()===t)||terms.some(t=>x.toLowerCase().includes(t)));return k?p[k]:null};return {code:find(['code','adm2','lga_code','lgaid','gid']),name:find(['name','lga_name','lganame']),parent:find(['parent','state','state_name','adm1','state_code'])}}
