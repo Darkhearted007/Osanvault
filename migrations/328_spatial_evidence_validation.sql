@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_gis_spatial_evidence_decision ON gis_spatial_identity_evidence (decision, confidence)

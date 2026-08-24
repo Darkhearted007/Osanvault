@@ -1,3 +1,31 @@
-import { db } from 'hatchable';
-export const access='admin'; export const methods=['GET'];
-export default async function(req,res){const q=await db.query("SELECT count(*) FILTER(WHERE status='OPEN')::int open_exceptions,count(*) FILTER(WHERE decision='CONFLICT')::int conflicts,count(*) FILTER(WHERE decision IN ('UNRESOLVED','LOW_CONFIDENCE'))::int insufficient,count(*) FILTER(WHERE source_geometry_valid=false OR target_geometry_valid=false)::int invalid_geometry,count(*)::int evidence_rows FROM gis_current_exception_queue q LEFT JOIN gis_geometry_evidence e ON e.crosswalk_version='phase326-current' AND e.source_feature_id=q.source_feature_id WHERE q.crosswalk_version='phase323-current'",[]);const x=q.rows[0]||{};const blocked=Number(x.open_exceptions||0)>0||Number(x.conflicts||0)>0||Number(x.insufficient||0)>0||Number(x.invalid_geometry||0)>0;return res.json({phase:326,certification:blocked?'BLOCKED':'CERTIFIABLE',blocked,openExceptions:Number(x.open_exceptions||0),conflicts:Number(x.conflicts||0),insufficientEvidence:Number(x.insufficient||0),invalidGeometry:Number(x.invalid_geometry||0),evidenceRows:Number(x.evidence_rows||0),reason:blocked?'One or more current exceptions, conflicts, insufficient evidence or invalid geometries remain.':'All current evidence gates pass; downstream regulatory activation remains a separate gate.'});}
+import { db } from "hatchable";
+
+export const access = "admin";
+export const methods = ["GET"];
+
+export default async function (req, res) {
+  const version = req.query?.crosswalk_version || "phase323-current";
+  const { rows } = await db.query(
+    `SELECT
+       COUNT(*) FILTER (WHERE status = 'OPEN')::int AS open_exceptions,
+       COUNT(*) FILTER (WHERE decision = 'CONFLICT')::int AS conflicts,
+       COUNT(*) FILTER (WHERE decision = 'GEOMETRY_DATA_REQUIRED')::int AS geometry_required,
+       COUNT(*) FILTER (WHERE decision IN ('LOW_CONFIDENCE','UNRESOLVED'))::int AS unresolved_evidence
+     FROM gis_current_exception_queue q
+     LEFT JOIN gis_spatial_identity_evidence e
+       ON e.crosswalk_version = $1 AND e.source_feature_id::text = q.source_feature_id::text
+    WHERE q.crosswalk_version = $1`,
+    [version]
+  );
+
+  const s = rows[0] || {};
+  const blocked = Number(s.open_exceptions || 0) > 0 || Number(s.conflicts || 0) > 0 ||
+    Number(s.geometry_required || 0) > 0 || Number(s.unresolved_evidence || 0) > 0;
+
+  return res.json({
+    crosswalk_version: version,
+    certification: blocked ? "BLOCKED" : "CERTIFIABLE",
+    reason: blocked ? "Current exceptions or required spatial evidence remain unresolved." : "All current identity evidence requirements pass.",
+    metrics: s
+  });
+}

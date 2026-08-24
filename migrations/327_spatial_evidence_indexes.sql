@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_gis_spatial_evidence_version_source ON gis_spatial_identity_evidence (crosswalk_version, source_feature_id)

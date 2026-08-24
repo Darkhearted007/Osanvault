@@ -1,4 +1,32 @@
-import { db } from 'hatchable';
-import { spatialMetrics, validateAndNormalizeGeometry, nameSimilarity, scoreCandidate } from '../../lib/phase326Geometry.js';
-export const access='admin'; export const methods=['GET'];
-export default async function(req,res){const sourceId=req.query?.source_feature_id;if(!sourceId)return res.status(400).json({error:'source_feature_id is required'});const s=await db.query("SELECT * FROM gis_spatial_features WHERE id=$1 LIMIT 1",[sourceId]);if(!s.rows.length)return res.status(404).json({error:'Source feature not found'});const source=s.rows[0];const targets=(await db.query("SELECT * FROM gis_spatial_features WHERE provider='GRID3' AND geometry_json IS NOT NULL ORDER BY area_name")).rows;const out=[];for(const t of targets){const m=spatialMetrics(source.geometry_json,t.geometry_json);if(!m.ok)continue;const ns=nameSimilarity(source.area_name,t.area_name);const sm=String(source.parent_area_code||'').replace(/^NGA/,'')===String(t.parent_area_code||'');const sc=scoreCandidate(m,sm?1:0,ns,0);if(m.iou>0||ns>=.5)out.push({targetFeatureId:t.id,targetName:t.area_name,targetStateCode:t.parent_area_code,iou:m.iou,sourceOverlap:m.sourceOverlapRatio,targetOverlap:m.targetOverlapRatio,centroidDistanceKm:m.centroidDistanceKm,nameSimilarity:ns,stateMatch:sm,combinedScore:sc.combinedScore,confidence:sc.confidence,geometryError:m.error||null});}out.sort((a,b)=>b.combinedScore-a.combinedScore);return res.json({phase:326,source:{id:source.id,name:source.area_name,state:source.parent_area_code},geometryEngineTested:true,candidateCount:out.length,candidates:out.slice(0,25)});}
+import { db } from "hatchable";
+
+export const access = "admin";
+export const methods = ["GET"];
+
+export default async function (req, res) {
+  const version = req.query?.crosswalk_version || "phase323-current";
+  const { rows } = await db.query(
+    `SELECT source_feature_id,
+            json_agg(json_build_object(
+              'target_feature_id', target_feature_id,
+              'target_area_name', target_area_name,
+              'target_state_code', target_state_code,
+              'iou', iou,
+              'sourceOverlap', source_overlap_ratio,
+              'targetOverlap', target_overlap_ratio,
+              'centroidDistance', centroid_distance,
+              'stateMatch', state_match,
+              'nameSimilarity', name_similarity,
+              'combinedScore', combined_score,
+              'confidence', confidence,
+              'decision', decision,
+              'evidence', evidence
+            ) ORDER BY combined_score DESC NULLS LAST) AS candidates
+       FROM gis_spatial_identity_evidence
+      WHERE crosswalk_version = $1
+      GROUP BY source_feature_id
+      ORDER BY source_feature_id`,
+    [version]
+  );
+  return res.json({ crosswalk_version: version, rows });
+}
