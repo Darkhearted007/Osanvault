@@ -1,0 +1,2 @@
+CREATE TABLE IF NOT EXISTS gis_identity_review_triage (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), match_id uuid NOT NULL, source_provider text NOT NULL, target_provider text NOT NULL, category text NOT NULL, priority text NOT NULL, rationale text NOT NULL, recommended_action text NOT NULL, evidence jsonb NOT NULL DEFAULT '{}'::jsonb, created_at timestamptz NOT NULL DEFAULT now(), UNIQUE(match_id));
+CREATE INDEX IF NOT EXISTS idx_gis_review_triage_queue ON gis_identity_review_triage(priority,category);
