@@ -6,7 +6,7 @@ export const methods = ["GET","POST"];
 export default async function(req,res){
   const version=req.query?.crosswalk_version||req.body?.crosswalk_version||"phase323-current";
   if(req.method==="GET"){
-    const {rows}=await db.query(`SELECT * FROM gis_evidence_acquisition_queue WHERE crosswalk_version=$1 ORDER BY CASE priority WHEN 'CRITICAL' THEN 1 WHEN 'HIGH' THEN 2 WHEN 'MEDIUM' THEN 3 ELSE 4 END,source_feature_id`,[version]);
+    const {rows}=await db.query(`SELECT id,crosswalk_version,source_feature_id,priority,missing_evidence,required_source_providers,status,resolution_blocker,created_at,updated_at FROM gis_evidence_acquisition_queue WHERE crosswalk_version=$1 ORDER BY CASE priority WHEN 'CRITICAL' THEN 1 WHEN 'HIGH' THEN 2 WHEN 'MEDIUM' THEN 3 ELSE 4 END,source_feature_id`,[version]);
     return res.json({crosswalk_version:version,count:rows.length,rows});
   }
   const b=req.body||{};
