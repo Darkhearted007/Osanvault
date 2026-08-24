@@ -1,0 +1,11 @@
+import { db } from 'hatchable';
+export const access='admin'; export const methods=['GET','POST'];
+function n(v){return String(v||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/&/g,' AND ').replace(/[^A-Z0-9]+/g,' ').trim().replace(/\s+/g,' ')}
+const aliases=new Map([['AIYEKIRE','GBONYIN'],['EFON ALAYEE','EFON'],['ILEJEMEJI','ILEJEMEJE'],['ABUJA MUNICIPAL','MUNICIPAL AREA COUNCIL'],['ONU IMO','ONUIMO'],['JEMAA','JEMA A'],['ATAKUMOSA EAST','ATAKUNMOSA EAST'],['ATAKUMOSA WEST','ATAKUNMOSA WEST'],['KIRI ASAMMA','KIRI KASAMA'],['ZANGO KATAF','ZANGON KATAF'],['OGORI MANGONGO','OGORI MAGONGO'],['EGBADO NORTH','YEWA NORTH'],['EGBADO SOUTH','YEWA SOUTH'],['DAMBAN','DAMBAM'],['ILEJEMEJE','ILEJEMEJI']]);
+function same(a,b){const x=n(a),y=n(b);return x===y||aliases.get(x)===y||aliases.get(y)===x}
+export default async function(req,res){
+ const v=String(req.body?.crosswalk_version||'phase324-current');
+ if(req.method==='GET'){const q=await db.query("SELECT category,status,count(*)::int count FROM gis_current_exception_queue WHERE crosswalk_version=$1 GROUP BY category,status ORDER BY category,status",[v]);return res.json({crosswalkVersion:v,summary:q.rows});}
+ const rows=(await db.query("SELECT q.id,q.source_feature_id,q.target_feature_id,q.status,s.area_name source_name,s.area_code source_code,t.area_name target_name,t.area_code target_code FROM gis_current_exception_queue q JOIN gis_spatial_features s ON s.id=q.source_feature_id LEFT JOIN gis_spatial_features t ON t.id=q.target_feature_id WHERE q.crosswalk_version=$1 AND q.status='OPEN' ORDER BY q.created_at LIMIT 30",[v])).rows;
+ let auto=0; for(const r of rows){if(r.target_feature_id&&same(r.source_name,r.target_name)){await db.query("UPDATE gis_current_exception_queue SET status='RESOLVED_ALIAS',category='NAME_ALIAS',evidence=$1 WHERE id=$2",[{source:r.source_name,target:r.target_name,method:'phase324_deterministic_alias',reviewRequired:false},r.id]);auto++;}}
+ const summary=(await db.query("SELECT status,count(*)::int count FROM gis_current_exception_queue WHERE crosswalk_version=$1 GROUP BY status",[v])).rows;const open=summary.find(x=>x.status==='OPEN')?.count||0;return res.json({crosswalkVersion:v,processed:rows.length,autoResolved:auto,summary,remainingOpen:open,certificationEligible:open===0});}
