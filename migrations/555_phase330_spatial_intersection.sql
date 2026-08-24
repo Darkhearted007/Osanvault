@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS gis_spatial_intersection_evidence (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  crosswalk_version TEXT NOT NULL,
+  source_feature_id TEXT NOT NULL,
+  target_feature_id TEXT NOT NULL,
+  source_provider TEXT NOT NULL,
+  target_provider TEXT NOT NULL,
+  source_geometry_available BOOLEAN NOT NULL DEFAULT false,
+  target_geometry_available BOOLEAN NOT NULL DEFAULT false,
+  intersection_area DOUBLE PRECISION,
+  source_area DOUBLE PRECISION,
+  target_area DOUBLE PRECISION,
+  source_overlap_ratio DOUBLE PRECISION,
+  target_overlap_ratio DOUBLE PRECISION,
+  iou DOUBLE PRECISION,
+  geometry_method TEXT,
+  geometry_crs TEXT,
+  evidence_status TEXT NOT NULL DEFAULT 'REQUIRES_GEOMETRY',
+  confidence TEXT NOT NULL DEFAULT 'UNRESOLVED',
+  evidence JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE(crosswalk_version, source_feature_id, target_feature_id)
+)
