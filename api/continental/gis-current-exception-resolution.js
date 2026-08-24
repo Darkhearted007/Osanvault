@@ -1,0 +1,15 @@
+import { db } from 'hatchable';
+export const access='admin'; export const methods=['GET','POST'];
+function n(v){return String(v||'').normalize('NFKD').replace(/[\\u0300-\\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]+/g,' ').trim().replace(/\\s+/g,' ')}
+const aliases=new Map([['AIYEKIRE','GBONYIN'],['EFON ALAYEE','EFON'],['ILEJEMEJI','ILEJEMEJE'],['ABUJA MUNICIPAL','MUNICIPAL AREA COUNCIL'],['ONU IMO','ONUIMO'],['JEMAA','JEMA A'],['ATAKUMOSA EAST','ATAKUNMOSA EAST'],['ATAKUMOSA WEST','ATAKUNMOSA WEST'],['KIRI ASAMMA','KIRI KASAMA'],['ZANGO KATAF','ZANGON KATAF'],['OGORI MANGONGO','OGORI MAGONGO'],['EGBADO NORTH','YEWA NORTH'],['EGBADO SOUTH','YEWA SOUTH']]);
+function same(a,b){const x=n(a),y=n(b);return x===y||aliases.get(x)===y||aliases.get(y)===x}
+export default async function(req,res){
+ if(req.method==='GET'){const q=await db.query("SELECT category,status,count(*)::int count FROM gis_current_exception_queue GROUP BY category,status ORDER BY category,status");return res.json({summary:q.rows});}
+ const v=String(req.body?.crosswalk_version||'phase323-current');
+ const src=(await db.query("SELECT id,area_code,area_name,parent_area_code FROM gis_spatial_features WHERE provider='UN SALB' ORDER BY area_code")).rows;
+ const locked=(await db.query("SELECT source_feature_id,target_feature_id,confidence,evidence FROM gis_spatial_identity_matches WHERE confidence='High'")).rows;
+ const decisions=(await db.query("SELECT source_feature_id,target_feature_id,decision,confidence,evidence FROM gis_final_identity_decisions WHERE decision IN ('EVIDENCE_APPROVED','REVIEWED_APPROVED')")).rows;
+ const good=new Map();for(const r of locked)good.set(r.source_feature_id,r);for(const r of decisions)good.set(r.source_feature_id,r);
+ let open=0,resolved=0;
+ for(const s of src){if(good.has(s.id))continue;const candidates=(await db.query("SELECT id,area_code,area_name,parent_area_code FROM gis_spatial_features WHERE provider='GRID3' AND area_name IS NOT NULL")).rows;let best=null;for(const t of candidates){if(same(s.area_name,t.area_name)){best=t;break}}let status='OPEN',category='IDENTITY_REVIEW';if(best){status='RESOLVED_ALIAS';category='NAME_ALIAS';resolved++}else{open++}await db.query("INSERT INTO gis_current_exception_queue(crosswalk_version,source_feature_id,target_feature_id,state_code,category,status,evidence) VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT(crosswalk_version,source_feature_id) DO UPDATE SET target_feature_id=EXCLUDED.target_feature_id,category=EXCLUDED.category,status=EXCLUDED.status,evidence=EXCLUDED.evidence",[v,s.id,best?.id||null,s.parent_area_code||null,category,status,{source:s.area_name,sourceCode:s.area_code,target:best?.area_name||null,method:best?'deterministic_alias':'manual_review_required'}]);}
+ const q=(await db.query("SELECT status,count(*)::int count FROM gis_current_exception_queue WHERE crosswalk_version=$1 GROUP BY status",[v])).rows;return res.json({crosswalkVersion:v,totalFeatures:src.length,deterministicResolved:resolved,openExceptions:open,queue:q,certificationEligible:open===0});}
