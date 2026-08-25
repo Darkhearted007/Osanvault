@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS gis_phase3356_integrity_marker (id INTEGER PRIMARY KEY, phase TEXT NOT NULL, status TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT now())
