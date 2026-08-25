@@ -24,9 +24,13 @@ export default async function(req,res){
   if(j.status==='COMPLETE')return res.json({phase:383,status:'COMPLETE',offset:j.fetch_offset,totalLoaded:j.total_loaded,totalInvalid:j.total_invalid});
   await db.query(`UPDATE gis_phase383_ward_ingestion SET status='RUNNING',last_run_at=now(),updated_at=now() WHERE dataset_key='GRID3_WARD_V3'`);
   try{
-    const meta=await fetchJson(j.source_url+'?f=json');
-    const oid=meta.objectIdField;
-    if(!oid)throw new Error('OBJECT_ID_FIELD_NOT_FOUND');
+    let oid='OBJECTID';
+    try{
+      const meta=await fetchJson(j.source_url+'?f=json');
+      oid=meta.objectIdField||meta.objectIdFieldName||'OBJECTID';
+    }catch(e){
+      oid='OBJECTID';
+    }
     const ds=await db.query(`SELECT id FROM gis_phase372_boundary_datasets WHERE dataset_key='GRID3_ADMIN_BOUNDARIES'`);
     if(!ds.rows.length)throw new Error('BOUNDARY_DATASET_NOT_REGISTERED');
     let offset=Number(j.fetch_offset), totalLoaded=0,totalInvalid=0,pages=0,transfer=false;
