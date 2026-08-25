@@ -1,0 +1,4 @@
+import { db } from "hatchable";
+export const access="public";
+export const methods=["GET"];
+export default async function(req,res){const version=req.query?.certification_version||'phase361-v1';const q=await db.query(`SELECT candidate_id,provider,hierarchy_level,evidence_score,selection_status,evidence FROM gis_phase369_boundary_candidates ORDER BY evidence_score DESC`);const g=await db.query(`SELECT gate_status,selected_candidate_id,lga_ward_assertions_enabled,evidence,created_at FROM gis_phase369_resolution_gate WHERE certification_version=$1 ORDER BY created_at DESC LIMIT 1`,[version]);return res.json({phase:369,certificationVersion:version,candidates:q.rows,gate:g.rows[0]||null,status:g.rows[0]?.lga_ward_assertions_enabled?'LGA_WARD_ENABLED':'LGA_WARD_NOT_ASSERTED'});}
