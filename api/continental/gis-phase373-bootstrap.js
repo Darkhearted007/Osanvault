@@ -1,0 +1,4 @@
+import { db } from "hatchable";
+export const access="admin";
+export const methods=["POST"];
+export default async function(req,res){const sources=[['GRID3_STATE','https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/NGA_Operational_States/FeatureServer','STATE'],['GRID3_LGA','https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/NGA_Operational_LGAs/FeatureServer','LGA'],['GRID3_WARD','https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/NGA_Operational_Wards/FeatureServer','WARD']];for(const [key,url,layer] of sources)await db.query(`INSERT INTO gis_phase373_fetch_jobs(dataset_key,source_url,layer_name,status) VALUES($1,$2,$3,'PENDING') ON CONFLICT(dataset_key) DO UPDATE SET source_url=EXCLUDED.source_url,layer_name=EXCLUDED.layer_name`,[key,url,layer]);return res.json({phase:373,jobs:sources.map(x=>({datasetKey:x[0],sourceUrl:x[1],layer:x[2]})),status:'BOOTSTRAPPED',pageSize:10});}
