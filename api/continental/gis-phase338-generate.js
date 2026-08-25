@@ -1,0 +1,14 @@
+import { db } from "hatchable";
+export const access="admin";
+export const methods=["POST"];
+function norm(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();}
+function sim(a,b){const x=norm(a),y=norm(b);if(!x||!y)return 0;if(x===y)return 1;const A=new Set(x.split(' ')),B=new Set(y.split(' '));let n=0;for(const v of A)if(B.has(v))n++;return n/Math.max(A.size,B.size);}
+export default async function(req,res){
+ const version=req.body?.crosswalk_version||"phase323-current";
+ const limit=Math.min(Number(req.body?.limit||774),774);
+ const src=await db.query(`SELECT id,feature_name,state_code,geometry_geojson FROM gis_geometry_features WHERE provider='GRID3' AND geometry_valid=true AND normalized_geometry_available=true AND feature_name IS NOT NULL ORDER BY feature_id LIMIT $1`,[limit]);
+ const tgt=await db.query(`SELECT id,feature_name,state_code,geometry_geojson FROM gis_geometry_features WHERE provider='GRID3' AND geometry_valid=true AND normalized_geometry_available=true AND feature_name IS NOT NULL ORDER BY feature_id LIMIT $1`,[limit]);
+ let inserted=0,review=0,high=0;
+ for(const s of src.rows){let best=[];for(const t of tgt.rows){if(String(s.id)===String(t.id))continue;const ns=sim(s.feature_name,t.feature_name);const sm=!!s.state_code&&!!t.state_code&&s.state_code===t.state_code;if(!sm&&ns<0.8)continue;const score=sm?(0.55*ns+0.45):(0.9*ns);best.push({t,ns,sm,score});}best.sort((a,b)=>b.score-a.score);for(const c of best.slice(0,3)){const decision=c.score>=0.9&&c.sm&&c.ns>=0.8?'REVIEW':'REVIEW';const r=await db.query(`INSERT INTO gis_phase338_spatial_candidates (crosswalk_version,source_feature_id,target_feature_id,source_name,target_name,source_state_code,target_state_code,name_similarity,state_match,spatial_score,candidate_score,decision,evidence) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) ON CONFLICT(crosswalk_version,source_feature_id,target_feature_id) DO UPDATE SET name_similarity=EXCLUDED.name_similarity,state_match=EXCLUDED.state_match,spatial_score=EXCLUDED.spatial_score,candidate_score=EXCLUDED.candidate_score,decision=EXCLUDED.decision,evidence=EXCLUDED.evidence,created_at=now() RETURNING id`,[version,s.id,c.t.id,s.feature_name,c.t.feature_name,s.state_code,c.t.state_code,c.ns,c.sm,null,c.score,decision,JSON.stringify({method:'state_constrained_name_candidate',geometry_present:true})]);if(r.rowCount)inserted++;review++;}}
+ return res.json({phase:338,crosswalk_version:version,sourceCount:src.rows.length,targetCount:tgt.rows.length,candidatesUpserted:inserted,reviewCandidates:review,highConfidence:high,activationEligible:false});
+}
