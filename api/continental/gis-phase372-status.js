@@ -1,0 +1,4 @@
+import { db } from "hatchable";
+export const access="public";
+export const methods=["GET"];
+export default async function(req,res){const key=req.query?.dataset_key||'GRID3_ADMIN_BOUNDARIES';const q=await db.query(`SELECT dataset_key,provider,source_url,source_version,hierarchy_level,status,feature_count,valid_geometry_count,state_count,lga_count,ward_count,checksum,provenance,validated_at FROM gis_phase372_boundary_datasets WHERE dataset_key=$1`,[key]);if(!q.rows.length)return res.status(404).json({status:'BOUNDARY_DATASET_NOT_INGESTED'});const r=q.rows[0];return res.json({phase:372,dataset:r,assertions:{lgaWardEnabled:false,reason:'Boundary ingestion is validated separately from feature-level intersection authorization'}});}
