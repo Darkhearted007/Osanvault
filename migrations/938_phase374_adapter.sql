@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS gis_phase374_source_metadata (id UUID PRIMARY KEY DEFAULT gen_random_uuid(),dataset_key TEXT NOT NULL UNIQUE,source_url TEXT NOT NULL,object_id_field TEXT,fields JSONB NOT NULL DEFAULT '[]'::jsonb,metadata JSONB NOT NULL DEFAULT '{}'::jsonb,discovered_at TIMESTAMPTZ NOT NULL DEFAULT now());

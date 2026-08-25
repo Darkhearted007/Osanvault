@@ -1,0 +1,4 @@
+import { db } from "hatchable";
+export const access="admin";
+export const methods=["POST"];
+export default async function(req,res){await db.query(`INSERT INTO gis_phase372_boundary_datasets(dataset_key,provider,source_url,source_version,hierarchy_level,provenance) VALUES('GRID3_ADMIN_BOUNDARIES','GRID3','https://grid3.org/geospatial-data-nigeria','live-arcgis','STATE_LGA_WARD',$1) ON CONFLICT(dataset_key) DO UPDATE SET source_url=EXCLUDED.source_url,source_version=EXCLUDED.source_version,provenance=EXCLUDED.provenance`,[JSON.stringify({phase:374,source:'GRID3 ArcGIS REST',assertionsEnabled:false})]);return res.json({phase:374,status:'INGESTION_DATASET_READY',datasetKey:'GRID3_ADMIN_BOUNDARIES',assertions:{lgaWardEnabled:false}})}

@@ -1,0 +1,4 @@
+import { db } from "hatchable";
+export const access="admin";
+export const methods=["POST"];
+export default async function(req,res){const q=await db.query(`SELECT feature_count,valid_geometry_count,state_count,lga_count,ward_count,status FROM gis_phase372_boundary_datasets WHERE dataset_key='GRID3_ADMIN_BOUNDARIES'`);if(!q.rows.length)return res.status(409).json({status:'NOT_READY'});const r=q.rows[0];const ready=String(r.status)==='INGESTED_VALIDATED'&&Number(r.feature_count)>0&&Number(r.valid_geometry_count)===Number(r.feature_count)&&Number(r.lga_count)>0&&Number(r.ward_count)>0;return res.json({phase:374,status:ready?'READY_FOR_PHASE371':'BOUNDARY_ASSERTIONS_LOCKED',dataset:r,assertions:{lgaWardEnabled:false,reason:'Phase 371 must rerun and produce unambiguous feature-level matches before authorization'}})}

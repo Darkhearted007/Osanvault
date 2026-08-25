@@ -1,0 +1,4 @@
+export const access="public";
+export const methods=["GET"];
+const urls=['https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/NGA_Operational_States/FeatureServer','https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/NGA_Operational_LGAs/FeatureServer','https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/NGA_Operational_Wards/FeatureServer'];
+export default async function(req,res){const out=[];for(const u of urls){try{const r=await fetch(u+'?f=pjson');const t=await r.text();out.push({url:u,status:r.status,contentType:r.headers.get('content-type'),sample:t.slice(0,500)})}catch(e){out.push({url:u,status:0,error:String(e?.message||e)})}}return res.json({phase:374,status:'UPSTREAM_PROBE',out})}
