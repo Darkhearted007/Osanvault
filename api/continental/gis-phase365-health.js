@@ -1,0 +1,4 @@
+import { db } from "hatchable";
+export const access="public";
+export const methods=["GET"];
+export default async function(req,res){const version=req.query?.certification_version||'phase361-v1';const run=await db.query(`SELECT integrity_status,anomalies,incident_count,created_at FROM gis_phase365_watchdog_runs WHERE certification_version=$1 ORDER BY created_at DESC LIMIT 1`,[version]);const incidents=await db.query(`SELECT severity,incident_type,status,first_seen_at,last_seen_at FROM gis_phase365_incidents WHERE certification_version=$1 AND status='OPEN' ORDER BY last_seen_at DESC`,[version]);if(!run.rows.length)return res.status(404).json({status:'NO_WATCHDOG_RUN'});return res.json({phase:365,status:run.rows[0].integrity_status,anomalies:run.rows[0].anomalies,openIncidents:incidents.rows.length,incidents:incidents.rows,checkedAt:run.rows[0].created_at});}
