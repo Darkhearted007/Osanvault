@@ -1,0 +1,4 @@
+import { db } from "hatchable";
+export const access="public";
+export const methods=["GET"];
+export default async function(req,res){const q=await db.query(`SELECT dataset_key,status,feature_count,valid_geometry_count,state_count,lga_count,ward_count,validated_at FROM gis_phase372_boundary_datasets WHERE dataset_key='GRID3_ADMIN_BOUNDARIES'`);const j=await db.query(`SELECT dataset_key,status,fetch_offset,page_size,total_loaded,last_error,last_run_at FROM gis_phase373_fetch_jobs ORDER BY dataset_key`);const r=q.rows[0]||null;return res.json({phase:375,boundaryDataset:r,jobs:j.rows,readyForSpatialResolution:!!r&&String(r.status)==='INGESTED_VALIDATED'&&Number(r.lga_count)>0&&Number(r.ward_count)>0,assertions:{lgaWardEnabled:false}})}

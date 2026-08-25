@@ -1,0 +1,5 @@
+export const access="admin";
+export const methods=["POST"];
+const sources=[['STATE','https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/NGA_Operational_States/FeatureServer'],['LGA','https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/NGA_Operational_LGAs/FeatureServer'],['WARD','https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/NGA_Operational_Wards/FeatureServer']];
+async function probe(url){const r=await fetch(url+'?f=json');const t=await r.text();let d={};try{d=JSON.parse(t)}catch{}return {status:r.status,ok:r.ok,contentType:r.headers.get('content-type'),service:d.name||null,layers:Array.isArray(d.layers)?d.layers.map(x=>({id:x.id,name:x.name})):[],error:d.error||null,rawPrefix:t.slice(0,300)};}
+export default async function(req,res){const out=[];for(const [level,url] of sources){try{out.push({level,url,...await probe(url)})}catch(e){out.push({level,url,status:0,ok:false,error:String(e?.message||e)})}}return res.json({phase:375,status:'SOURCE_RECOVERY',sources:out,policy:{lgaWardAssertionsEnabled:false}})}
