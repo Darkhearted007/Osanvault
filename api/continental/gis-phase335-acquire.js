@@ -11,7 +11,7 @@ export default async function(req,res){
   const run=await db.query(`INSERT INTO gis_authoritative_acquisition_runs (crosswalk_version,provider,dataset_name,source_url,status) VALUES ($1,'GRID3','Nigeria Operational LGA Boundaries',$2,'STARTED') RETURNING id`,[version,GRID3_LGA]);
   const runId=run.rows[0].id;
   try {
-    const url=GRID3_LGA+"/0/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=geojson";
+    const url=GRID3_LGA+"/11/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=geojson";
     const r=await fetch(url);
     if(!r.ok) throw new Error(`GRID3 HTTP ${r.status}`);
     const data=await r.json();
