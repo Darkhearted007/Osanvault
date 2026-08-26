@@ -1,0 +1,2 @@
+CREATE TABLE IF NOT EXISTS gis_exception_promotion_audit (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), candidate_match_id uuid NOT NULL, evidence_attachment_id uuid, decision text NOT NULL, reason text NOT NULL, before_status text NOT NULL, after_status text NOT NULL, decided_by text, created_at timestamptz NOT NULL DEFAULT now());
+CREATE INDEX IF NOT EXISTS gis_exception_promotion_audit_candidate_idx ON gis_exception_promotion_audit(candidate_match_id);
