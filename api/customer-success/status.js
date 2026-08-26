@@ -1,0 +1,3 @@
+import { db } from 'hatchable';
+export const access='member'; export const methods=['GET'];
+export default async function(req,res){const {rows}=await db.query("SELECT cs.lifecycle_stage,cs.health_score,cs.activation_percent,cs.last_activity_at,cs.next_review_at FROM customer_success cs JOIN gis_organizations o ON o.id=cs.organization_id WHERE o.id=$1 LIMIT 1",[req.member.id]);res.json({success:rows[0]||null});}

@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS customer_milestones (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid NOT NULL, milestone_key text NOT NULL, completed boolean NOT NULL DEFAULT false, completed_at timestamptz, metadata jsonb NOT NULL DEFAULT '{}'::jsonb, created_at timestamptz NOT NULL DEFAULT now(), UNIQUE(organization_id,milestone_key));

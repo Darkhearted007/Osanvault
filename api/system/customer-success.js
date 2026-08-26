@@ -1,0 +1,3 @@
+import { db } from 'hatchable';
+export const access='admin'; export const methods=['GET'];
+export default async function(req,res){const [health,milestones]=await Promise.all([db.query("SELECT lifecycle_stage,COUNT(*)::int AS customers,ROUND(AVG(health_score))::int AS avg_health,ROUND(AVG(activation_percent))::int AS avg_activation FROM customer_success GROUP BY lifecycle_stage ORDER BY lifecycle_stage"),db.query("SELECT milestone_key,COUNT(*)::int AS total,COUNT(*) FILTER (WHERE completed)::int AS completed FROM customer_milestones GROUP BY milestone_key ORDER BY milestone_key")]);res.json({lifecycle:health.rows,milestones:milestones.rows,generated_at:new Date().toISOString(),payment_collection_enabled:false,regulated_features_enabled:false});}
