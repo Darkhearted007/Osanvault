@@ -1,0 +1,1 @@
+INSERT INTO gis_authoritative_sources (source_key,source_name,source_url,authority_level) SELECT 'INEC_ELECTORAL_BOUNDARIES','Independent National Electoral Commission — Electoral Wards and Delimitation','https://inecnigeria.org/polling-units/','CANDIDATE_AUTHORITATIVE' WHERE NOT EXISTS (SELECT 1 FROM gis_authoritative_sources WHERE source_key='INEC_ELECTORAL_BOUNDARIES');

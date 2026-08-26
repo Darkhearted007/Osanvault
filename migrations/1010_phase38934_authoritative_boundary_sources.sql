@@ -1,0 +1,1 @@
+INSERT INTO gis_authoritative_sources (source_key,source_name,source_url,authority_level) SELECT 'OSGOF_ADMIN_BOUNDARIES','Office of the Surveyor-General of the Federation — National Geospatial Information','https://osgof.gov.ng/','CANDIDATE_AUTHORITATIVE' WHERE NOT EXISTS (SELECT 1 FROM gis_authoritative_sources WHERE source_key='OSGOF_ADMIN_BOUNDARIES');
