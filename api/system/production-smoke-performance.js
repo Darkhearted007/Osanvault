@@ -1,6 +1,6 @@
 import { storage } from 'hatchable';
 export const access='admin'; export const methods=['GET'];
-const now=()=>performance.now();
+const now=()=>Date.now();
 export default async function(req,res){
  const checks=[]; const timings={};
  const t0=now(); let cp=null;
