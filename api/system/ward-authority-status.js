@@ -1,0 +1,3 @@
+import { db } from 'hatchable';
+export const access='admin'; export const methods=['GET'];
+export default async function(req,res){const s=await db.query('SELECT source_key,authority_name,evidence_scope,authority_level,active FROM gis_ward_authority_sources ORDER BY authority_name');const m=await db.query("SELECT status,count(*)::int AS count FROM gis_ward_evidence_matches GROUP BY status ORDER BY status");res.json({phase:'389.44',sources:s.rows,matches:m.rows,policy:{ward_evidence_required:true,lga_evidence_cannot_certify_ward:true,unsupported_matches_require_review:true}});}
