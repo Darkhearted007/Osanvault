@@ -1,0 +1,3 @@
+import { db } from 'hatchable';
+export const access='admin'; export const methods=['GET'];
+export default async function(req,res){const o=(await db.query("SELECT o.id,o.name,o.organization_type,o.status,COUNT(DISTINCT p.id)::int position_count,COUNT(DISTINCT d.id)::int dashboard_count FROM gis_organizations o LEFT JOIN gis_organization_positions p ON p.organization_id=o.id LEFT JOIN gis_organization_dashboards d ON d.organization_id=o.id GROUP BY o.id ORDER BY o.name")).rows;return res.json({phase:'387.9',organizations:o,ready:o.length>0&&o.every(x=>x.position_count>0&&x.dashboard_count>0)});}

@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS gis_organizations (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), name text NOT NULL, organization_type text NOT NULL, status text NOT NULL DEFAULT 'ACTIVE', created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now(), UNIQUE(name));
