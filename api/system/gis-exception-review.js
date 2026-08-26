@@ -1,0 +1,3 @@
+import { db } from 'hatchable';
+export const access='admin'; export const methods=['GET'];
+export default async function(req,res){const {rows}=await db.query("SELECT id,state_code,category,status,source_feature_id,target_feature_id,evidence,created_at FROM gis_current_exception_queue WHERE status='OPEN' ORDER BY state_code,created_at");const byState={};for(const r of rows)(byState[r.state_code]??=[]).push(r);res.json({phase:'389.27',status:'REVIEW_REQUIRED',open_count:rows.length,by_state:byState,policy:'OPEN exceptions are not auto-resolved. Certification requires authoritative evidence or an approved human decision for every exception.'});}
