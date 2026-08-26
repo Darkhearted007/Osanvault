@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS commercial_entitlements (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid NOT NULL, plan_key text NOT NULL, entitlement_key text NOT NULL, enabled boolean NOT NULL DEFAULT true, source_subscription_id uuid REFERENCES commercial_subscriptions(id), created_at timestamptz NOT NULL DEFAULT now(), UNIQUE(organization_id, entitlement_key));

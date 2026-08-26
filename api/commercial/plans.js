@@ -1,0 +1,3 @@
+import { db } from 'hatchable';
+export const access='public'; export const methods=['GET'];
+export default async function(req,res){const {rows}=await db.query("SELECT plan_key,name,description,price_minor,currency,billing_interval,regulated_enabled FROM commercial_plans WHERE active=true ORDER BY price_minor,plan_key");res.json({plans:rows,regulated_features_enabled:false,payment_collection_enabled:false});}

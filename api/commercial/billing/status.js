@@ -1,0 +1,3 @@
+import { db } from 'hatchable';
+export const access='member'; export const methods=['GET'];
+export default async function(req,res){const {rows}=await db.query("SELECT s.id,s.status,p.plan_key,p.name,s.current_period_end FROM commercial_subscriptions s JOIN commercial_plans p ON p.id=s.plan_id WHERE s.organization_id=$1 ORDER BY s.created_at DESC",[req.member.id]);res.json({subscriptions:rows,payment_collection_enabled:false,regulated_billing_enabled:false});}
