@@ -1,0 +1,2 @@
+export const access='public'; export const methods=['GET'];
+export default async function(req,res){res.json({payment_collection_enabled:false,regulated_billing_enabled:false,provider_configured:false,checkout_mode:'DISABLED',supported_currency:'NGN',message:'Payment collection is not active. Provider credentials and applicable legal/regulatory approvals must be configured before activation.'});}
