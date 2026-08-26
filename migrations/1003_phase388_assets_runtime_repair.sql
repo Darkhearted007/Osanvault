@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS gis_organization_assets (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid NOT NULL REFERENCES gis_organizations(id) ON DELETE CASCADE, asset_id text NOT NULL, access_level text NOT NULL DEFAULT 'VIEW', UNIQUE(organization_id,asset_id));
