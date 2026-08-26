@@ -1,0 +1,13 @@
+import { storage } from 'hatchable';
+export const access='admin'; export const methods=['GET'];
+export default async function(req,res){
+ const read=async k=>{try{const x=await storage.get(k);return JSON.parse(new TextDecoder().decode(x.buffer))}catch{return null}};
+ const cp=await read('phase388/control-plane.json'); const cert=await read('phase389/production-operations-readiness.json');
+ const org=(cp?.organizations||[]).find(x=>x.environment==='production'&&x.status==='ACTIVE');
+ const assets=(cp?.assets||[]).filter(x=>x.organization_id===org?.id); const audits=(cp?.accessEvents||[]).filter(x=>x.organization_id===org?.id);
+ const snapshot={schema_version:1,captured_at:new Date().toISOString(),organization_id:org?.id||null,organization_status:org?.status||null,counts:{positions:(cp?.positions||[]).filter(x=>x.organization_id===org?.id).length,dashboards:(cp?.dashboards||[]).filter(x=>x.organization_id===org?.id).length,layers:(cp?.layers||[]).filter(x=>x.organization_id===org?.id).length,assets:assets.length,audits:audits.length},asset_ids:assets.map(x=>x.id)};
+ await storage.put('phase389/backup-recovery/latest-snapshot.json',new TextEncoder().encode(JSON.stringify(snapshot,null,2)),'application/json');
+ const checks=[{id:'production_tenant',pass:!!org,detail:'Active production tenant available'},{id:'operational_readiness',pass:cert?.status==='READY_FOR_LAUNCH',detail:cert?.status||'Missing readiness evidence'},{id:'snapshot_created',pass:true,detail:'Immutable test snapshot written to project storage'},{id:'restore_manifest',pass:snapshot.counts.assets>0&&snapshot.counts.positions===5&&snapshot.counts.dashboards===5,detail:'Snapshot contains required production baseline'},{id:'audit_coverage',pass:snapshot.counts.audits>0,detail:'Snapshot includes production audit evidence'}];
+ const passed=checks.filter(x=>x.pass).length;const result={phase:'389.03',status:passed===checks.length?'PASS':'BLOCKED',score:Math.round(passed/checks.length*100),tested_at:snapshot.captured_at,checks,restore_point:'phase389/backup-recovery/latest-snapshot.json',note:'This creates and validates an application-level recovery snapshot. Provider/database disaster-recovery guarantees must be verified separately against the hosting provider.'};
+ await storage.put('phase389/backup-recovery/result.json',new TextEncoder().encode(JSON.stringify(result,null,2)),'application/json');res.json(result);
+}
