@@ -1,0 +1,12 @@
+ALTER TABLE gis_reconciliation_runs ADD COLUMN IF NOT EXISTS run_name text;
+ALTER TABLE gis_reconciliation_runs ADD COLUMN IF NOT EXISTS method text;
+ALTER TABLE gis_reconciliation_runs ADD COLUMN IF NOT EXISTS candidate_count integer DEFAULT 0;
+ALTER TABLE gis_reconciliation_runs ADD COLUMN IF NOT EXISTS verified_count integer DEFAULT 0;
+ALTER TABLE gis_reconciliation_runs ADD COLUMN IF NOT EXISTS unresolved_count integer DEFAULT 0;
+ALTER TABLE gis_reconciliation_runs ADD COLUMN IF NOT EXISTS status text DEFAULT 'OPEN';
+ALTER TABLE gis_reconciliation_results ADD COLUMN IF NOT EXISTS run_id uuid;
+ALTER TABLE gis_reconciliation_results ADD COLUMN IF NOT EXISTS exception_id uuid;
+ALTER TABLE gis_reconciliation_results ADD COLUMN IF NOT EXISTS candidate_id uuid;
+ALTER TABLE gis_reconciliation_results ADD COLUMN IF NOT EXISTS decision text;
+ALTER TABLE gis_reconciliation_results ADD COLUMN IF NOT EXISTS authority_status text;
+ALTER TABLE gis_reconciliation_results ADD COLUMN IF NOT EXISTS rationale text;
