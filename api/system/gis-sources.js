@@ -1,0 +1,3 @@
+import { db } from 'hatchable';
+export const access='admin'; export const methods=['GET'];
+export default async function(req,res){const {rows}=await db.query('SELECT id,source_key,source_name,source_url,authority_level,active,updated_at FROM gis_authoritative_sources ORDER BY source_name');res.json({phase:'389.32',sources:rows,policy:{source_must_be_authoritative:true,snapshot_hash_required:true,unverified_evidence_cannot_certify:true}});}
