@@ -1,0 +1,4 @@
+import { storage } from 'hatchable';
+export const access = 'public';
+export const methods = ['POST'];
+export default async function(req,res){const b=req.body||{};if(!b.name||!b.email||!b.organization)return res.status(400).json({error:'name, email and organization are required'});const id=crypto.randomUUID();const lead={id,name:String(b.name).slice(0,120),email:String(b.email).slice(0,200),organization:String(b.organization).slice(0,160),plan:b.plan==='enterprise'?'enterprise':'explorer',created_at:new Date().toISOString(),status:'received'};await storage.put(`phase389/leads/${id}.json`,new TextEncoder().encode(JSON.stringify(lead)),'application/json');res.status(201).json({ok:true,id,status:'received',next:'account_review'})}
