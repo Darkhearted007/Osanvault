@@ -1,0 +1,3 @@
+import { db } from 'hatchable';
+export const access='member'; export const methods=['GET'];
+export default async function(req,res){const email=String(req.member?.email||'').toLowerCase();const {rows}=await db.query("SELECT w.id,w.organization,w.plan,w.status,m.role,c.items FROM commercial_workspace_members m JOIN commercial_workspaces w ON w.id=m.workspace_id LEFT JOIN commercial_onboarding_checklists c ON c.workspace_id=w.id WHERE lower(m.email)=$1 AND w.status='ACTIVE' ORDER BY w.created_at DESC",[email]);res.json({workspaces:rows.map(x=>({...x,items:typeof x.items==='string'?JSON.parse(x.items):x.items}))});}

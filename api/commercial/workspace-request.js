@@ -1,0 +1,3 @@
+import { db } from 'hatchable';
+export const access='public'; export const methods=['POST'];
+export default async function(req,res){const b=req.body||{};const name=String(b.name||'').trim();const email=String(b.email||'').trim().toLowerCase();const org=String(b.organization||'').trim();const plan=String(b.plan||'enterprise').trim();if(!name||!email||!org)return res.status(400).json({error:'name, email and organization are required'});const {rows}=await db.query("INSERT INTO commercial_workspace_requests (name,email,organization,plan,status) VALUES ($1,$2,$3,$4,'PENDING') RETURNING id, status, created_at",[name,email,org,plan]);res.status(201).json({request_id:rows[0].id,status:rows[0].status,created_at:rows[0].created_at});}
