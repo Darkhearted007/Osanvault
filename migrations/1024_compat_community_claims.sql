@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS community_claims (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), asset_id uuid, claimant_name text, claim_status text NOT NULL DEFAULT 'Open', is_material boolean NOT NULL DEFAULT true, confidence numeric(5,2), created_at timestamptz NOT NULL DEFAULT now());

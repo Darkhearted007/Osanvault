@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS economic_evidence (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), profile_id uuid, title text, verification_status text NOT NULL DEFAULT 'submitted', created_at timestamptz NOT NULL DEFAULT now());

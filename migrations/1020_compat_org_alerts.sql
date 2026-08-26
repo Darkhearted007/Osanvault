@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS gis_organization_alerts (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid NOT NULL REFERENCES gis_organizations(id) ON DELETE CASCADE, status text NOT NULL DEFAULT 'OPEN', severity text NOT NULL DEFAULT 'INFO', title text, created_at timestamptz NOT NULL DEFAULT now());

@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS economic_cashflow_records (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), entity_id uuid, record_type text, amount numeric(20,2), currency text DEFAULT 'NGN', occurred_on date, category text, evidence_status text DEFAULT 'reported', created_at timestamptz NOT NULL DEFAULT now());

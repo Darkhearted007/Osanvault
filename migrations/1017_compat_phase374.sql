@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS gis_phase374_adapter_discovery (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), root_url text NOT NULL, status text NOT NULL DEFAULT 'UNVERIFIED', metadata jsonb NOT NULL DEFAULT '{}'::jsonb, checked_at timestamptz NOT NULL DEFAULT now());

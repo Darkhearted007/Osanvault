@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS industrial_assets (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), name text NOT NULL, status text NOT NULL DEFAULT 'UNVERIFIED', risk_score numeric(6,2), created_at timestamptz NOT NULL DEFAULT now());

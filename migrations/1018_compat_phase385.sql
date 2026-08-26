@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS gis_phase385_hierarchy_reconciliation (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), state_code text, lga_code text, status text NOT NULL DEFAULT 'REVIEW_REQUIRED', evidence jsonb NOT NULL DEFAULT '{}'::jsonb, created_at timestamptz NOT NULL DEFAULT now());
