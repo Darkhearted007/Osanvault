@@ -1,0 +1,1 @@
+ALTER TABLE crm_opportunities ALTER COLUMN owner_id TYPE text USING owner_id::text

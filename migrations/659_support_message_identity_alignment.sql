@@ -1,0 +1,1 @@
+ALTER TABLE support_messages ALTER COLUMN author_id TYPE text USING author_id::text

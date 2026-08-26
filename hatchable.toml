@@ -31,3 +31,13 @@ owner_column = "owner_id"
 read = "own"
 write = "own"
 owner_column = "owner_id"
+
+[db.tables.crm_opportunities]
+read = "own"
+write = "own"
+owner_column = "owner_id"
+
+[db.tables.support_messages]
+read = "own"
+write = "own"
+owner_column = "author_id"
