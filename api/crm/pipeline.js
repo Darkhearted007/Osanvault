@@ -1,0 +1,3 @@
+import { db } from 'hatchable';
+export const access='admin'; export const methods=['GET'];
+export default async function(req,res){const [leads,opps]=await Promise.all([db.query("SELECT id,name,email,company,source,status,score,created_at FROM crm_leads ORDER BY created_at DESC LIMIT 200"),db.query("SELECT o.id,o.lead_id,o.stage,o.value_minor,o.currency,o.next_follow_up_at,l.name,l.email,l.company FROM crm_opportunities o JOIN crm_leads l ON l.id=o.lead_id ORDER BY o.created_at DESC LIMIT 200")]);res.json({leads:leads.rows,opportunities:opps.rows,stages:['new','qualified','proposal','negotiation','won','lost']});}
