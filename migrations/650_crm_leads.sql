@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS crm_leads (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid, name text NOT NULL, email text NOT NULL, company text, source text NOT NULL DEFAULT 'website', status text NOT NULL DEFAULT 'new', score integer NOT NULL DEFAULT 0, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());

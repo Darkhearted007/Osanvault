@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS crm_events (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), lead_id uuid NOT NULL REFERENCES crm_leads(id) ON DELETE CASCADE, actor_id uuid, event_type text NOT NULL, metadata jsonb NOT NULL DEFAULT '{}'::jsonb, created_at timestamptz NOT NULL DEFAULT now());
