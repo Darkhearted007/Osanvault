@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS ward_authoritative_sources (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), source_name text NOT NULL, source_url text NOT NULL, authority_type text NOT NULL, source_level text NOT NULL, expected_format text, status text NOT NULL DEFAULT 'DISCOVERED', notes text, created_at timestamptz NOT NULL DEFAULT now());
