@@ -26,3 +26,8 @@ owner_column = "submitted_by"
 read = "own"
 write = "own"
 owner_column = "owner_id"
+
+[db.tables.economic_decision_execution]
+read = "own"
+write = "own"
+owner_column = "owner_id"
