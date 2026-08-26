@@ -1,0 +1,3 @@
+import { db } from 'hatchable';
+export const access='admin'; export const methods=['GET'];
+export default async function(req,res){const t=await db.query("SELECT to_regclass('public.gis_ward_evidence_records') AS table_name");const c=await db.query("SELECT evidence_status,count(*)::int AS count FROM gis_ward_evidence_records GROUP BY evidence_status ORDER BY evidence_status");res.json({phase:'389.45',persistence_ready:Boolean(t.rows[0]?.table_name),records:c.rows,policy:{unverified_cannot_certify:true,source_reference_required:true,review_required_for_certification:true}});}

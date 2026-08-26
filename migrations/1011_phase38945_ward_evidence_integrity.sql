@@ -1,0 +1,3 @@
+CREATE TABLE IF NOT EXISTS gis_ward_evidence_records (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), authority_key text NOT NULL, ward_code text, ward_name text, source_reference text NOT NULL, evidence_type text NOT NULL, content_hash text, source_version text, evidence_status text NOT NULL DEFAULT 'UNVERIFIED', reviewer_id text, reviewer_rationale text, created_at timestamptz NOT NULL DEFAULT now(), verified_at timestamptz);
+CREATE INDEX IF NOT EXISTS idx_gis_ward_evidence_authority ON gis_ward_evidence_records(authority_key);
+CREATE INDEX IF NOT EXISTS idx_gis_ward_evidence_status ON gis_ward_evidence_records(evidence_status);
