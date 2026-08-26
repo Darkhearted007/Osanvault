@@ -11,7 +11,7 @@ export default async function(req,res){
  for(const d of decisions){
   const ev={phase3874:{reviewDecision:d.reviewer_decision,rationale:d.rationale||null,appliedAt:new Date().toISOString()}};
   if(d.reviewer_decision==='APPROVE' && d.target_feature_id){
-   await db.query("UPDATE gis_final_identity_crosswalk SET status='LOCKED',target_feature_id=$1,updated_at=now() WHERE source_feature_id=$2",[d.target_feature_id,d.source_feature_id]);
+   await db.query("UPDATE gis_final_identity_crosswalk SET status='LOCKED',target_feature_id=$1,evidence=evidence || $3::jsonb WHERE source_feature_id=$2",[d.target_feature_id,d.source_feature_id,JSON.stringify(ev)]);
    await db.query("UPDATE gis_phase3865_review_queue SET evidence=evidence || $1::jsonb,updated_at=now() WHERE id=$2",[JSON.stringify(ev),d.id]); applied++;
   } else if(['REJECT','QUARANTINE','DEFER'].includes(d.reviewer_decision)){
    await db.query("UPDATE gis_phase3865_review_queue SET evidence=evidence || $1::jsonb,updated_at=now() WHERE id=$2",[JSON.stringify(ev),d.id]); applied++;
