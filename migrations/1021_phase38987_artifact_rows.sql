@@ -1,0 +1,2 @@
+CREATE TABLE IF NOT EXISTS gis_official_artifact_rows (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), artifact_id uuid NOT NULL, state_name text, lga_name text, ward_name text, ward_code text, polling_unit_code text, polling_unit_name text, raw_text text NOT NULL, row_hash text NOT NULL, created_at timestamptz NOT NULL DEFAULT now(), UNIQUE(artifact_id,row_hash));
+CREATE INDEX IF NOT EXISTS gis_official_artifact_rows_lookup_idx ON gis_official_artifact_rows(state_name,lga_name,ward_name);
