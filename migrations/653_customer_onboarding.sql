@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS customer_onboarding (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid NOT NULL, lead_id uuid, plan_key text NOT NULL DEFAULT 'explorer', status text NOT NULL DEFAULT 'started', checklist jsonb NOT NULL DEFAULT '[]'::jsonb, started_at timestamptz NOT NULL DEFAULT now(), completed_at timestamptz);
