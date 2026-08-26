@@ -1,5 +1,5 @@
 import { storage } from 'hatchable';
-export const access='public'; export const methods=['GET'];
+export const access='admin'; export const methods=['GET'];
 const records=[
  {title:'ÒsánVault Africa — Intellectual Property Notice',type:'Copyright',status:'Protected',owner:'OSANVAULT AFRICA LTD',scope:'Software, source code, UI/UX, documentation, databases, schemas, workflows, architecture, branding and original content created for ÒsánVault Africa.',year:2026},
  {title:'ÒsánVault / OsanVault Africa',type:'Trademark',status:'Claimed / registration subject to formal filing',owner:'OSANVAULT AFRICA LTD',scope:'Name, word marks, logos, distinctive brand identifiers and associated goodwill.'},
