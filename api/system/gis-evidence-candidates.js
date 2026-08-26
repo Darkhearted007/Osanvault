@@ -1,0 +1,3 @@
+import { db } from 'hatchable';
+export const access='admin'; export const methods=['GET'];
+export default async function(req,res){const ids=['3d767271-823e-49bd-854f-ce25ba64d105','5810e9bc-2ca2-44cc-acda-2d7509273b92'];const {rows}=await db.query("SELECT id,state_code,category,evidence,status FROM gis_current_exception_queue WHERE id = ANY($1::uuid[])",[ids]);res.json({phase:'389.31',candidates:rows,required_evidence:['authoritative source reference','source date/version','reviewer decision','rationale'],auto_resolution:false});}
