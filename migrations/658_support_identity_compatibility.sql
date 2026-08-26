@@ -1,0 +1,1 @@
+ALTER TABLE support_tickets ALTER COLUMN requester_id TYPE text USING requester_id::text
