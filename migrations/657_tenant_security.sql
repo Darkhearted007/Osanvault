@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS tenant_security_controls (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), control_key text NOT NULL UNIQUE, description text NOT NULL, required_scope text NOT NULL, enabled boolean NOT NULL DEFAULT true, created_at timestamptz NOT NULL DEFAULT now(), last_verified_at timestamptz);
