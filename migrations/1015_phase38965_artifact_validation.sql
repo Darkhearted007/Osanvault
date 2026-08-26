@@ -1,0 +1,1 @@
+ALTER TABLE gis_controlled_imports ADD COLUMN IF NOT EXISTS validation_status text NOT NULL DEFAULT 'NOT_VALIDATED';
