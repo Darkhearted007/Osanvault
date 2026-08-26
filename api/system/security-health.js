@@ -1,0 +1,3 @@
+import { db } from 'hatchable';
+export const access='admin'; export const methods=['GET'];
+export default async function(req,res){const {rows}=await db.query("SELECT control_key,description,required_access,enabled,last_verified_at FROM security_controls ORDER BY control_key");const controls=rows.map(x=>({...x,pass:x.enabled}));const passed=controls.filter(x=>x.pass).length;res.json({phase:'389.22',status:passed===controls.length?'PASS':'BLOCKED',score:controls.length?Math.round(passed/controls.length*100):0,controls,guardrails:{payment_collection_enabled:false,regulated_features_enabled:false},generated_at:new Date().toISOString()});}

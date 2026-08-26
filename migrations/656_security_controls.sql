@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS security_controls (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), control_key text NOT NULL UNIQUE, description text NOT NULL, required_access text NOT NULL, enabled boolean NOT NULL DEFAULT true, last_verified_at timestamptz, created_at timestamptz NOT NULL DEFAULT now());
