@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS gis_organization_audit (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid REFERENCES gis_organizations(id) ON DELETE CASCADE, member_id text, action text NOT NULL, metadata jsonb NOT NULL DEFAULT '{}'::jsonb, created_at timestamptz NOT NULL DEFAULT now());
