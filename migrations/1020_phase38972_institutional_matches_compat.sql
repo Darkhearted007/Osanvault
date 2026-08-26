@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS institutional_matches (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), project_id uuid NOT NULL, institution_id uuid, match_score numeric(8,2), match_state text, created_at timestamptz NOT NULL DEFAULT now());

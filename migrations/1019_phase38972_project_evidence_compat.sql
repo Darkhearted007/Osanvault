@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS project_evidence (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), project_id uuid NOT NULL, created_at timestamptz NOT NULL DEFAULT now());

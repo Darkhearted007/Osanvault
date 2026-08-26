@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS inec_artifacts (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), source_url text NOT NULL, http_status integer, content_type text, byte_size bigint, sha256 text, storage_key text, retrieval_status text NOT NULL DEFAULT 'PENDING', verification_status text NOT NULL DEFAULT 'UNVERIFIED', created_at timestamptz NOT NULL DEFAULT now());
