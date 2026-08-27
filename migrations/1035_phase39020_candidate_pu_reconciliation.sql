@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_inec_candidate_crosswalk_candidate ON inec_candidate_live_crosswalks(candidate_match_id)
