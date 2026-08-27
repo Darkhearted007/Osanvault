@@ -1,6 +1,6 @@
 import { db, storage } from 'hatchable';
 export const access='admin'; export const methods=['POST'];
-const PARSER_VERSION='391.11.2';
+const PARSER_VERSION='391.29.1';
 async function hashBytes(buf){const d=await crypto.subtle.digest('SHA-256',buf);return Array.from(new Uint8Array(d)).map(x=>x.toString(16).padStart(2,'0')).join('');}
 function clean(s){return String(s||'').replace(/<[^>]*>/g,' ').replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim()}
 function selectOptions(html,name){
@@ -16,7 +16,7 @@ function selectOptions(html,name){
 export default async function(req,res){
   const artifactId=req.body?.artifact_id;
   if(!artifactId)return res.status(400).json({error:'artifact_id is required'});
-  const a=(await db.query('SELECT id,source_registry_id,canonical_source_key,sha256,retrieval_status,verification_status,provenance_status,storage_key,source_url,content_type,byte_size FROM inec_official_artifacts WHERE id=$1 LIMIT 1',[String(artifactId)])).rows[0];
+  const a=(await db.query('SELECT id,source_registry_id,canonical_source_key,sha256,retrieval_status,verification_status,provenance_status,storage_key,source_url,content_type,byte_size,artifact_type FROM inec_official_artifacts WHERE id=$1 LIMIT 1',[String(artifactId)])).rows[0];
   if(!a)return res.status(404).json({error:'artifact not found'});
   const eligible=a.canonical_source_key==='INEC-POLLING-UNIT-LOCATOR-2026'&&a.retrieval_status==='RETRIEVED'&&!!a.sha256&&a.provenance_status==='SOURCE_BOUND_AND_HASH_VERIFIED'&&(a.verification_status==='PENDING_CONTENT_VALIDATION'||a.verification_status==='VERIFIED');
   if(!eligible)return res.status(409).json({error:'artifact is not eligible for deterministic parsing',decision:'PARSE_BLOCKED_ARTIFACT_NOT_FULLY_VERIFIED',candidate_mutation:false});
