@@ -4,6 +4,7 @@ export const methods=['POST'];
 const SOURCE='INEC-POLLING-UNIT-LOCATOR-2026';
 const BASE='https://cvr.inecnigeria.org';
 async function sha(text){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text));return [...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+function key(path,q){return path+'|'+JSON.stringify(Object.fromEntries(Object.entries(q||{}).sort(([a],[b])=>a.localeCompare(b))))}
 export default async function(req,res){
   const id=req.body?.artifact_id;
   if(!id)return res.status(400).json({error:'artifact_id is required',decision:'VERIFICATION_BLOCKED'});
@@ -16,15 +17,15 @@ export default async function(req,res){
   let bundle;try{bundle=JSON.parse(text)}catch(e){return res.status(409).json({error:'bundle JSON invalid',decision:'VERIFICATION_BLOCKED'})}
   if(bundle.schema_version!=='391.29.1'||bundle.canonical_source_key!==SOURCE||bundle.transport_base!==BASE||!Array.isArray(bundle.entries)||bundle.entries.length===0)return res.status(409).json({error:'bundle schema/provenance signature invalid',decision:'VERIFICATION_BLOCKED'});
   const snapshots=(await db.query("SELECT request_query,endpoint_path,response_sha256,http_status,content_type,acquisition_status,provenance_status FROM app_7855832537293bad.inec_live_api_snapshots WHERE endpoint_path LIKE '/PublicApi/pus/%' AND acquisition_status='ACQUIRED'" )).rows;
-  const byKey=new Map(snapshots.map(s=>[s.endpoint_path+'|'+JSON.stringify(s.request_query),s]));
-  const uniqueRequests=[...new Map(bundle.entries.map(e=>[e.endpoint_path+'|'+JSON.stringify(e.request_query),e])).values()];
+  const byKey=new Map(snapshots.map(s=>[key(s.endpoint_path,s.request_query),s]));
+  const uniqueRequests=[...new Map(bundle.entries.map(e=>[key(e.endpoint_path,e.request_query),e])).values()];
   let snapshotBound=0,refetchPass=0,refetchFail=0; const failures=[];
   for(let i=0;i<uniqueRequests.length;i+=12){
     const batch=uniqueRequests.slice(i,i+12);
     const rs=await Promise.all(batch.map(async e=>{
-      const key=e.endpoint_path+'|'+JSON.stringify(e.request_query); const stored=byKey.get(key); if(!stored)return {key,status:'MISSING_SNAPSHOT'}; snapshotBound++;
+      const k=key(e.endpoint_path,e.request_query); const stored=byKey.get(k); if(!stored)return {key:k,status:'MISSING_SNAPSHOT'}; snapshotBound++;
       const qs=new URLSearchParams(e.request_query||{}); const url=BASE+e.endpoint_path+'?'+qs.toString();
-      try{const r=await fetch(url,{redirect:'follow'});const body=await r.text();const h=await sha(body);const ok=r.status===stored.http_status&&String(r.headers.get('content-type')||'')===String(stored.content_type||'')&&h===stored.response_sha256&&r.ok;return {key,status:ok?'PASS':'MISMATCH',http_status:r.status,sha256:h,expected_sha256:stored.response_sha256}}catch(err){return {key,status:'FETCH_FAILED',error:String(err)}}
+      try{const r=await fetch(url,{redirect:'follow'});const body=await r.text();const h=await sha(body);const ok=r.status===stored.http_status&&String(r.headers.get('content-type')||'')===String(stored.content_type||'')&&h===stored.response_sha256&&r.ok;return {key:k,status:ok?'PASS':'MISMATCH',http_status:r.status,sha256:h,expected_sha256:stored.response_sha256}}catch(err){return {key,status:'FETCH_FAILED',error:String(err)}}
     }));
     for(const r of rs){if(r.status==='PASS')refetchPass++;else{refetchFail++;failures.push(r)}}
   }
