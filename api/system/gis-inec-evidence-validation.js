@@ -19,7 +19,7 @@ export default async function(req,res){
   if(!a)return res.status(404).json({error:'artifact not found',decision:'EVIDENCE_UNVERIFIED',candidate_mutation:false});
   const gate=a.canonical_source_key===SOURCE&&a.retrieval_status==='RETRIEVED'&&!!a.sha256&&(a.provenance_status==='SOURCE_BOUND_AND_HASH_VERIFIED'||a.provenance_status==='VERIFIED')&&(a.verification_status==='VERIFIED'||a.verification_status==='PENDING_CONTENT_VALIDATION');
   if(!gate)return res.status(409).json({error:'artifact failed authority/integrity gate',decision:'EVIDENCE_UNVERIFIED',artifact:a,candidate_mutation:false});
-  const p=(await db.query('SELECT parser_version,artifact_sha256,records_extracted,status,parsed_at FROM gis_artifact_parse_audits WHERE artifact_id=$1 ORDER BY parsed_at DESC LIMIT 1',[artifactId])).rows[0];
+  const p=(await db.query("SELECT parser_version,artifact_sha256,records_extracted,status,parsed_at FROM gis_artifact_parse_audits WHERE artifact_id=$1 AND status='PARSED' ORDER BY parsed_at DESC LIMIT 1",[artifactId])).rows[0];
   if(!p||p.artifact_sha256!==a.sha256||p.parser_version!==PARSER||p.status!=='PARSED')return res.status(409).json({error:'parser lineage gate failed',decision:'EVIDENCE_UNVERIFIED',candidate_mutation:false});
   const candidateId=b.candidate_match_id;
   const candidates=candidateId?(await db.query("SELECT id,state_name,lga_name,candidate_area_code,status FROM gis_exception_candidate_matches WHERE id=$1 AND status='CANDIDATE_ONLY'",[candidateId])).rows:(await db.query("SELECT id,state_name,lga_name,candidate_area_code,status FROM gis_exception_candidate_matches WHERE status='CANDIDATE_ONLY' ORDER BY state_name,lga_name",[])).rows;
