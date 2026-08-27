@@ -10,5 +10,6 @@ export default async function(req,res){
  const promos=(await db.query("SELECT COUNT(*)::int total FROM gis_exception_promotion_audit")).rows[0];
  checks.push({stage:'artifact',...art});checks.push({stage:'evidence',...ev});checks.push({stage:'candidates',...cand});checks.push({stage:'admin_review',...reviews});checks.push({stage:'promotion_audit',...promos});
  const complete=art.retrieved>0&&art.hashed>0&&art.provenance_verified>0&&art.integrity_verified>0&&ev.verified>0&&cand.resolved>0&&reviews.total>0&&promos.total>0;
- res.status(200).json({phase:'391.9',checks,complete,production_gate:complete?'READY':'NOT_READY',policy:'Certification is observational and fail-closed; no evidence, candidate, review, or promotion records are created by this endpoint.'});
+ const audit=await db.query('INSERT INTO evidence_chain_certification_audits(phase,checks,complete,production_gate,notes) VALUES($1,$2,$3,$4,$5) RETURNING id',['391.9',JSON.stringify(checks),complete,complete?'READY':'NOT_READY','Observation-only certification; no evidence, candidate, review, or promotion records created.']);
+ res.status(200).json({phase:'391.9',auditId:audit.rows[0].id,checks,complete,production_gate:complete?'READY':'NOT_READY',policy:'Certification is observational and fail-closed; no evidence, candidate, review, or promotion records are created by this endpoint.'});
 }
