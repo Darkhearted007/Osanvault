@@ -13,9 +13,9 @@ async function sha256Hex(buffer) {
 
 export default async function (req, res) {
   const source = (await db.query(
-    `SELECT id, source_key, source_title, source_url, authority_level
+    `SELECT source_registry_id AS id, source_key, source_url, authority_level
      FROM gis_canonical_source_identity
-     WHERE id=$1 AND source_key=$2`,
+     WHERE source_registry_id=$1 AND source_key=$2`,
     [SOURCE_ID, SOURCE_KEY]
   )).rows[0];
 
@@ -57,7 +57,7 @@ export default async function (req, res) {
   const fullyCertifiedArtifact = Boolean(artifactIntegrity && provenance && contentValidation === 'VALIDATED_OFFICIAL_LOCATOR_CONTENT');
 
   const parsed = (await db.query(
-    `SELECT COUNT(*)::int AS n FROM gis_inec_parsed_records WHERE artifact_id=$1`,
+    `SELECT COUNT(*)::int AS n FROM gis_official_artifact_rows WHERE artifact_id=$1`,
     [artifact?.id || '00000000-0000-0000-0000-000000000000']
   )).rows[0]?.n || 0;
   const verified = (await db.query(`SELECT COUNT(*)::int AS n FROM gis_ward_evidence_attachments WHERE verification_status='VERIFIED'`)).rows[0]?.n || 0;
