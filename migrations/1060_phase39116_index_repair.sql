@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS gis_phase39116_lineage_candidate_idx ON gis_phase39116_lineage_decisions(candidate_match_id,created_at DESC);
