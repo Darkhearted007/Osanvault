@@ -14,6 +14,7 @@ export default async function(req,res){
    observations.push({table,exists:exists===1,rowCount});
   }catch(e){observations.push({table,exists:false,rowCount:null,error:String(e?.message||e)});contradictions.push({check:'table_probe',table,error:String(e?.message||e)});}
  }
+ const missing=observations.filter(x=>!x.exists); if(missing.length) contradictions.push({check:'expected_tables_visible',missing:missing.map(x=>x.table)});
  const candidate=observations.find(x=>x.table==='gis_exception_candidate_matches');
  if(candidate?.exists && candidate.rowCount!==30) contradictions.push({check:'candidate_preservation',expected:30,observed:candidate.rowCount});
  const source=observations.find(x=>x.table==='gis_canonical_source_identity');
