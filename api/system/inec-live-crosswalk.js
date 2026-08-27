@@ -3,7 +3,7 @@ export const access='admin'; export const methods=['POST'];
 const SOURCE='INEC-POLLING-UNIT-LOCATOR-2026'; const BASE='https://cvr.inecnigeria.org';
 const norm=s=>String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
 const STATE_ALIASES={FEDERALCAPITALTERRITORY:'FCT',NASSARAWA:'NASARAWA'};
-const LGA_ALIASES={'OBIOMANGWA':'OBINGWA','DAMBAN':'DAMBAM','EFONALAYEE':'EFON','ILEJEMEJI':'ILEJEMEJE','ABUJAMUNICIPAL':'MUNICIPAL','KIRIASAMMA':'KIRIKA SAMMA','OGORIMANGONGO':'OGORI MANGOGO','NASSARAWAEGGON':'NASARAWA EGGON'};
+const LGA_ALIASES={'OBIOMANGWA':'OBINGWA','DAMBAN':'DAMBAM','EFONALAYEE':'EFON','ILEJEMEJI':'ILEJEMEJE','ABUJAMUNICIPAL':'MUNICIPAL','KIRIASAMMA':'KIRIKA SAMMA','OGORIMANGONGO':'OGORI MANGOGO','NASSARAWAEGGON':'NASARAWA EGGON','IGUEBEN':'IGUEBEN','MBAITOLI':'MBAITOLI','BAGUDO':'BAGUDO','EGBADONORTH':'EGBADO NORTH','EGBADOSOUTH':'EGBADO SOUTH','ATAKUMOSAWEST':'ATAKUMOSA WEST','AYEDAADE':'AYEDAADE','EMOHUA':'EMOHUA'};
 async function digest(text){return [...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text)))].map(x=>x.toString(16).padStart(2,'0')).join('')}
 async function jsonGet(path,params){const qs=new URLSearchParams(params);const url=BASE+path+'?'+qs.toString();const r=await fetch(url);const text=await r.text();let json=null;try{json=JSON.parse(text)}catch{}return {url,status:r.status,type:r.headers.get('content-type')||'',text,json}}
 function options(obj){if(!Array.isArray(obj)||!obj[0])return [];return Object.entries(obj[0]).filter(([k])=>k!=='selected'&&k!=='0').map(([id,name])=>({id:Number(id),name:String(name)}))}
