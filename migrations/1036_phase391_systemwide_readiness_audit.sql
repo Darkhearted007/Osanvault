@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS systemwide_readiness_audits (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), phase text NOT NULL, decision text NOT NULL, checks jsonb NOT NULL, blockers jsonb NOT NULL DEFAULT '[]'::jsonb, created_at timestamptz NOT NULL DEFAULT now())
