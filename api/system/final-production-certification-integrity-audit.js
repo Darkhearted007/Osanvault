@@ -58,7 +58,7 @@ export default async function(req,res){
   const lockedCrosswalk=await count("SELECT COUNT(*)::int n FROM gis_authoritative_crosswalk WHERE status='LOCKED'");
   const reviewCrosswalk=await count("SELECT COUNT(*)::int n FROM gis_authoritative_crosswalk WHERE status='REVIEW'");
 
-  const g39118=await q("SELECT id,candidate_match_id,decision,algorithm_version,decision_fingerprint,artifact_id,artifact_sha256,provenance_reference,candidate_mutation,decided_at FROM gis_inec_geographic_reconciliation_decisions WHERE candidate_match_id IS NOT NULL ORDER BY candidate_match_id,decided_at DESC,id DESC");
+  const g39118=await q("SELECT id,candidate_match_id,decision,algorithm_version,decision_fingerprint,artifact_id,artifact_sha256,provenance_reference,candidate_mutation,decided_at,inec_evidence_reference,geometry_metadata FROM gis_inec_geographic_reconciliation_decisions WHERE candidate_match_id IS NOT NULL AND algorithm_version LIKE '391.18%' ORDER BY candidate_match_id,decided_at DESC,id DESC");
   const g39118Latest=new Map(); for(const x of g39118) if(!g39118Latest.has(x.candidate_match_id)) g39118Latest.set(x.candidate_match_id,x);
   const reviews=await q("SELECT id,exception_id,reviewer_id,decision,rationale,evidence_reference,created_at FROM gis_exception_reviews ORDER BY exception_id,created_at DESC,id DESC");
   const reviewLatest=new Map(); for(const x of reviews) if(!reviewLatest.has(x.exception_id)) reviewLatest.set(x.exception_id,x);
