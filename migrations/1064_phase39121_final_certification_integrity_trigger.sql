@@ -1,0 +1,1 @@
+CREATE TRIGGER gis_phase39121_final_certification_audit_immutable BEFORE UPDATE OR DELETE ON gis_phase39121_final_certification_audits FOR EACH ROW EXECUTE FUNCTION gis_phase39121_append_only_guard()

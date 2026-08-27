@@ -1,0 +1,1 @@
+CREATE OR REPLACE FUNCTION gis_phase39121_append_only_guard() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'Phase 391.21 audit records are append-only'; END; $$
