@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS gis_inec_evidence_validation_logical_subject_idx ON gis_inec_evidence_validation_decisions(candidate_match_id,artifact_id,artifact_sha256,parser_version,validated_at DESC);

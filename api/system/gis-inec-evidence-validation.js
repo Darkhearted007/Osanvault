@@ -32,8 +32,40 @@ export default async function(req,res){
     if(decision==='EVIDENCE_CONFIRMED')confirmed++;else if(decision==='EVIDENCE_INSUFFICIENT')insufficient++;else if(decision==='EVIDENCE_CONFLICT')conflict++;else if(decision==='EVIDENCE_NOT_FOUND')notFound++;else unverified++;
     const matches=parsed.filter(r=>String(r.state_name||'').trim().toUpperCase()===String(c.state_name||'').trim().toUpperCase()&&String(r.lga_name||'').trim().toUpperCase()===String(c.lga_name||'').trim().toUpperCase());
     const evidenceReference={artifact_id:a.id,artifact_sha256:a.sha256,canonical_source_key:a.canonical_source_key,source_registry_id:a.source_registry_id,parser_version:p.parser_version,parse_audit:{artifact_id:a.id,parser_version:p.parser_version,records_extracted:p.records_extracted,parsed_at:p.parsed_at},matched_artifact_rows:matches.map(r=>({artifact_row_id:r.id,row_hash:r.row_hash,state_name:r.state_name,lga_name:r.lga_name,ward_name:r.ward_name,ward_code:r.ward_code,polling_unit_name:r.polling_unit_name}))};
-    const fingerprint=await digest(JSON.stringify({candidate_id:c.id,artifact_id:a.id,artifact_sha256:a.sha256,parser_version:p.parser_version,decision,evidenceReference}));
-    const ins=await db.query('INSERT INTO gis_inec_evidence_validation_decisions(run_id,candidate_match_id,artifact_id,artifact_sha256,canonical_source_key,source_registry_id,parser_version,evidence_decision,evidence_reference,validation_errors,decision_fingerprint,candidate_status_before,candidate_mutation) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,false) ON CONFLICT(decision_fingerprint) DO NOTHING RETURNING id,validated_at',[run.id,c.id,a.id,a.sha256,a.canonical_source_key,a.source_registry_id,p.parser_version,decision,JSON.stringify(evidenceReference),JSON.stringify(errors),fingerprint,c.status]);
+    // Logical decision identity is derived ONLY from immutable validation inputs.
+    // parse_audit.parsed_at and the evaluated decision/evidence payload are execution
+    // outputs and MUST NOT participate in the logical identity. Phase 391.26 proved
+    // that including execution-varying data allowed duplicate logical decisions.
+    const fingerprint=await digest(JSON.stringify({candidate_id:c.id,artifact_id:a.id,artifact_sha256:a.sha256,parser_version:p.parser_version}));
+    // Serialize competing evaluations for the same immutable candidate/artifact subject.
+    // The advisory lock and NOT EXISTS check execute in one SQL statement/transaction,
+    // so concurrent retries cannot create another logical decision. Existing historical
+    // duplicates are preserved and never rewritten or deleted.
+    const ins=await db.query(`WITH locked AS (
+      SELECT pg_advisory_xact_lock(hashtextextended($1,0)) AS locked
+    )
+    INSERT INTO gis_inec_evidence_validation_decisions(
+      run_id,candidate_match_id,artifact_id,artifact_sha256,canonical_source_key,
+      source_registry_id,parser_version,evidence_decision,evidence_reference,
+      validation_errors,decision_fingerprint,candidate_status_before,candidate_mutation
+    )
+    SELECT $2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,false
+    FROM locked
+    WHERE NOT EXISTS (
+      SELECT 1
+      FROM gis_inec_evidence_validation_decisions d
+      WHERE d.candidate_match_id=$3
+        AND d.artifact_id=$4
+        AND d.artifact_sha256=$5
+        AND d.parser_version=$8
+    )
+    ON CONFLICT(decision_fingerprint) DO NOTHING
+    RETURNING id,validated_at`,[
+      `${c.id}:${a.id}:${a.sha256}:${p.parser_version}`,
+      run.id,c.id,a.id,a.sha256,a.canonical_source_key,a.source_registry_id,
+      p.parser_version,decision,JSON.stringify(evidenceReference),JSON.stringify(errors),
+      fingerprint,c.status
+    ]);
     out.push({candidate_id:c.id,state_name:c.state_name,lga_name:c.lga_name,candidate_area_code:c.candidate_area_code,candidate_status:c.status,artifact_id:a.id,artifact_sha256:a.sha256,canonical_source:a.canonical_source_key,parser_version:p.parser_version,evidence_decision:decision,evidence_reference:evidenceReference,validation_errors:errors,candidate_mutation:false,audit_id:ins.rows[0]?.id||null});
   }
   await db.query('UPDATE gis_inec_evidence_validation_runs SET confirmed_count=$1,insufficient_count=$2,conflict_count=$3,not_found_count=$4,unverified_count=$5,status=$6,completed_at=now() WHERE id=$7',[confirmed,insufficient,conflict,notFound,unverified,(insufficient||conflict||notFound||unverified)?'COMPLETE_WITH_HOLDS':'COMPLETE',run.id]);
