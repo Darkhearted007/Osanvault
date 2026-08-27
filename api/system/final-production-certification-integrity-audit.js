@@ -73,7 +73,7 @@ export default async function(req,res){
     if(!g) missing39118++; if(!r) missingReview++; if(!f) missingRec++;
     let recFpExpected=null, recFpStatus='NOT_EVALUATED';
     if(f){
-      recFpExpected=await hash(JSON.stringify({candidate_id:c.id,phase39118_fingerprint:g?.decision_fingerprint||null,phase39119_review_fingerprint:null,evidence_ids:g?.inec_evidence_reference||null,artifact_id:f.artifact_id||null,artifact_sha256:f.artifact_sha256||null,policy_version:f.policy_version,certification_algorithm_version:f.certification_algorithm_version,final_decision:f.final_decision||null}));
+      recFpExpected=await hash(JSON.stringify({candidate_id:c.id,phase39118_fingerprint:f.phase39118_decision ? (g?.decision_fingerprint||null) : null,phase39119_review_fingerprint:null,evidence_ids:f.evidence_ids||[],artifact_id:f.artifact_id||null,artifact_sha256:f.artifact_sha256||null,policy_version:f.policy_version,certification_algorithm_version:f.certification_algorithm_version,final_decision:f.final_decision||null}));
       recFpStatus=recFpExpected===f.deterministic_fingerprint?'PASS':'FAIL'; if(recFpStatus==='FAIL') recFpMismatch++;
     }
     candidateReports.push({
