@@ -62,7 +62,7 @@ export default async function(req,res){
   const g39118Latest=new Map(); for(const x of g39118) if(!g39118Latest.has(x.candidate_match_id)) g39118Latest.set(x.candidate_match_id,x);
   const reviews=await q("SELECT id,exception_id,reviewer_id,decision,rationale,evidence_reference,created_at FROM gis_exception_reviews ORDER BY exception_id,created_at DESC,id DESC");
   const reviewLatest=new Map(); for(const x of reviews) if(!reviewLatest.has(x.exception_id)) reviewLatest.set(x.exception_id,x);
-  const recs=await q("SELECT id,candidate_match_id,phase39118_decision,phase39119_review_state,review_decision,evidence_ids,artifact_id,artifact_sha256,policy_version,certification_algorithm_version,deterministic_fingerprint,audit_id,candidate_mutation,geometry_mutation,evidence_mutation,created_at FROM gis_inec_final_certification_reconciliations ORDER BY candidate_match_id,created_at DESC,id DESC");
+  const recs=await q("SELECT id,candidate_match_id,final_decision,phase39118_decision,phase39119_review_state,review_decision,evidence_ids,artifact_id,artifact_sha256,policy_version,certification_algorithm_version,deterministic_fingerprint,audit_id,candidate_mutation,geometry_mutation,evidence_mutation,created_at FROM gis_inec_final_certification_reconciliations ORDER BY candidate_match_id,created_at DESC,id DESC");
   const recLatest=new Map(); for(const x of recs) if(!recLatest.has(x.candidate_match_id)) recLatest.set(x.candidate_match_id,x);
   const audits=await q("SELECT id,reconciliation_id,candidate_match_id,deterministic_fingerprint,event_type,created_at FROM gis_inec_final_certification_audits ORDER BY candidate_match_id,created_at DESC,id DESC");
   const auditLatest=new Map(); for(const x of audits) if(!auditLatest.has(x.candidate_match_id)) auditLatest.set(x.candidate_match_id,x);
@@ -92,6 +92,7 @@ export default async function(req,res){
   const baseline=await q("SELECT baseline_key,status,position_count,dashboard_count,gis_dataset_status,e2e_status,organization_id,created_at,updated_at FROM production_certification_baseline WHERE baseline_key='osanvault-africa-production' LIMIT 1");
   const readiness=await q("SELECT id,phase,decision,checks,blockers,created_at FROM systemwide_readiness_audits ORDER BY created_at DESC LIMIT 1");
   const engine=await readJson('phase388/final-production-certification.json');
+  const source=src[0]||null;
 
   const gates=[];
   gates.push(gate('artifact_integrity',artifactIntegrityFailures===0?'PASS':'FAIL',artifactIntegrityFailures===0?'All stored INEC artifacts are verified and provenance-bound':`${artifactIntegrityFailures} stored INEC artifact(s) are not fully verified`,artifacts.map(x=>x.id)));
