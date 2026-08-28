@@ -18,10 +18,10 @@ const TABLES = {
 };
 
 async function exists(t){
-  return (await db.query("SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name=$1",[t])).rows.length>0;
+  return (await db.query("SELECT 1 FROM information_schema.tables WHERE table_schema=current_schema() AND table_name=$1",[t])).rows.length>0;
 }
 async function cols(t){
-  return (await db.query("SELECT column_name,data_type FROM information_schema.columns WHERE table_schema='public' AND table_name=$1 ORDER BY ordinal_position",[t])).rows;
+  return (await db.query("SELECT column_name,data_type FROM information_schema.columns WHERE table_schema=current_schema() AND table_name=$1 ORDER BY ordinal_position",[t])).rows;
 }
 function names(cs){return new Set(cs.map(x=>x.column_name));}
 async function countExact(t,col,values){
