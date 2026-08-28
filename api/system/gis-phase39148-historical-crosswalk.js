@@ -30,7 +30,9 @@ async function countExact(t,col,values){
 }
 
 export default async function(req,res){
-  const current=(await db.query("SELECT id,tenant_id,state_name,lga_name,candidate_area_code,status,evidence_reference,exception_id,created_at FROM gis_exception_candidate_matches WHERE status='CANDIDATE_ONLY' ORDER BY id")).rows;
+  const candidateColumns = names(await cols('gis_exception_candidate_matches'));
+  const selectTenant = candidateColumns.has('tenant_id') ? ',tenant_id' : '';
+  const current=(await db.query(`SELECT id${selectTenant},state_name,lga_name,candidate_area_code,status,evidence_reference,exception_id,created_at FROM gis_exception_candidate_matches WHERE status='CANDIDATE_ONLY' ORDER BY id`)).rows;
   const ids=current.map(x=>String(x.id));
   const areaCodes=current.map(x=>String(x.candidate_area_code)).filter(Boolean);
   const result={phase:PHASE,mode:'READ_ONLY_DISCOVERY',executed_at:new Date().toISOString(),candidate_inventory:{total:current.length,candidate_only:current.length,resolved:0,deleted:0},phase_tables:{},crosswalk:{candidate_id:0,candidate_match_id:0,source_feature_id:0,source_dataset_id:0,external_id:0,original_id:0,source_record_id:0,import_record_id:0,geometry_id:0,artifact_id:0,artifact_hash:0,row_hash:0,feature_hash:0,geometry_hash:0,deterministic_source_key:0,historical_lineage_id:0,audit_reference:0,predecessor:0,successor:0,attribute_discovery_only:0},phase_matches:{},geometry_exact:{},lineage_findings:[],artifacts:{},administrative_identity:{},inec:{},verification:{},review:{},promotion:{},security_note:'Route is admin-gated and performs no candidate, lineage, evidence, review, or promotion mutation.'};
