@@ -22,7 +22,7 @@ export default async function (req, res) {
   if (!source) return res.status(409).json({ phase: '391.28', production_gate: 'NOT_READY', error: 'canonical source identity missing or inconsistent' });
 
   const artifact = (await db.query(
-    `SELECT id, sha256, storage_key, byte_size, content_type, retrieval_status, verification_status, provenance_status
+    `SELECT id, sha256, storage_key, byte_size, content_type, artifact_type, retrieval_status, verification_status, provenance_status
      FROM inec_official_artifacts
      WHERE canonical_source_key=$1
      ORDER BY created_at DESC LIMIT 1`,
