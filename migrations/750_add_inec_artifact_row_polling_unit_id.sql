@@ -1,0 +1,1 @@
+ALTER TABLE gis_official_artifact_rows ADD COLUMN IF NOT EXISTS polling_unit_id integer;
