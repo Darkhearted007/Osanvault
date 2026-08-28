@@ -45,7 +45,9 @@ export default async function (req, res) {
         const prefix = new TextDecoder().decode(bytes.slice(0, 16));
         const text = new TextDecoder().decode(bytes);
         const htmlLike = /^\\s*</.test(prefix) && /(?:INEC|Independent National Electoral Commission)/i.test(text) && /(?:Polling Unit|polling-unit|polling unit)/i.test(text);
-        contentValidation = htmlLike ? 'VALIDATED_OFFICIAL_LOCATOR_CONTENT' : 'REJECTED_CONTENT_SIGNATURE';
+        const artifactType=String(artifact.artifact_type||'').toLowerCase();
+        const jsonBundle = String(artifact.content_type||'').toLowerCase().startsWith('application/json') && artifactType.includes('official') && artifactType.includes('polling-unit') && artifactType.includes('response bundle');
+        contentValidation = htmlLike || jsonBundle ? 'VALIDATED_OFFICIAL_LOCATOR_CONTENT' : 'REJECTED_CONTENT_SIGNATURE';
       } else storageIntegrity = 'MISSING_STORAGE_BYTES';
     } catch (e) {
       storageIntegrity = 'STORAGE_READ_FAILED';

@@ -2,7 +2,7 @@ import { db } from 'hatchable';
 export const access='admin';
 export const methods=['POST'];
 const SOURCE='INEC-POLLING-UNIT-LOCATOR-2026';
-const PARSER='391.29.1';
+const PARSER='391.29.2';
 async function digest(v){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(v)));return [...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,'0')).join('')}
 function decisionFor(c,rows){
   if(!rows.length)return ['EVIDENCE_NOT_FOUND',['No parsed artifact row matches the candidate State/LGA.']];
