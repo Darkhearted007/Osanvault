@@ -3,12 +3,12 @@ export const access='admin';
 export const methods=['GET'];
 const SOURCE='INEC-POLLING-UNIT-LOCATOR-2026';
 const SOURCE_ID='1a17203d-270d-475c-99ae-871d232397be';
-const ARTIFACT='a2aa0cff-3020-404e-b9f8-b57ba75ccd59';
+// Current artifact is selected from the canonical source registry below; no stale artifact ID is hardcoded.
 async function sha(buf){const d=await crypto.subtle.digest('SHA-256',buf);return [...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,'0')).join('')}
 export default async function(req,res){
  const source=(await db.query("SELECT id,source_key,source_url,authority_level,acquisition_status FROM gis_official_source_registry WHERE source_key=$1",[SOURCE])).rows;
  const canonical=(await db.query("SELECT source_key,source_registry_id,source_url,authority_level FROM gis_canonical_source_identity WHERE source_key=$1",[SOURCE])).rows;
- const a=(await db.query("SELECT id,source_registry_id,canonical_source_key,source_url,retrieval_status,http_status,content_type,byte_size,sha256,storage_key,verification_status,provenance_status FROM inec_official_artifacts WHERE id=$1",[ARTIFACT])).rows[0]||null;
+ const a=(await db.query("SELECT id,source_registry_id,canonical_source_key,source_url,retrieval_status,http_status,content_type,byte_size,sha256,storage_key,verification_status,provenance_status FROM inec_official_artifacts WHERE canonical_source_key=$1 ORDER BY created_at DESC LIMIT 1",[SOURCE])).rows[0]||null;
  const blockers=[]; if(source.length!==1)blockers.push('canonical source registry cardinality is not exactly one'); if(!canonical[0]||canonical[0].source_registry_id!==SOURCE_ID)blockers.push('canonical source identity does not resolve to the expected source registry id'); if(!a)blockers.push('expected artifact record is missing');
  let storedHash=null,bytes=null; if(a?.storage_key){try{const s=await storage.get(a.storage_key);bytes=s?.buffer; if(bytes)storedHash=await sha(bytes);else blockers.push('stored artifact bytes unavailable');}catch(e){blockers.push('stored artifact bytes unavailable: '+String(e?.message||e));}}
  if(a?.sha256&&storedHash&&a.sha256!==storedHash)blockers.push('stored artifact SHA-256 mismatch');
