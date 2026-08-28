@@ -51,7 +51,15 @@ export default async function(req,res){
     if(checks.attribute_area_code) result.crosswalk.attribute_discovery_only+=checks.attribute_area_code;
   }
 
-  // Current spatial inventory is inspected only as a possible lineage source; area_code is not treated as authoritative identity.
+  // Re-keyed candidate recovery: exact candidate area_code -> GRID3 source_code -> source feature -> canonical/final crosswalk.
+  // This is lineage discovery only; it does not establish INEC Ward/PU identity.
+  if(await exists('gis_identity_crosswalks')){
+    const rows=(await db.query(`SELECT c.id,c.candidate_area_code,ix.source_feature_id,ix.target_provider_feature_id,ix.source_code,ix.match_method,ix.confidence,ix.review_required FROM gis_exception_candidate_matches c JOIN gis_identity_crosswalks ix ON ix.source_code=c.candidate_area_code WHERE c.status='CANDIDATE_ONLY' ORDER BY c.id`)).rows;
+    result.crosswalk.rekeyed_identity_crosswalk=rows.length;
+    result.crosswalk.rekeyed_identity_source_features=new Set(rows.map(x=>String(x.source_feature_id))).size;
+    result.crosswalk.rekeyed_provider_features=new Set(rows.map(x=>String(x.target_provider_feature_id))).size;
+    result.lineage_findings.push({status:'REKEYED_CANDIDATE_CROSSWALK_FOUND',count:rows.length,relationship:'candidate_area_code == GRID3 source_code -> identity_crosswalk.source_feature_id',authoritative_identity_proof:false});
+  }
   if(await exists('gis_spatial_features')){
     const sCols=names(await cols('gis_spatial_features'));
     const sRows=(await db.query("SELECT * FROM gis_spatial_features WHERE area_code = ANY($1) ORDER BY area_code",[areaCodes])).rows;
