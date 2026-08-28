@@ -6,7 +6,7 @@ function clean(s){return String(s||'').replace(/<[^>]*>/g,' ').replace(/&amp;/g,
 function responsePollingUnits(responseJson){
   if(!Array.isArray(responseJson)) return [];
   const obj=responseJson.find(x=>x&&typeof x==='object'&&!Array.isArray(x))||{};
-  return Object.entries(obj).filter(([k,v])=>k!=='selected'&&k!=='0'&&/^\\d+$/.test(k)&&v!=null&&String(v).trim()).map(([id,name])=>({polling_unit_id:Number(id),polling_unit_name:String(name)}));
+  return Object.entries(obj).filter(([k,v])=>k!=='selected'&&k!=='0'&&/^\d+$/.test(k)&&v!=null&&String(v).trim()).map(([id,name])=>({polling_unit_id:Number(id),polling_unit_name:String(name)}));
 }
 function selectOptions(html,name){
   const blocks=html.match(/<select\b[\s\S]*?<\/select>/gi)||[];
