@@ -15,6 +15,7 @@ export default async function(req,res){
  if(a?.retrieval_status!=='RETRIEVED')blockers.push('artifact retrieval is not successful');
  if(a?.http_status!==200)blockers.push('artifact HTTP status is not 200');
  if(a?.verification_status!=='PENDING_CONTENT_VALIDATION'&&a?.verification_status!=='VERIFIED')blockers.push('artifact verification state is invalid');
+ if(a?.provenance_status!=='SOURCE_BOUND_AND_HASH_VERIFIED'&&a?.provenance_status!=='VERIFIED')blockers.push('artifact provenance state is invalid');
  const parsed= a ? Number((await db.query("SELECT COUNT(*)::int n FROM gis_official_artifact_rows WHERE artifact_id=$1",[a.id])).rows[0]?.n||0) : 0;
  const validated=a ? Number((await db.query("SELECT COUNT(DISTINCT candidate_match_id)::int n FROM gis_inec_evidence_validation_decisions WHERE artifact_id=$1",[a.id])).rows[0]?.n||0) : 0;
  const qualifying=Number((await db.query("SELECT COUNT(*)::int n FROM gis_ward_evidence_attachments WHERE verification_status='VERIFIED' AND authority_level='PRIMARY_OFFICIAL' AND geometry_verified=true AND provenance_verified=true AND artifact_sha256 IS NOT NULL")).rows[0]?.n||0);
