@@ -1,6 +1,6 @@
 import { db, storage } from 'hatchable';
 export const access='admin'; export const methods=['POST'];
-const PARSER_VERSION='391.29.1';
+const PARSER_VERSION='391.29.2';
 async function hashBytes(buf){const d=await crypto.subtle.digest('SHA-256',buf);return Array.from(new Uint8Array(d)).map(x=>x.toString(16).padStart(2,'0')).join('');}
 function clean(s){return String(s||'').replace(/<[^>]*>/g,' ').replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim()}
 function responsePollingUnits(responseJson){
