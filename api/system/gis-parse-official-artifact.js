@@ -18,7 +18,7 @@ export default async function(req,res){
   if(!artifactId)return res.status(400).json({error:'artifact_id is required'});
   const a=(await db.query('SELECT id,source_registry_id,canonical_source_key,sha256,retrieval_status,verification_status,provenance_status,storage_key,source_url,content_type,byte_size,artifact_type FROM inec_official_artifacts WHERE id=$1 LIMIT 1',[String(artifactId)])).rows[0];
   if(!a)return res.status(404).json({error:'artifact not found'});
-  const eligible=a.canonical_source_key==='INEC-POLLING-UNIT-LOCATOR-2026'&&a.retrieval_status==='RETRIEVED'&&!!a.sha256&&a.provenance_status==='SOURCE_BOUND_AND_HASH_VERIFIED'&&(a.verification_status==='PENDING_CONTENT_VALIDATION'||a.verification_status==='VERIFIED');
+  const eligible=a.canonical_source_key==='INEC-POLLING-UNIT-LOCATOR-2026'&&a.retrieval_status==='RETRIEVED'&&!!a.sha256&&(a.provenance_status==='SOURCE_BOUND_AND_HASH_VERIFIED'||a.provenance_status==='VERIFIED')&&(a.verification_status==='PENDING_CONTENT_VALIDATION'||a.verification_status==='VERIFIED');
   if(!eligible)return res.status(409).json({error:'artifact is not eligible for deterministic parsing',decision:'PARSE_BLOCKED_ARTIFACT_NOT_FULLY_VERIFIED',candidate_mutation:false});
   let s;try{s=await storage.get(a.storage_key)}catch(e){return res.status(422).json({error:'stored artifact unavailable',decision:'PARSE_BLOCKED_STORAGE_UNAVAILABLE',detail:String(e),candidate_mutation:false});}
   if(!s?.buffer?.length)return res.status(422).json({error:'stored artifact is empty',decision:'PARSE_BLOCKED_EMPTY_ARTIFACT',candidate_mutation:false});
@@ -26,7 +26,7 @@ export default async function(req,res){
   if(actual!==a.sha256)return res.status(409).json({error:'stored artifact hash mismatch',decision:'PARSE_BLOCKED_HASH_MISMATCH',recorded_sha256:a.sha256,computed_sha256:actual,candidate_mutation:false});
   if(Number.isFinite(Number(a.byte_size))&&Number(a.byte_size)!==s.buffer.byteLength)return res.status(409).json({error:'stored artifact byte-size mismatch',decision:'PARSE_BLOCKED_BYTE_SIZE_MISMATCH',recorded_byte_size:Number(a.byte_size),computed_byte_size:s.buffer.byteLength,candidate_mutation:false});
   let html;try{html=new TextDecoder('utf-8',{fatal:true}).decode(s.buffer)}catch(e){return res.status(422).json({error:'stored artifact is not valid UTF-8',decision:'PARSE_BLOCKED_ENCODING',candidate_mutation:false});}
-  const isApiBundle=String(a.content_type||'').toLowerCase().startsWith('application/json')&&a.artifact_type==='official INEC machine-readable polling-unit API response bundle';
+  const isApiBundle=String(a.content_type||'').toLowerCase().startsWith('application/json')&&(a.artifact_type==='official INEC machine-readable polling-unit API response bundle'||a.artifact_type==='official machine-readable polling-unit API response bundle');
   if(isApiBundle){
     let bundle;try{bundle=JSON.parse(html)}catch(e){return res.status(422).json({error:'stored API bundle is invalid JSON',decision:'PARSE_BLOCKED_JSON',candidate_mutation:false});}
     if(bundle?.schema_version!=='391.29.1'||bundle?.canonical_source_key!=='INEC-POLLING-UNIT-LOCATOR-2026'||!Array.isArray(bundle.entries))return res.status(422).json({error:'stored API bundle failed schema/provenance signature',decision:'PARSE_BLOCKED_BUNDLE_SCHEMA',candidate_mutation:false});
