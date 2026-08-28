@@ -11,7 +11,7 @@ export default async function(req,res){
  const run=(await db.query('INSERT INTO gis_phase39116_lineage_runs(phase,algorithm_version,candidate_count,status) VALUES($1,$2,$3,$4) RETURNING id',['391.16',VERSION,cs.length,'RUNNING'])).rows[0];
  let hits=0,auth=0,eligible=0;const decisions=[];
  for(const c of cs){let lineage=[];
-  if(exists.gis_evidence_candidates){const r=(await db.query("SELECT id FROM gis_evidence_candidates WHERE candidate_match_id=$1 LIMIT 10",[c.id])).rows;if(r.length){lineage.push({table:'gis_evidence_candidates',ids:r.map(x=>x.id)});hits++}}
+  /* The legacy gis_evidence_candidates table is intentionally not queried; it is not part of the live schema. */
   if(exists.gis_geometry_evidence){const r=(await db.query("SELECT * FROM gis_geometry_evidence WHERE candidate_match_id=$1 LIMIT 5",[c.id])).rows;if(r.length){lineage.push({table:'gis_geometry_evidence',rows:r.map(x=>({id:x.id,source:x.source,source_url:x.source_url,artifact_id:x.artifact_id,sha256:x.sha256,verification_status:x.verification_status}))});hits++}}
   if(exists.inec_candidate_live_crosswalks){const r=(await db.query("SELECT * FROM inec_candidate_live_crosswalks WHERE candidate_match_id=$1 LIMIT 5",[c.id])).rows;if(r.length)lineage.push({table:'inec_candidate_live_crosswalks',rows:r.map(x=>({id:x.id,state_id:x.state_id,lga_id:x.lga_id,official_lga_name:x.official_lga_name,official_ward_count:x.official_ward_count,match_status:x.match_status}))})}
   const geometryLineage=!!lineage.find(x=>x.table==='gis_geometry_evidence'); const decision=geometryLineage?'GEOMETRY_LINEAGE_FOUND_REQUIRES_AUTHORITY_REVIEW':'LINEAGE_FOUND_BUT_GEOGRAPHIC_PROOF_UNAVAILABLE'; if(geometryLineage)auth++;
