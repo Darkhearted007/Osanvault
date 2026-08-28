@@ -7,7 +7,7 @@ export default async function(req,res){
  const only=req.body?.candidate_id;
  const cs=only?(await db.query("SELECT id,state_name,lga_name,candidate_area_code,status,evidence_reference,exception_id FROM gis_exception_candidate_matches WHERE id=$1 AND status='CANDIDATE_ONLY'",[only])).rows:(await db.query("SELECT id,state_name,lga_name,candidate_area_code,status,evidence_reference,exception_id FROM gis_exception_candidate_matches WHERE status='CANDIDATE_ONLY' ORDER BY id",[])).rows;
  if(only&&!cs.length)return res.status(404).json({phase:'391.16',error:'candidate_not_found_or_not_candidate_only',production_gate:'NOT_READY'});
- const tables=['gis_spatial_features','gis_spatial_intersection_evidence','inec_candidate_live_crosswalks','gis_geometry_evidence','gis_evidence_candidates','gis_evidence_records']; const exists={}; for(const t of tables)exists[t]=await tableExists(t);
+ const tables=['gis_spatial_features','gis_spatial_intersection_evidence','inec_candidate_live_crosswalks','gis_geometry_evidence','gis_evidence_records']; const exists={}; for(const t of tables)exists[t]=await tableExists(t);
  const run=(await db.query('INSERT INTO gis_phase39116_lineage_runs(phase,algorithm_version,candidate_count,status) VALUES($1,$2,$3,$4) RETURNING id',['391.16',VERSION,cs.length,'RUNNING'])).rows[0];
  let hits=0,auth=0,eligible=0;const decisions=[];
  for(const c of cs){let lineage=[];
