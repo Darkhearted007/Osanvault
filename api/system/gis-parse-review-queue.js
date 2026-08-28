@@ -1,0 +1,6 @@
+import { db } from 'hatchable';
+export const access='admin'; export const methods=['GET'];
+export default async function(req,res){
+  const q=await db.query(`SELECT p.id AS parse_audit_id,p.artifact_id,p.parser_version,p.artifact_sha256,p.records_extracted,p.errors,p.status,p.notes,p.created_at,a.canonical_source_key,a.source_registry_id,a.source_url,a.content_type,a.byte_size,a.storage_key,a.verification_status,a.provenance_status,a.retrieval_status,r.id AS review_id,r.decision AS review_decision,r.rationale AS review_rationale,r.reviewer_id,r.created_at AS reviewed_at FROM gis_artifact_parse_audits p JOIN inec_official_artifacts a ON a.id=p.artifact_id LEFT JOIN gis_parse_review_decisions r ON r.parse_audit_id=p.id WHERE a.canonical_source_key='INEC-POLLING-UNIT-LOCATOR-2026' ORDER BY p.created_at DESC`);
+  res.json({count:q.rows.length,items:q.rows,policy:'Parsing approval is an administrative review of the parsing result only. It never resolves candidates, establishes Ward/Polling Unit identity, or authorizes promotion.'});
+}
