@@ -1,5 +1,5 @@
 import { db } from 'hatchable';
-export const access='member';
+export const access='admin';
 export const methods=['POST'];
 const clean=v=>typeof v==='string'?v.trim().slice(0,120):'';
 export default async function(req,res){

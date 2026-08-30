@@ -1,5 +1,5 @@
 import { db } from 'hatchable';
-export const access='member';
+export const access='admin';
 export const methods=['POST'];
 export default async function(req,res){
  const member=req.member;
