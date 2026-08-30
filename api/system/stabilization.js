@@ -1,5 +1,5 @@
 import { db } from 'hatchable';
-export const access='member';
+export const access='admin';
 export const methods=['GET','POST'];
 
 async function check(name,fn){try{return {name,status:'ok',details:await fn()};}catch(e){return {name,status:'failed',error:String(e?.message||e)}}}

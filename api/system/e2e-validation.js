@@ -1,5 +1,5 @@
 import { db } from 'hatchable';
-export const access='member';
+export const access='admin';
 export const methods=['GET','POST','DELETE'];
 
 const TEST_KEY='OV19_11_CONTROLLED_E2E';

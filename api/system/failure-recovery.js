@@ -1,5 +1,5 @@
 import { db } from 'hatchable';
-export const access='member';
+export const access='admin';
 export const methods=['GET','POST'];
 const KEY='OV19_12_FAILURE_RECOVERY';
 const pass=(name,details)=>({name,status:'passed',details});
