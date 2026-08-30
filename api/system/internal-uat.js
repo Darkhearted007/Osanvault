@@ -1,5 +1,5 @@
 import { db } from 'hatchable';
-export const access='member';
+export const access='admin';
 export const methods=['GET','POST'];
 const KEY='OV19_18_INTERNAL_UAT';
 const pass=(name,details)=>({name,status:'passed',details});
