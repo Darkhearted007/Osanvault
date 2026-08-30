@@ -1,5 +1,5 @@
 import { db } from 'hatchable';
-export const access='member';
+export const access='admin';
 export const methods=['POST'];
 export default async function(req,res){
  const existing=await db.query(`SELECT id,display_name,data_environment,onboarding_status FROM economic_onboarding_profiles WHERE owner_id=$1 AND display_name='OSANVAULT AFRICA LTD' AND data_environment='production' LIMIT 1`,[req.member.id]);
