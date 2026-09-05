@@ -1,0 +1,15 @@
+ALTER TABLE economic_evidence_vault ADD COLUMN IF NOT EXISTS organization_id uuid;
+ALTER TABLE economic_evidence_vault ADD COLUMN IF NOT EXISTS asset_id uuid;
+ALTER TABLE economic_evidence_vault ADD COLUMN IF NOT EXISTS project_id uuid;
+ALTER TABLE economic_evidence_vault ADD COLUMN IF NOT EXISTS document_type text;
+ALTER TABLE economic_evidence_vault ADD COLUMN IF NOT EXISTS content_hash text;
+ALTER TABLE economic_evidence_vault ADD COLUMN IF NOT EXISTS storage_key text;
+ALTER TABLE economic_evidence_vault ADD COLUMN IF NOT EXISTS version integer NOT NULL DEFAULT 1;
+ALTER TABLE economic_evidence_vault ADD COLUMN IF NOT EXISTS provenance_status text NOT NULL DEFAULT 'UNVERIFIED';
+ALTER TABLE economic_evidence_vault ADD COLUMN IF NOT EXISTS evidence_status text NOT NULL DEFAULT 'PENDING';
+ALTER TABLE economic_evidence_vault ADD COLUMN IF NOT EXISTS access_control_state text NOT NULL DEFAULT 'PRIVATE';
+ALTER TABLE economic_evidence_vault ADD COLUMN IF NOT EXISTS audit_reference text;
+CREATE INDEX IF NOT EXISTS idx_evidence_vault_org ON economic_evidence_vault(organization_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_evidence_vault_asset ON economic_evidence_vault(asset_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_evidence_vault_project ON economic_evidence_vault(project_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_evidence_vault_hash ON economic_evidence_vault(organization_id, content_hash);
