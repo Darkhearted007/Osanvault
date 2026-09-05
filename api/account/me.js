@@ -29,7 +29,7 @@ export default async function (req, res) {
 
   res.json({
     user,
-    role: roleResult.rows[0]?.role || 'viewer',
+    role: org?.role || roleResult.rows[0]?.role || 'viewer',
     organization: org ? {
       id:org.organization_id,name:org.organization_name,slug:org.slug||null,status:org.status,
       role:org.role,positionCode:org.position_code||null,positionTitle:org.position_name||null,dashboardKey:org.dashboard_key||null
