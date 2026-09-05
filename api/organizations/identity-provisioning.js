@@ -1,3 +1,4 @@
+import { db } from 'hatchable';
 import {readState,writeState,id,audit,orgFor} from '../../lib/phase388-control-plane.js';
 export const access='admin';
 export const methods=['GET','POST'];
@@ -9,6 +10,19 @@ export default async function(req,res){
   if(!b.name||!b.slug)return res.status(400).json({error:'name and slug are required'});
   let o=s.organizations.find(x=>x.slug===b.slug);if(o)o.name=b.name;else{o={id:id(),name:b.name,slug:b.slug,organization_type:b.organization_type||'ENTERPRISE',status:'ACTIVE',created_at:new Date().toISOString()};s.organizations.push(o)}
   audit(s,o.id,null,req.member.id,'ORGANIZATION_PROVISIONED',{phase:'388.15'});await writeState(s);return res.json({phase:'388.15',action,organization:o,idempotent:!!s.organizations.find(x=>x.slug===b.slug&&x.id!==o.id)});
+ }
+ if(action==='RECONCILE_FOUNDER'){
+  const email=String(b.email||'').trim().toLowerCase();
+  if(email!=='olugbenga1000@gmail.com')return res.status(400).json({error:'founder email does not match canonical founder identity'});
+  const orgResult=await db.query(`SELECT id,name FROM gis_organizations WHERE slug='osanvault-africa-production' AND status='ACTIVE'`);
+  const userResult=await db.query(`SELECT id,email,email_verified_at FROM users WHERE lower(email)=$1`,[email]);
+  if(!orgResult.rows[0])return res.status(404).json({error:'production organization not found'});
+  if(!userResult.rows[0])return res.status(404).json({error:'founder user not found'});
+  if(!userResult.rows[0].email_verified_at)return res.status(403).json({error:'founder email is not verified'});
+  const orgId=orgResult.rows[0].id,userId=userResult.rows[0].id;
+  const memberResult=await db.query(`INSERT INTO gis_organization_members (organization_id,member_id,role,status) VALUES ($1,$2,'ADMIN','ACTIVE') ON CONFLICT (organization_id,member_id) DO UPDATE SET role='ADMIN',status='ACTIVE' RETURNING id,organization_id,member_id,role,status`,[orgId,userId]);
+  const membershipResult=await db.query(`INSERT INTO gis_organization_memberships (organization_id,member_id,role,status) VALUES ($1,$2,'ADMIN','ACTIVE') ON CONFLICT (organization_id,member_id) DO UPDATE SET role='ADMIN',status='ACTIVE' RETURNING id,organization_id,member_id,role,status`,[orgId,userId]);
+  return res.json({phase:'production-founder-reconciliation',status:'VERIFIED',organization:orgResult.rows[0],user:{id:userId,email},member:memberResult.rows[0],membership:membershipResult.rows[0],position:{position_code:'CEO',position_name:'Chief Executive Officer',dashboard_key:'executive-command'}});
  }
  if(action==='INVITE_MEMBER'){
   if(!orgFor(s,b.organization_id)||!b.member_id)return res.status(400).json({error:'organization_id and member_id are required'});

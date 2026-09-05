@@ -1,15 +1,24 @@
-import { readState, memberFor } from 'lib/phase388-control-plane.js';
+import { db } from 'hatchable';
 export const access='user';
 export const methods=['GET'];
 export default async function(req,res){
- const s=await readState();
- const organizations=(s.members||[])
-  .filter(m=>String(m.member_id)===String(req.user.id)&&m.status==='ACTIVE')
-  .map(m=>{
-   const o=(s.organizations||[]).find(x=>x.id===m.organization_id);
-   if(!o||o.status!=='ACTIVE') return null;
-   const p=(s.positions||[]).find(x=>x.organization_id===o.id&&x.position_code===m.position_code&&x.status==='ACTIVE');
-   return {id:o.id,name:o.name,slug:o.slug||null,organizationType:o.organization_type||'production',status:o.status,dashboardMode:o.dashboard_mode||p?.dashboard_key||null,role:m.role||'ADMIN',positionCode:m.position_code||null,positionTitle:m.position_title||null,dashboardKey:m.dashboard_key||p?.dashboard_key||null};
-  }).filter(Boolean);
- return res.json({organizations});
+  const userId=String(req.user.id);
+  const {rows}=await db.query(`
+    SELECT o.id,o.name,o.slug,o.organization_type,o.status,o.dashboard_mode,
+           m.role,m.status AS membership_status,
+           p.position_code,p.position_name,p.dashboard_key
+    FROM gis_organization_members m
+    JOIN gis_organizations o ON o.id=m.organization_id
+    LEFT JOIN gis_organization_positions p
+      ON p.organization_id=o.id
+     AND p.position_code=CASE WHEN m.role='ADMIN' THEN 'CEO' ELSE p.position_code END
+     AND p.status='ACTIVE'
+    WHERE m.member_id=$1 AND m.status='ACTIVE' AND o.status='ACTIVE'
+    ORDER BY o.created_at ASC`,[userId]);
+  const organizations=rows.map(r=>({
+    id:r.id,name:r.name,slug:r.slug||null,organizationType:r.organization_type||null,status:r.status,
+    dashboardMode:r.dashboard_mode||r.dashboard_key||null,role:r.role||null,
+    positionCode:r.position_code||null,positionTitle:r.position_name||null,dashboardKey:r.dashboard_key||null
+  }));
+  res.json({organizations});
 }
