@@ -11,7 +11,7 @@ export default async function(req,res){
   if(!membership.rows[0])return res.status(403).json({error:'Organization access denied'});
   const role=membership.rows[0].role||'USER';
   const positionCode=role==='ADMIN'?'CEO':null;
-  const position=positionCode?await db.query(`SELECT position_code,position_name,dashboard_key FROM gis_organization_positions WHERE organization_id=$1 AND position_code=$2 AND status='ACTIVE'`,[orgId,positionCode]):{rows:[]};
+  const position=positionCode?await db.query(`SELECT position_code,position_name,dashboard_key FROM gis_organization_positions WHERE organization_id=$1 AND position_code=$2`,[orgId,positionCode]):{rows:[]};
   const requestedPosition=req.query?.positionCode||null;
   if(requestedPosition&&requestedPosition!==positionCode)return res.status(403).json({error:'Position access denied'});
   const dashboards=await db.query(`SELECT id,dashboard_key,position_code,config FROM gis_organization_dashboards WHERE organization_id=$1 AND position_code=$2`,[orgId,positionCode||'__none__']);

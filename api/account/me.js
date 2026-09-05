@@ -11,7 +11,7 @@ export default async function (req, res) {
     FROM gis_organization_members m
     JOIN gis_organizations o ON o.id=m.organization_id
     LEFT JOIN gis_organization_positions p
-      ON p.organization_id=o.id AND p.position_code='CEO' AND p.status='ACTIVE'
+      ON p.organization_id=o.id AND p.position_code='CEO'
     WHERE m.member_id=$1 AND m.status='ACTIVE' AND o.status='ACTIVE'
     ORDER BY o.created_at ASC`, [user.id]);
 
