@@ -1,5 +1,5 @@
 import { readState, memberFor } from 'lib/phase388-control-plane.js';
-export const access='member';
+export const access='user';
 export const methods=['GET'];
 export default async function(req,res){
  const orgId=req.query?.organizationId;
@@ -8,7 +8,7 @@ export default async function(req,res){
  const s=await readState();
  const organization=(s.organizations||[]).find(o=>o.id===orgId&&o.status==='ACTIVE');
  if(!organization)return res.status(404).json({error:'Organization not found'});
- const membership=memberFor(s,orgId,req.member.id);
+ const membership=memberFor(s,orgId,req.user.id);
  if(!membership||membership.status!=='ACTIVE')return res.status(403).json({error:'Organization access denied'});
  const positionCode=requestedPosition||membership.position_code||null;
  if(requestedPosition&&requestedPosition!==membership.position_code)return res.status(403).json({error:'Position access denied'});

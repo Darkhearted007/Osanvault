@@ -1,10 +1,10 @@
 import { readState, memberFor } from 'lib/phase388-control-plane.js';
-export const access='member';
+export const access='user';
 export const methods=['GET'];
 export default async function(req,res){
  const s=await readState();
  const organizations=(s.members||[])
-  .filter(m=>String(m.member_id)===String(req.member.id)&&m.status==='ACTIVE')
+  .filter(m=>String(m.member_id)===String(req.user.id)&&m.status==='ACTIVE')
   .map(m=>{
    const o=(s.organizations||[]).find(x=>x.id===m.organization_id);
    if(!o||o.status!=='ACTIVE') return null;
