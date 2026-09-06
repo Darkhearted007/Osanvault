@@ -10,13 +10,28 @@ export default async function(req,res){
   const email=String(user.email||'').trim().toLowerCase();
   if(email!=='olugbenga1000@gmail.com')return res.status(403).json({ok:false,error:'founder_dashboard_not_authorized'});
 
-  const assets=await q(`SELECT a.id,a.asset_identifier,a.name,a.description,a.status,a.current_state,a.jurisdiction_code,t.name AS asset_type FROM assets a LEFT JOIN asset_types t ON t.id=a.asset_type_id ORDER BY a.created_at DESC LIMIT 50`);
-  const verification=await q(`SELECT COUNT(*)::int AS total,COUNT(*) FILTER (WHERE status IN ('open','pending','under_review'))::int AS pending,COUNT(*) FILTER (WHERE status='closed')::int AS closed FROM verification_cases`);
-  const verifiedAssets=await q(`SELECT COUNT(DISTINCT a.id)::int AS count FROM assets a JOIN verification_cases v ON v.asset_id=a.id WHERE v.status='closed'`);
-  const valuations=await q(`SELECT COUNT(DISTINCT av.asset_id)::int AS valued_assets,COALESCE(SUM(av.value),0)::numeric AS total_value FROM asset_valuations av JOIN assets a ON a.id=av.asset_id WHERE av.value IS NOT NULL`);
-  const tokenized=await q(`SELECT COUNT(DISTINCT asset_id)::int AS count FROM asset_investment_vehicles`);
-  const evidence=await q(`SELECT COUNT(*)::int AS total,COUNT(*) FILTER (WHERE verification_status='Verified')::int AS verified FROM asset_evidence`);
-  const risks=await q(`SELECT COUNT(DISTINCT asset_id)::int AS assessed FROM asset_risk_assessments`);
+  const orgId='d762a7d4-d114-41fa-849e-ce2272e92e71';
+  const membership=await db.query(`SELECT m.role FROM gis_organization_members m WHERE m.organization_id=$1 AND m.member_id=$2 AND m.status='ACTIVE'`,[orgId,String(user.id)]);
+  if(!membership.rows[0])return res.status(403).json({ok:false,error:'organization_access_denied'});
+  if(membership.rows[0].role!=='ADMIN')return res.status(403).json({ok:false,error:'executive_role_not_authorized'});
+  const position=await db.query(`SELECT position_code,position_name,dashboard_key FROM gis_organization_positions WHERE organization_id=$1 AND position_code='CEO' LIMIT 1`,[orgId]);
+  if(!position.rows[0])return res.status(403).json({ok:false,error:'executive_position_not_configured'});
+
+  const assets=await q(`SELECT a.id,a.asset_identifier,a.name,a.description,a.status,a.current_state,a.jurisdiction_code,t.name AS asset_type
+    FROM gis_organization_assets oa
+    JOIN assets a ON a.id=oa.asset_id
+    LEFT JOIN asset_types t ON t.id=a.asset_type_id
+    WHERE oa.organization_id=$1
+    ORDER BY a.created_at DESC LIMIT 50`,[orgId]);
+  const verification=await q(`SELECT COUNT(*)::int AS total,COUNT(*) FILTER (WHERE status IN ('open','pending','under_review'))::int AS pending,COUNT(*) FILTER (WHERE status='closed')::int AS closed
+    FROM verification_cases v JOIN gis_organization_assets oa ON oa.asset_id::text=v.asset_id::text WHERE oa.organization_id=$1`,[orgId]);
+  const verifiedAssets=await q(`SELECT COUNT(DISTINCT a.id)::int AS count FROM gis_organization_assets oa JOIN assets a ON a.id=oa.asset_id JOIN verification_cases v ON v.asset_id=a.id WHERE oa.organization_id=$1 AND v.status='closed'`,[orgId]);
+  const valuations=await q(`SELECT COUNT(DISTINCT av.asset_id)::int AS valued_assets,COALESCE(SUM(av.value),0)::numeric AS total_value
+    FROM gis_organization_assets oa JOIN asset_valuations av ON av.asset_id::text=oa.asset_id::text WHERE oa.organization_id=$1 AND av.value IS NOT NULL`,[orgId]);
+  const tokenized=await q(`SELECT COUNT(DISTINCT v.asset_id)::int AS count FROM gis_organization_assets oa JOIN asset_investment_vehicles v ON v.asset_id::text=oa.asset_id::text WHERE oa.organization_id=$1`,[orgId]);
+  const evidence=await q(`SELECT COUNT(*)::int AS total,COUNT(*) FILTER (WHERE verification_status='Verified')::int AS verified
+    FROM asset_evidence e JOIN gis_organization_assets oa ON oa.asset_id::text=e.asset_id::text WHERE oa.organization_id=$1`,[orgId]);
+  const risks=await q(`SELECT COUNT(DISTINCT r.asset_id)::int AS assessed FROM asset_risk_assessments r JOIN gis_organization_assets oa ON oa.asset_id::text=r.asset_id::text WHERE oa.organization_id=$1`,[orgId]);
 
   const v=verification[0]||{total:0,pending:0,closed:0};
   const va=verifiedAssets[0]||{count:0};
@@ -28,7 +43,7 @@ export default async function(req,res){
   res.json({
     ok:true,
     founder:{authenticated:true,email:user.email||null},
-    organization:{name:'ÒsánVault Africa',source:'existing production tenant'},
+    organization:{id:orgId,name:'ÒsánVault Africa Ltd',source:'existing production tenant',role:membership.rows[0].role,positionCode:position.rows[0].position_code,positionTitle:position.rows[0].position_name,dashboardKey:position.rows[0].dashboard_key},
     kpis:{
       totalAssets:{value:assets.length,available:true,source:'assets'},
       verifiedAssets:{value:Number(va.count||0),available:true,source:'verification_cases:closed'},
