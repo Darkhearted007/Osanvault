@@ -1,17 +1,17 @@
-import { readState, audit, writeState, memberFor, orgFor } from '../../lib/phase388-control-plane.js';
-export const access='member';
+import { db } from 'hatchable';
+export const access='user';
 export const methods=['GET'];
-const map={executive:'CEO',operations:'OPERATIONS_MANAGER',analyst:'INTELLIGENCE_ANALYST',regulator:'REGULATOR',investor:'INVESTOR'};
+const modules={executive:['overview','risk','opportunities','reports'],operations:['assets','alerts','risk','actions','reports'],analyst:['evidence','signals','gis','risk','relationships','reports'],regulator:['compliance','evidence','jurisdiction','risk','review_queue','audit','reports'],investor:['portfolio','readiness','risk','evidence_confidence','opportunities','reports']};
 export default async function(req,res){
- const orgId=req.query?.organization_id, dashboard=(req.query?.dashboard||'').toLowerCase();
+ const orgId=String(req.query?.organization_id||''), dashboard=String(req.query?.dashboard||'').toLowerCase(), userId=String(req.user.id);
  if(!orgId||!dashboard)return res.status(400).json({error:'organization_id and dashboard are required'});
- const s=await readState(), org=orgFor(s,orgId), member=memberFor(s,orgId,req.member.id);
+ const org=(await db.query("SELECT id,name,status FROM gis_organizations WHERE id=$1 AND status='ACTIVE'",[orgId])).rows[0];
  if(!org)return res.status(404).json({error:'organization_not_found'});
- if(!member||member.status!=='ACTIVE')return res.status(403).json({error:'organization_access_denied'});
- const positions=s.positions.filter(p=>p.organization_id===orgId&&p.status==='ACTIVE');
- const position=positions.find(p=>p.position_code===member.position_code)||positions.find(p=>String(p.dashboard_key).toLowerCase()===dashboard);
+ const member=(await db.query("SELECT id,member_id,role,status FROM gis_organization_members WHERE organization_id=$1 AND member_id=$2 AND status='ACTIVE'",[orgId,userId])).rows[0];
+ if(!member)return res.status(403).json({error:'organization_access_denied'});
+ const positionCode=member.role==='ADMIN'?'CEO':null;
+ const position=positionCode?(await db.query("SELECT id,position_code,position_name,dashboard_key,created_at FROM gis_organization_positions WHERE organization_id=$1 AND position_code=$2",[orgId,positionCode])).rows[0]:null;
  if(!position)return res.status(403).json({error:'position_not_authorized'});
  if(String(position.dashboard_key).toLowerCase()!==dashboard)return res.status(403).json({error:'dashboard_not_authorized',authorized_dashboard:position.dashboard_key});
- audit(s,orgId,req.member.id,req.member.id,'WORKSPACE_AUTHORIZED',{dashboard,position_code:position.position_code}); await writeState(s);
- res.json({phase:'388.18',authorized:true,organization:{id:org.id,name:org.name},member:{id:member.member_id,role:member.role,status:member.status,position_code:member.position_code},position,dashboard,modules:dashboard==='executive'?['overview','risk','opportunities','reports']:dashboard==='operations'?['assets','alerts','risk','actions','reports']:dashboard==='analyst'?['evidence','signals','gis','risk','relationships','reports']:dashboard==='regulator'?['compliance','evidence','jurisdiction','risk','review_queue','audit','reports']:dashboard==='investor'?['portfolio','readiness','risk','evidence_confidence','opportunities','reports']:[]});
+ res.json({phase:'production-organization-workspace-auth',authorized:true,organization:{id:org.id,name:org.name},member:{id:member.member_id,role:member.role,status:member.status},position,dashboard,modules:modules[dashboard]||[]});
 }

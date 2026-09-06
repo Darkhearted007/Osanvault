@@ -1,10 +1,10 @@
 import { db } from 'hatchable';
-export const access='member';
+export const access='user';
 export const methods=['GET'];
 export default async function(req,res){
- const member=req.member, orgId=req.query?.organization_id, dashboard=req.query?.dashboard;
+ const member=req.user, orgId=req.query?.organization_id, dashboard=req.query?.dashboard;
  if(!orgId||!dashboard)return res.status(400).json({error:'organization_id and dashboard are required'});
- const org=(await db.query("SELECT o.id,o.name,o.organization_type,m.role FROM gis_organization_memberships m JOIN gis_organizations o ON o.id=m.organization_id WHERE o.id=$1 AND m.member_id=$2 AND m.status='ACTIVE'",[orgId,member.id])).rows[0];
+ const org=(await db.query("SELECT o.id,o.name,o.organization_type,m.role FROM gis_organization_members m JOIN gis_organizations o ON o.id=m.organization_id WHERE o.id=$1 AND m.member_id=$2 AND m.status='ACTIVE'",[orgId,member.id])).rows[0];
  if(!org)return res.status(404).json({error:'workspace_not_found'});
  const positions=(await db.query("SELECT id,title,dashboard_key FROM gis_organization_positions WHERE organization_id=$1 AND dashboard_key=$2 ORDER BY title",[orgId,dashboard])).rows;
  const assets=(await db.query("SELECT COUNT(*)::int total FROM gis_organization_assets WHERE organization_id=$1",[orgId])).rows[0].total;

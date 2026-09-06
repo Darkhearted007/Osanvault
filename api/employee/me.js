@@ -1,7 +1,7 @@
 import { db } from 'hatchable';
-export const access='member'; export const methods=['GET'];
+export const access='user'; export const methods=['GET'];
 export default async function(req,res){
- const m=req.member;
+ const m=req.user;
  const p=await db.query(`SELECT pr.id,pr.full_name,pr.email,pr.phone,pr.lifecycle_status,op.title AS position,od.name AS department FROM people_records pr LEFT JOIN org_positions op ON op.id=pr.position_id LEFT JOIN org_departments od ON od.id=op.department_id WHERE lower(coalesce(pr.email,''))=lower($1) LIMIT 1`,[m.email||'']);
  if(!p.rows.length)return res.status(404).json({ok:false,error:'Employee profile not linked to this account'});
  const person=p.rows[0];
