@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_projects_organization_id ON projects(organization_id);

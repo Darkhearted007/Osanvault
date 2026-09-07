@@ -23,8 +23,11 @@ async function calculate(projectId) {
 }
 export default async function(req,res){
  const id=req.params.id;
- const p=await db.query('SELECT id,name FROM projects WHERE id=$1',[id]);
+ const p=await db.query('SELECT id,name,organization_id AS "organizationId" FROM projects WHERE id=$1',[id]);
  if(!p.rows.length)return res.status(404).json({error:'Project not found'});
+ if(!p.rows[0].organizationId)return res.status(403).json({error:'project_not_tenant_assigned'});
+ const membership=await db.query("SELECT role FROM gis_organization_members WHERE organization_id=$1 AND member_id=$2 AND status='ACTIVE'",[p.rows[0].organizationId,req.member.id]);
+ if(!membership.rows.length)return res.status(403).json({error:'organization_access_denied'});
  if(req.method==='GET'){
   const r=await db.query('SELECT id,project_id AS "projectId",capital_required AS "capitalRequired",currency,minimum_capital AS "minimumCapital",maximum_capital AS "maximumCapital",use_of_funds AS "useOfFunds",revenue_model AS "revenueModel",expected_cashflow AS "expectedCashflow",tenor_months AS "tenorMonths",risk_profile AS "riskProfile",security_type AS "securityType",security_notes AS "securityNotes",sponsor_contribution AS "sponsorContribution",development_stage AS "developmentStage",governance_notes AS "governanceNotes",capital_readiness_score AS "capitalReadinessScore",capital_readiness_state AS "capitalReadinessState",evidence_score AS "evidenceScore",verification_score AS "verificationScore",economics_score AS "economicsScore",governance_score AS "governanceScore",risk_score AS "riskScore",repayment_score AS "repaymentScore",assessed_at AS "assessedAt" FROM canonical_capital_profiles WHERE project_id=$1',[id]);
   return res.json({project:p.rows[0],profile:r.rows[0]||null});
