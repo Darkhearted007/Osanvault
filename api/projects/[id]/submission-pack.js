@@ -1,3 +1,22 @@
 import { db } from 'hatchable';
+import { authorizeTenant, tenantError } from '../../../lib/tenantAuthority.js';
 export const access='member'; export const methods=['GET'];
-export default async function(req,res){const id=req.params.id;const p=await db.query('SELECT * FROM canonical_capital_profiles WHERE project_id=$1',[id]);if(!p.rows.length)return res.status(404).json({error:'capital_profile_not_found'});const profile=p.rows[0];const [project,readiness,sources,evidence,remediation]=await Promise.all([db.query('SELECT id,name,status FROM projects WHERE id=$1',[id]),db.query('SELECT overall_score,evidence_score,verification_score,project_readiness_score,intelligence_state FROM asset_intelligence_assessments WHERE asset_id=(SELECT asset_id FROM projects WHERE id=$1) ORDER BY assessed_at DESC LIMIT 1',[id]),db.query('SELECT organization_name,organization_type,mandate FROM institutional_profiles WHERE status<>$1 ORDER BY organization_name',['inactive']),db.query('SELECT id,evidence_type,status,verification_status FROM asset_evidence WHERE asset_id=(SELECT asset_id FROM projects WHERE id=$1) ORDER BY created_at DESC',[id]),db.query('SELECT blocker_code,title,status,priority,required_evidence FROM intelligence_remediation_items WHERE subject_type=$1 AND subject_id=$2 ORDER BY priority DESC,created_at',['project',id])]);res.json({project:project.rows[0]||{id},capitalProfile:{id:profile.id,capitalRequired:profile.capital_required,minCapital:profile.min_capital,maxCapital:profile.max_capital,currency:profile.currency,useOfFunds:profile.use_of_funds,revenueModel:profile.revenue_model,developmentStage:profile.development_stage},intelligence:readiness.rows[0]||null,institutionalSources:sources.rows,evidenceIndex:evidence.rows,openRemediation:remediation.rows.filter(x=>x.status!=='completed'),submissionState:remediation.rows.some(x=>x.status!=='completed')?'conditional':'candidate',disclaimer:'Submission packs summarize platform records for diligence. They do not constitute financing approval, valuation, investment advice, legal opinion, or a guarantee.'})}
+export default async function(req,res){
+ const id=req.params.id;
+ const project=await db.query('SELECT id,organization_id AS "organizationId" FROM projects WHERE id=$1',[id]);
+ if(!project.rows.length)return res.status(404).json({error:'Project not found'});
+ if(!project.rows[0].organizationId)return res.status(403).json({error:'project_not_tenant_assigned'});
+ const tenant=await authorizeTenant(req,project.rows[0].organizationId,'capital:read');
+ if(!tenant.allowed)return tenantError(res,tenant);
+ const p=await db.query('SELECT id,capital_required,minimum_capital,maximum_capital,currency,use_of_funds,revenue_model,development_stage FROM canonical_capital_profiles WHERE project_id=$1',[id]);
+ if(!p.rows.length)return res.status(404).json({error:'capital_profile_not_found'});
+ const profile=p.rows[0];
+ const [projectData,readiness,sources,evidence,remediation]=await Promise.all([
+  db.query('SELECT id,name,status FROM projects WHERE id=$1',[id]),
+  db.query('SELECT overall_score,evidence_score,verification_score,project_readiness_score,intelligence_state FROM asset_intelligence_assessments WHERE asset_id=(SELECT asset_id FROM projects WHERE id=$1) ORDER BY assessed_at DESC LIMIT 1',[id]),
+  db.query("SELECT organization_name,organization_type,mandate FROM institutional_profiles WHERE status='active' ORDER BY organization_name"),
+  db.query('SELECT id,evidence_type,status,verification_status FROM asset_evidence WHERE asset_id=(SELECT asset_id FROM projects WHERE id=$1) ORDER BY created_at DESC',[id]),
+  db.query('SELECT blocker_code,title,status,priority,required_evidence FROM intelligence_remediation_items WHERE subject_type=$1 AND subject_id=$2 ORDER BY priority DESC,created_at',['project',id])
+ ]);
+ res.json({project:projectData.rows[0],capitalProfile:{id:profile.id,capitalRequired:profile.capital_required,minCapital:profile.minimum_capital,maxCapital:profile.maximum_capital,currency:profile.currency,useOfFunds:profile.use_of_funds,revenueModel:profile.revenue_model,developmentStage:profile.development_stage},intelligence:readiness.rows[0]||null,institutionalSources:sources.rows,evidenceIndex:evidence.rows,openRemediation:remediation.rows.filter(x=>x.status!=='completed'),submissionState:remediation.rows.some(x=>x.status!=='completed')?'conditional':'candidate',disclaimer:'Submission packs summarize platform records for diligence. They do not constitute financing approval, valuation, investment advice, legal opinion, or a guarantee.'});
+}

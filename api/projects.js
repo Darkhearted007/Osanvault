@@ -1,4 +1,4 @@
 import { db } from 'hatchable';
 export const access = 'member';
 export const methods = ['GET'];
-export default async function(req,res){const r=await db.query(`SELECT p.id,p.project_identifier AS "projectIdentifier",p.name,p.description,p.project_type AS "projectType",p.status,p.jurisdiction,COUNT(pa.asset_id)::int AS "assetCount" FROM projects p LEFT JOIN project_assets pa ON pa.project_id=p.id GROUP BY p.id ORDER BY p.created_at DESC`);res.json(r.rows);}
+export default async function(req,res){if(!req.member?.id)return res.status(401).json({error:'authentication_required'});const r=await db.query(`SELECT p.id,p.project_identifier AS "projectIdentifier",p.name,p.description,p.project_type AS "projectType",p.status,p.jurisdiction,COUNT(pa.asset_id)::int AS "assetCount" FROM projects p LEFT JOIN project_assets pa ON pa.project_id=p.id JOIN gis_organization_members gm ON gm.organization_id=p.organization_id AND gm.member_id=$1 AND gm.status='ACTIVE' GROUP BY p.id ORDER BY p.created_at DESC`,[req.member.id]);res.json(r.rows);}

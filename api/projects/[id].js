@@ -1,4 +1,5 @@
 import { db } from 'hatchable';
+import { authorizeTenant, tenantError } from '../../lib/tenantAuthority.js';
 export const access = 'member';
 export const methods = ['GET'];
 export default async function(req,res){
@@ -8,8 +9,8 @@ export default async function(req,res){
  if(!p.rows.length)return res.status(404).json({error:'Project not found'});
  const projectOrg=p.rows[0].organizationId;
  if(!projectOrg)return res.status(403).json({error:'project_not_tenant_assigned'});
- const membership=await db.query("SELECT role FROM gis_organization_members WHERE organization_id=$1 AND member_id=$2 AND status='ACTIVE'",[projectOrg,member.id]);
- if(!membership.rows.length)return res.status(403).json({error:'organization_access_denied'});
+ const tenant=await authorizeTenant(req,projectOrg,'project:read');
+ if(!tenant.allowed)return tenantError(res,tenant);
  const [assets,milestones,opportunities]=await Promise.all([
   db.query(`SELECT a.id,a.asset_identifier AS "assetIdentifier",a.name,a.status FROM assets a JOIN project_assets pa ON pa.asset_id=a.id WHERE pa.project_id=$1`,[id]),
   db.query(`SELECT id,code,title,description,status,target_date AS "targetDate",completed_at AS "completedAt",sort_order AS "sortOrder" FROM project_milestones WHERE project_id=$1 ORDER BY sort_order,id`,[id]),

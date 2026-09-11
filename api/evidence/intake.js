@@ -3,6 +3,7 @@ export const access='member';
 export const methods=['GET','POST'];
 const clean=(v,max)=>typeof v==='string'?v.trim().slice(0,max):'';
 export default async function(req,res){
+ if(!req.member?.id)return res.status(401).json({ok:false,error:'authentication_required'});
  const profile=await db.query(`SELECT id,display_name FROM economic_onboarding_profiles WHERE owner_id=$1 AND lower(display_name)=lower($2) AND data_environment='production' ORDER BY created_at DESC LIMIT 1`,[req.member.id,'OSANVAULT AFRICA LTD']);
  if(!profile.rows.length)return res.status(404).json({ok:false,error:'Production profile not found.'});
  const p=profile.rows[0];

@@ -1,9 +1,14 @@
 import { db } from 'hatchable';
+import { authorizeTenant, tenantError } from '../../../lib/tenantAuthority.js';
 export const access = 'member';
 export const methods = ['GET'];
 const weights = { OWNERSHIP: 30, LOCATION: 20, JURISDICTION: 20, LEGAL: 30 };
 export default async function (req, res) {
   const id = req.params.id;
+  const ownership=(await db.query("SELECT organization_id FROM gis_organization_assets WHERE asset_id=$1 LIMIT 1",[id])).rows[0];
+  if(!ownership)return res.status(403).json({error:'asset_not_tenant_assigned'});
+  const tenant=await authorizeTenant(req,ownership.organization_id,'asset:read');
+  if(!tenant.allowed)return tenantError(res,tenant);
   const asset = await db.query('SELECT id, asset_identifier AS "assetIdentifier", name, status FROM assets WHERE id = $1', [id]);
   if (!asset.rows.length) return res.status(404).json({ error: 'Asset not found' });
   const reqs = await db.query('SELECT requirement_code AS code, title, status, evidence_count AS "evidenceCount", required, description FROM verification_requirements WHERE case_id = (SELECT id FROM verification_cases WHERE asset_id = $1 ORDER BY opened_at DESC LIMIT 1) ORDER BY created_at', [id]);

@@ -1,15 +1,16 @@
 import { db } from 'hatchable';
+import { authorizeTenant, tenantError } from 'lib/tenantAuthority.js';
 export const access = 'member';
 export const methods = ['GET','PUT'];
 
 async function calculate(projectId) {
   const [evidence, verification, economics, governance, risk, readiness] = await Promise.all([
-    db.query('SELECT COUNT(*)::int AS n FROM project_evidence WHERE project_id=$1',[projectId]).catch(()=>({rows:[{n:0}]})),
-    db.query('SELECT COUNT(*)::int AS n FROM verification_cases vc JOIN projects p ON p.id=$1 WHERE vc.status=\'closed\'',[projectId]).catch(()=>({rows:[{n:0}]})),
-    db.query('SELECT COUNT(*)::int AS n FROM project_economic_models WHERE project_id=$1',[projectId]).catch(()=>({rows:[{n:0}]})),
-    db.query('SELECT governance_ready FROM project_capital_readiness WHERE project_id=$1 ORDER BY assessed_at DESC LIMIT 1',[projectId]).catch(()=>({rows:[]})),
-    db.query('SELECT risk_ready FROM project_capital_readiness WHERE project_id=$1 ORDER BY assessed_at DESC LIMIT 1',[projectId]).catch(()=>({rows:[]})),
-    db.query('SELECT economics_ready,evidence_ready,legal_ready,valuation_ready,risk_ready,governance_ready FROM project_capital_readiness WHERE project_id=$1 ORDER BY assessed_at DESC LIMIT 1',[projectId]).catch(()=>({rows:[]}))
+    db.query('SELECT COUNT(*)::int AS n FROM project_evidence WHERE project_id=$1',[projectId]),
+    db.query("SELECT COUNT(*)::int AS n FROM verification_cases vc JOIN project_assets pa ON pa.asset_id=vc.asset_id WHERE pa.project_id=$1 AND vc.status='closed'",[projectId]),
+    db.query('SELECT COUNT(*)::int AS n FROM project_economic_models WHERE project_id=$1',[projectId]),
+    db.query('SELECT governance_ready FROM project_capital_readiness WHERE project_id=$1 ORDER BY assessed_at DESC LIMIT 1',[projectId]),
+    db.query('SELECT risk_ready FROM project_capital_readiness WHERE project_id=$1 ORDER BY assessed_at DESC LIMIT 1',[projectId]),
+    db.query('SELECT economics_ready,evidence_ready,legal_ready,valuation_ready,risk_ready,governance_ready FROM project_capital_readiness WHERE project_id=$1 ORDER BY assessed_at DESC LIMIT 1',[projectId])
   ]);
   const e=Math.min(100,evidence.rows[0]?.n*20||0);
   const v=verification.rows[0]?.n?80:20;
@@ -26,8 +27,9 @@ export default async function(req,res){
  const p=await db.query('SELECT id,name,organization_id AS "organizationId" FROM projects WHERE id=$1',[id]);
  if(!p.rows.length)return res.status(404).json({error:'Project not found'});
  if(!p.rows[0].organizationId)return res.status(403).json({error:'project_not_tenant_assigned'});
- const membership=await db.query("SELECT role FROM gis_organization_members WHERE organization_id=$1 AND member_id=$2 AND status='ACTIVE'",[p.rows[0].organizationId,req.member.id]);
- if(!membership.rows.length)return res.status(403).json({error:'organization_access_denied'});
+ const permission=req.method==='GET'?'capital:read':'capital:write';
+ const tenant=await authorizeTenant(req,p.rows[0].organizationId,permission);
+ if(!tenant.allowed)return tenantError(res,tenant);
  if(req.method==='GET'){
   const r=await db.query('SELECT id,project_id AS "projectId",capital_required AS "capitalRequired",currency,minimum_capital AS "minimumCapital",maximum_capital AS "maximumCapital",use_of_funds AS "useOfFunds",revenue_model AS "revenueModel",expected_cashflow AS "expectedCashflow",tenor_months AS "tenorMonths",risk_profile AS "riskProfile",security_type AS "securityType",security_notes AS "securityNotes",sponsor_contribution AS "sponsorContribution",development_stage AS "developmentStage",governance_notes AS "governanceNotes",capital_readiness_score AS "capitalReadinessScore",capital_readiness_state AS "capitalReadinessState",evidence_score AS "evidenceScore",verification_score AS "verificationScore",economics_score AS "economicsScore",governance_score AS "governanceScore",risk_score AS "riskScore",repayment_score AS "repaymentScore",assessed_at AS "assessedAt" FROM canonical_capital_profiles WHERE project_id=$1',[id]);
   return res.json({project:p.rows[0],profile:r.rows[0]||null});

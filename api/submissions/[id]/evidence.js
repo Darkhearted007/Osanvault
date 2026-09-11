@@ -2,6 +2,7 @@ import { db } from 'hatchable';
 export const access = 'member';
 export const methods = ['POST'];
 export default async function(req,res){
+ if(!req.member?.id)return res.status(401).json({error:'authentication_required'});
  const b=req.body||{};
  const own=await db.query('SELECT id FROM asset_submissions WHERE id=$1 AND submitted_by=$2',[req.params.id,req.member.id]);
  if(!own.rows.length)return res.status(404).json({error:'Submission not found'});

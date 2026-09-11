@@ -1,4 +1,4 @@
 import { db } from 'hatchable';
-export const access = 'member';
-export const methods = ['GET'];
-export default async function(req,res){const r=await db.query(`SELECT co.id,co.project_id AS "projectId",p.name AS "projectName",co.status,co.eligibility_score AS "eligibilityScore",co.eligibility_state AS "eligibilityState",co.summary FROM capital_opportunities co JOIN projects p ON p.id=co.project_id WHERE co.status IN ('diligence','open') ORDER BY co.updated_at DESC`);res.json(r.rows)}
+export const access='member';
+export const methods=['GET'];
+export default async function(req,res){const r=await db.query(`SELECT co.id,co.project_id AS "projectId",p.name AS "projectName",co.status,co.eligibility_score AS "eligibilityScore",co.eligibility_state AS "eligibilityState",co.summary FROM capital_opportunities co JOIN projects p ON p.id=co.project_id JOIN gis_organization_members m ON m.organization_id=p.organization_id WHERE co.status IN ('diligence','open') AND p.organization_id IS NOT NULL AND m.member_id=$1 AND m.status='ACTIVE' ORDER BY co.updated_at DESC`,[req.member.id]);res.json(r.rows);}
