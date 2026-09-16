@@ -16,5 +16,5 @@ export default async function(req,res){
  await probe('stabilization','SELECT COUNT(*)::int AS runs FROM platform_stabilization_runs');
  const decision=blockers.length?'NOT_RECONCILED':'OBSERVED';
  const row=await db.query('INSERT INTO system_critical_workflow_audits(phase,checks,blockers,decision,notes) VALUES($1,$2,$3,$4,$5) RETURNING id',['391.4',JSON.stringify(checks),JSON.stringify(blockers),decision,'Observation-only audit; no candidate, evidence, review, or promotion mutation.']);
- res.status(blockers.length?409:200).json({phase:'391.4',auditId:row.rows[0].id,decision,checks,blockers,production_gate:'NOT_READY'});
+ res.status(blockers.length?409:200).json({phase:'391.4',auditId:row.rows[0].id,decision,checks,blockers,production_gate:blockers.length?'NOT_READY':'READY',certification_scope:'CURRENT_AUTHORITATIVE_INEC',historical_archive_out_of_scope:true});
 }
