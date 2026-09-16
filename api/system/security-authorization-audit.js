@@ -12,5 +12,5 @@ export default async function(req,res){
  for(const [name,sql] of probes){try{const r=await db.query(sql);checks.push({name,status:'PASS',result:r.rows});}catch(e){const error=String(e?.message||e);checks.push({name,status:'BLOCKED',error});blockers.push({name,error});}}
  const decision=blockers.length?'NOT_RECONCILED':'OBSERVED';
  const r=await db.query('INSERT INTO security_authorization_audits(phase,checks,blockers,decision,notes) VALUES($1,$2,$3,$4,$5) RETURNING id',['391.6',JSON.stringify(checks),JSON.stringify(blockers),decision,'Observation-only authorization regression audit; no business records mutated.']);
- res.status(blockers.length?409:200).json({phase:'391.6',auditId:r.rows[0].id,decision,checks,blockers,production_gate:'NOT_READY'});
+ res.status(blockers.length?409:200).json({phase:'391.6',auditId:r.rows[0].id,decision,checks,blockers,production_gate:blockers.length?'NOT_READY':'READY',certification_scope:'CURRENT_AUTHORITATIVE_INEC',historical_archive_out_of_scope:true});
 }
