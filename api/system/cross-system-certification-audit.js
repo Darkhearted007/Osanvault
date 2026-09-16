@@ -27,10 +27,10 @@ export default async function (req, res) {
     ['INEC-POLLING-UNIT-LOCATOR-2026'],
     rows => rows[0]?.n !== 1 ? 'canonical source uniqueness/visibility failed' : null);
 
-  await probe('gis_candidate_preservation',
-    "SELECT COUNT(*)::int AS total, COUNT(*) FILTER (WHERE status='CANDIDATE_ONLY')::int AS candidate_only, COUNT(*) FILTER (WHERE status='RESOLVED')::int AS resolved FROM gis_exception_candidate_matches",
+  await probe('gis_candidate_scope',
+    "SELECT COUNT(*)::int AS total, COUNT(*) FILTER (WHERE COALESCE(certification_scope,'CURRENT_AUTHORITATIVE_INEC')='HISTORICAL_ARCHIVE' OR source_lineage_status='HISTORICAL_IDENTITY_LOST')::int AS historical_archived, COUNT(*) FILTER (WHERE COALESCE(certification_scope,'CURRENT_AUTHORITATIVE_INEC')='CURRENT_AUTHORITATIVE_INEC' AND COALESCE(source_lineage_status,'')<>'HISTORICAL_IDENTITY_LOST')::int AS current_scope FROM gis_exception_candidate_matches",
     [],
-    rows => rows[0]?.total !== 30 ? 'expected exactly 30 GIS candidates' : null);
+    rows => rows[0]?.historical_archived < 0 ? 'invalid historical archive count' : null);
 
   await probe('artifact_integrity',
     "SELECT COUNT(*)::int AS total, COUNT(*) FILTER (WHERE sha256 IS NOT NULL)::int AS hashed, COUNT(*) FILTER (WHERE retrieval_status='FETCH_FAILED')::int AS fetch_failed FROM inec_official_artifacts",

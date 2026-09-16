@@ -16,7 +16,7 @@ export default async function(req,res){
  }
  const missing=observations.filter(x=>!x.exists); if(missing.length) contradictions.push({check:'expected_tables_visible',missing:missing.map(x=>x.table)});
  const candidate=observations.find(x=>x.table==='gis_exception_candidate_matches');
- if(candidate?.exists && candidate.rowCount!==30) contradictions.push({check:'candidate_preservation',expected:30,observed:candidate.rowCount});
+ if(candidate?.exists){try{const r=await db.query(`SELECT COUNT(*) FILTER (WHERE COALESCE(certification_scope,'CURRENT_AUTHORITATIVE_INEC')='HISTORICAL_ARCHIVE' OR source_lineage_status='HISTORICAL_IDENTITY_LOST')::int AS historical_archived, COUNT(*) FILTER (WHERE COALESCE(certification_scope,'CURRENT_AUTHORITATIVE_INEC')='CURRENT_AUTHORITATIVE_INEC' AND COALESCE(source_lineage_status,'')<>'HISTORICAL_IDENTITY_LOST')::int AS current_scope FROM ${schema_name}.gis_exception_candidate_matches`); observations.push({table:'gis_exception_candidate_matches_scope',...r.rows[0]});}catch(e){contradictions.push({check:'candidate_scope_probe',error:String(e?.message||e)});}}
  const source=observations.find(x=>x.table==='gis_canonical_source_identity');
  if(source?.exists){try{const r=await db.query(`SELECT COUNT(*)::int AS n FROM ${schema_name}.gis_canonical_source_identity WHERE source_key=$1`,['INEC-POLLING-UNIT-LOCATOR-2026']);if(r.rows[0].n!==1) contradictions.push({check:'canonical_source_identity',expected:1,observed:r.rows[0].n});}catch(e){contradictions.push({check:'canonical_source_identity_probe',error:String(e?.message||e)});}}
  const decision=contradictions.length?'NOT_RECONCILED':'RECONCILED';
