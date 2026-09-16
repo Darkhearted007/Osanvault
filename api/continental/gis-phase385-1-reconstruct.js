@@ -1,5 +1,5 @@
 import { db } from "hatchable";
-export const access = "public";
+export const access = "admin";
 export const methods = ["GET"];
 const SOURCE='https://services3.arcgis.com/BU6Aadhn6tbBEdyk/arcgis/rest/services/GRID3_NGA_operational_wards_v3_0/FeatureServer/0';
 export default async function(req,res){
