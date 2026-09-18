@@ -4,7 +4,7 @@ export default async function(req,res){
  const id=String(req.body?.request_id||''); if(!id)return res.status(400).json({error:'request_id is required'});
  const q=await db.query("SELECT * FROM commercial_workspace_requests WHERE id=$1",[id]); if(!q.rows.length)return res.status(404).json({error:'request not found'});
  const r=q.rows[0]; if(r.status==='PROVISIONED')return res.json({status:r.status,workspace_id:r.workspace_id});
- if(r.status!=='PENDING')return res.status(409).json({error:'request_not_provisionable',status:r.status});
+ if(r.status!=='APPROVED')return res.status(409).json({error:'request_not_provisionable',status:r.status});
  const p=(await db.query("SELECT plan_key,active,regulated_enabled FROM commercial_plans WHERE plan_key=$1",[r.plan])).rows[0];
  if(!p||!p.active||p.regulated_enabled)return res.status(409).json({error:'plan_not_eligible_for_provisioning'});
  try{
