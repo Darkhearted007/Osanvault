@@ -1,3 +1,6 @@
+ALTER TABLE org_departments ADD COLUMN IF NOT EXISTS description text;
+ALTER TABLE org_departments ADD COLUMN IF NOT EXISTS jurisdiction text NOT NULL DEFAULT 'Continental';
+
 INSERT INTO org_departments (name,description,status,code,jurisdiction) SELECT 'Office of the Group Chief Executive','Strategic leadership, enterprise direction and executive accountability.','Active','OCGE','Continental' WHERE NOT EXISTS (SELECT 1 FROM org_departments WHERE name='Office of the Group Chief Executive');
 INSERT INTO org_departments (name,description,status,code,jurisdiction) SELECT 'Strategy & Corporate Development','Strategy, expansion, partnerships, investment and portfolio development.','Active','SCD','Continental' WHERE NOT EXISTS (SELECT 1 FROM org_departments WHERE name='Strategy & Corporate Development');
 INSERT INTO org_departments (name,description,status,code,jurisdiction) SELECT 'Finance, Treasury & Investment','Financial control, treasury, capital allocation, investment and reporting.','Active','FTI','Continental' WHERE NOT EXISTS (SELECT 1 FROM org_departments WHERE name='Finance, Treasury & Investment');
