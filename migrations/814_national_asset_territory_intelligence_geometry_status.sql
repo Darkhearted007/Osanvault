@@ -1,0 +1,1 @@
+ALTER TABLE gis_layers ADD COLUMN IF NOT EXISTS geometry_status text NOT NULL DEFAULT 'UNVERIFIED';

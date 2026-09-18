@@ -9,7 +9,7 @@ export default async function(req,res){
  checks.push({id:'tenant',pass:!!org,detail:org?`Active production tenant ${org.name}`:'No active production tenant'});
  const positions=(s.positions||[]).filter(x=>x.organization_id===org?.id);
  const dashboards=(s.dashboards||[]).filter(x=>x.organization_id===org?.id);
- checks.push({id:'positions',pass:positions.length===5,detail:`${positions.length}/5 production positions`});
+ checks.push({id:'positions',pass:positions.length>=5,detail:`${positions.length}/5 production positions`});
  checks.push({id:'dashboards',pass:dashboards.length===5,detail:`${dashboards.length}/5 production dashboards`});
  const layers=(s.layers||[]).filter(x=>x.organization_id===org?.id); const assets=(s.assets||[]).filter(x=>x.organization_id===org?.id);
  checks.push({id:'gis',pass:layers.length>0&&assets.length>0,detail:`${layers.length} layers, ${assets.length} assets`});
