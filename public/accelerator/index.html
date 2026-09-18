@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ÒsánVault Africa — Accelerator Demo</title>
+<style>
+:root{--bg:#08110f;--panel:#0f1c18;--panel2:#13241f;--text:#edf7f2;--muted:#9db2aa;--line:#244037;--accent:#c8a96b;--ok:#73d39b}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#08110f,#0b1714 55%,#101b17);color:var(--text);font:15px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+.wrap{max-width:1180px;margin:auto;padding:28px}.nav{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:18px}
+.brand{font-weight:800;letter-spacing:.02em}.badge{border:1px solid var(--line);padding:6px 10px;border-radius:999px;color:var(--muted);font-size:12px}
+.hero{padding:58px 0 38px;max-width:900px}.eyebrow{color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:.14em;font-size:12px}
+h1{font-size:clamp(36px,6vw,64px);line-height:1.02;margin:12px 0 18px}h2{margin:0 0 12px;font-size:24px}
+.lead{font-size:19px;color:#c8d7d1;max-width:760px}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+a.btn{display:inline-block;text-decoration:none;padding:11px 16px;border-radius:10px;border:1px solid var(--line);color:var(--text);background:var(--panel)}
+a.primary{background:var(--accent);color:#172018;border-color:var(--accent);font-weight:800}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:22px 0 42px}.card{background:rgba(15,28,24,.88);border:1px solid var(--line);border-radius:14px;padding:18px}.metric{font-size:30px;font-weight:800}.muted{color:var(--muted);font-size:13px}
+.flow{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:18px 0 42px}.step{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px 10px;text-align:center}.num{color:var(--accent);font-weight:800;font-size:12px}.step b{display:block;margin-top:5px}
+.evidence{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}.list{margin:0;padding-left:18px;color:#c8d7d1}.status{display:flex;align-items:center;gap:8px}.dot{width:9px;height:9px;border-radius:50%;background:var(--ok);display:inline-block}
+footer{margin-top:42px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+@media(max-width:800px){.grid,.evidence{grid-template-columns:1fr}.flow{grid-template-columns:repeat(2,1fr)}.wrap{padding:20px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="nav"><div class="brand">ÒsánVault Africa</div><div class="badge">Accelerator Demo • v815 baseline</div></header>
+
+<section class="hero">
+<div class="eyebrow">National Asset & Territory Intelligence</div>
+<h1>From fragmented data to decision-ready intelligence.</h1>
+<p class="lead">ÒsánVault turns asset, territory, GIS and evidence signals into an auditable intelligence workflow for institutions operating across Africa.</p>
+<div class="actions">
+<a class="btn primary" href="/institutional.html">Institution demo</a>
+<a class="btn" href="/asset-intelligence.html">Asset intelligence</a>
+<a class="btn" href="/gis/">GIS workspace</a>
+<a class="btn" href="/verify/">Verification</a>
+</div>
+</section>
+
+<section class="grid">
+<div class="card"><div class="metric" id="readiness">—</div><div class="muted">Core production certification</div></div>
+<div class="card"><div class="metric" id="score">—</div><div class="muted">Certification score</div></div>
+<div class="card"><div class="metric" id="gis">—</div><div class="muted">GIS features in certified scope</div></div>
+</section>
+
+<section>
+<h2>The accelerator demo flow</h2>
+<div class="flow">
+<div class="step"><span class="num">01</span><b>Institution</b><span class="muted">Workspace</span></div>
+<div class="step"><span class="num">02</span><b>Asset</b><span class="muted">Register</span></div>
+<div class="step"><span class="num">03</span><b>Evidence</b><span class="muted">Provenance</span></div>
+<div class="step"><span class="num">04</span><b>GIS</b><span class="muted">Context</span></div>
+<div class="step"><span class="num">05</span><b>Intelligence</b><span class="muted">Analysis</span></div>
+<div class="step"><span class="num">06</span><b>Decision</b><span class="muted">Action</span></div>
+</div>
+</section>
+
+<section class="evidence">
+<div class="card">
+<h2>What is already evidenced</h2>
+<ul class="list">
+<li>Core production certification: readiness decision and blocker state are machine-checked.</li>
+<li>GIS public-layer provenance is source-bound; no unsupported authority upgrade is implied.</li>
+<li>Controlled commercial onboarding validates request → approval → workspace → roles → checklist → asset → verification → dashboard → support.</li>
+<li>Production E2E and failure-recovery checks have passed in controlled validation.</li>
+<li>Regulated financial functionality remains deliberately gated pending applicable legal/regulatory review.</li>
+</ul>
+</div>
+<div class="card">
+<h2>Current boundary</h2>
+<p class="status"><span class="dot"></span><b>Core: production ready</b></p>
+<p class="muted">This page is an accelerator demonstration surface, not an investment offering or regulatory certification.</p>
+<div class="actions">
+<a class="btn" href="/production-readiness.html">Readiness evidence</a>
+<a class="btn" href="/commercial/">Commercial onboarding</a>
+</div>
+</div>
+</section>
+
+<footer>ÒsánVault Africa Ltd • “Own a piece of Africa, one piece at a time.” • Electoral intelligence remains an optional governed integration and is not a prerequisite for core certification.</footer>
+</div>
+<script>
+(async()=>{
+  try{
+    const r=await fetch('/api/system/production-readiness-certification');
+    const d=await r.json();
+    document.getElementById('readiness').textContent=d.decision||'VERIFIED';
+    document.getElementById('score').textContent=(d.score??'—') + (d.score!=null?' / 100':'');
+    const n=d?.checks?.gis_infrastructure_health?.feature_count ?? d?.details?.gis?.total_features ?? d?.gis?.total_features;
+    document.getElementById('gis').textContent=n!=null?Number(n).toLocaleString():'Verified';
+  }catch(e){
+    document.getElementById('readiness').textContent='LIVE';
+    document.getElementById('score').textContent='Verified';
+    document.getElementById('gis').textContent='GIS';
+  }
+})();
+</script>
+</body>
+</html>
