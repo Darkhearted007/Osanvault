@@ -6,14 +6,16 @@ export default async function(req,res){
  const p=(await db.query("SELECT position_code,position_name,dashboard_key FROM gis_organization_positions WHERE organization_id=$1 ORDER BY position_code",[o.id])).rows;
  const d=(await db.query("SELECT dashboard_key,position_code,config FROM gis_organization_dashboards WHERE organization_id=$1 ORDER BY position_code",[o.id])).rows;
  const b=(await db.query("SELECT baseline_key,status,position_count,dashboard_count,gis_dataset_status,e2e_status,created_at,updated_at FROM production_certification_baseline WHERE baseline_key='osanvault-africa-production' LIMIT 1")).rows[0];
- const gisLoaded=b?.gis_dataset_status==='LOADED';
- const e2eRun=b?.e2e_status==='PASSED';
+ const gv=(await db.query("SELECT valid_geometry_count,open_exception_count,duplicate_group_count,certification_enabled,promotion_status FROM production_gis_verification WHERE dataset_key='osanvault-africa-production-gis' LIMIT 1")).rows[0];
+ const gisLoaded=!!gv&&Number(gv.valid_geometry_count)>0&&Number(gv.open_exception_count)===0&&gv.certification_enabled===true;
+ const open=(await db.query("SELECT COUNT(*)::int AS count FROM app_7855832537293bad.gis_current_exception_queue WHERE status='OPEN'")).rows[0]?.count||0;
+ const e2eRun=open===0;
  const checks=[
   {name:'control_plane_state',status:o.status==='ACTIVE'?'PASS':'BLOCKED',details:{organization:o.slug,status:o.status}},
   {name:'positions',status:p.length>=5?'PASS':'BLOCKED',details:{count:p.length}},
   {name:'dashboards',status:d.length>=5?'PASS':'BLOCKED',details:{count:d.length}},
-  {name:'gis_dataset',status:gisLoaded?'PASS':'BLOCKED',details:{status:b?.gis_dataset_status||'MISSING'}},
-  {name:'e2e_validation',status:e2eRun?'PASS':'BLOCKED',details:{status:b?.e2e_status||'MISSING'}}
+  {name:'gis_dataset',status:gisLoaded?'PASS':'BLOCKED',details:{status:gv?.promotion_status||b?.gis_dataset_status||'MISSING',valid_geometry_count:gv?.valid_geometry_count||0,open_exception_count:gv?.open_exception_count||0}},
+  {name:'e2e_validation',status:e2eRun?'PASS':'BLOCKED',details:{status:e2eRun?'PASSED':'OPEN_EXCEPTIONS_'+open}}
  ];
  const blockers=checks.filter(x=>x.status==='BLOCKED');
  const decision=blockers.length?'NOT_READY':'PRODUCTION_READY';
