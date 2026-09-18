@@ -1,4 +1,15 @@
-import { storage } from 'hatchable';
-export const access = 'public';
-export const methods = ['POST'];
-export default async function(req,res){const b=req.body||{};const name=String(b.name||'').trim(),email=String(b.email||'').trim().toLowerCase(),organization=String(b.organization||'').trim(),plan=String(b.plan||'explorer').trim(),website=String(b.website||'').trim();if(website)return res.status(400).json({error:'invalid request'});if(!name||!email||!organization)return res.status(400).json({error:'name, email and organization are required'});if(name.length>120||email.length>200||organization.length>160)return res.status(400).json({error:'input exceeds allowed length'});if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email))return res.status(400).json({error:'valid email is required'});if(plan!=='enterprise'&&plan!=='explorer')return res.status(400).json({error:'invalid plan'});const id=crypto.randomUUID();const lead={id,name,email,organization,plan,created_at:new Date().toISOString(),status:'received'};await storage.put(`phase389/leads/${id}.json`,new TextEncoder().encode(JSON.stringify(lead)),'application/json');res.status(201).json({ok:true,id,status:'received',next:'account_review'})}
+import { db } from 'hatchable';
+export const access='public'; export const methods=['POST'];
+export default async function(req,res){
+  const b=req.body||{};
+  const name=String(b.name||'').trim(), email=String(b.email||'').trim().toLowerCase();
+  const org=String(b.organization||'').trim(), plan=String(b.plan||'explorer').trim().toLowerCase();
+  if(!name||!email||!org)return res.status(400).json({error:'name, email and organization are required'});
+  if(name.length>120||email.length>200||org.length>160)return res.status(400).json({error:'input exceeds allowed length'});
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return res.status(400).json({error:'valid email is required'});
+  const p=(await db.query("SELECT plan_key,plan_name,active,regulated_enabled FROM commercial_plans WHERE plan_key=$1",[plan])).rows[0];
+  if(!p||!p.active||p.regulated_enabled)return res.status(400).json({error:'plan unavailable for non-regulated pilot'});
+  const id=crypto.randomUUID();
+  const r=await db.query("INSERT INTO commercial_workspace_requests (name,email,organization,plan,status) VALUES ($1,$2,$3,$4,'PENDING') RETURNING id,status,created_at",[name,email,org,plan]);
+  res.status(201).json({ok:true,request_id:r.rows[0].id,status:r.rows[0].status,created_at:r.rows[0].created_at,next:'admin_review'});
+}

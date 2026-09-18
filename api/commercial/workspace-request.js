@@ -1,3 +1,14 @@
 import { db } from 'hatchable';
 export const access='public'; export const methods=['POST'];
-export default async function(req,res){const b=req.body||{};const name=String(b.name||'').trim();const email=String(b.email||'').trim().toLowerCase();const org=String(b.organization||'').trim();const plan=String(b.plan||'enterprise').trim();if(!name||!email||!org)return res.status(400).json({error:'name, email and organization are required'});const {rows}=await db.query("INSERT INTO commercial_workspace_requests (name,email,organization,plan,status) VALUES ($1,$2,$3,$4,'PENDING') RETURNING id, status, created_at",[name,email,org,plan]);res.status(201).json({request_id:rows[0].id,status:rows[0].status,created_at:rows[0].created_at});}
+export default async function(req,res){
+  const b=req.body||{};
+  const name=String(b.name||'').trim(), email=String(b.email||'').trim().toLowerCase();
+  const org=String(b.organization||'').trim(), plan=String(b.plan||'enterprise').trim().toLowerCase();
+  if(!name||!email||!org)return res.status(400).json({error:'name, email and organization are required'});
+  if(name.length>120||email.length>200||org.length>160)return res.status(400).json({error:'input exceeds allowed length'});
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return res.status(400).json({error:'valid email is required'});
+  const p=(await db.query("SELECT plan_key,active,regulated_enabled FROM commercial_plans WHERE plan_key=$1",[plan])).rows[0];
+  if(!p||!p.active||p.regulated_enabled)return res.status(400).json({error:'plan unavailable for non-regulated onboarding'});
+  const {rows}=await db.query("INSERT INTO commercial_workspace_requests (name,email,organization,plan,status) VALUES ($1,$2,$3,$4,'PENDING') RETURNING id,status,created_at",[name,email,org,plan]);
+  res.status(201).json({request_id:rows[0].id,status:rows[0].status,created_at:rows[0].created_at});
+}
