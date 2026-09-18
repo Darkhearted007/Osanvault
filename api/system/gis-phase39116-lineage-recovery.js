@@ -1,6 +1,6 @@
 import { db } from 'hatchable';
 export const access='admin'; export const methods=['POST'];
-const VERSION='391.16.1';
+const VERSION='391.16.2';
 const hash=async s=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)))].map(x=>x.toString(16).padStart(2,'0')).join('');
 async function tableExists(t){return (await db.query("SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name=$1",[t])).rows.length>0}
 export default async function(req,res){
