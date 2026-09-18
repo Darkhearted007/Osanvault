@@ -1,14 +1,13 @@
 import { db } from 'hatchable';
-import { authorizeTenant, tenantError } from '../../lib/tenantAuthority.js';
+import { authorizeAssetTenant } from '../../lib/assetTenantAuthority.js';
+import { tenantError } from '../../lib/tenantAuthority.js';
 export const access = 'member';
 export const methods = ['GET'];
 export default async function (req, res) {
   const id = req.params.id;
   const asset = await db.query(`SELECT a.id, a.asset_identifier AS "assetIdentifier", a.name, a.description, a.status, a.current_state AS "currentState", a.jurisdiction_code AS jurisdiction, t.code AS "assetTypeId", t.name AS "assetTypeName", t.asset_class AS "assetClass", l.address AS location, l.latitude, l.longitude FROM assets a JOIN asset_types t ON t.id = a.asset_type_id LEFT JOIN asset_locations l ON l.asset_id = a.id AND l.is_primary = true WHERE a.id = $1`, [id]);
   if (!asset.rows.length) return res.status(404).json({ error: 'Asset not found' });
-  const ownership=await db.query("SELECT organization_id FROM gis_organization_assets WHERE asset_id=$1 LIMIT 1",[id]);
-  if(!ownership.rows.length)return res.status(403).json({error:'asset_not_tenant_assigned'});
-  const tenant=await authorizeTenant(req,ownership.rows[0].organization_id,'asset:read');
+  const tenant=await authorizeAssetTenant(req,id,'asset:read');
   if(!tenant.allowed)return tenantError(res,tenant);
   const [documents, evidence, verification, projects, valuations, risks] = await Promise.all([
     db.query('SELECT id, document_type AS "documentType", title, document_hash AS "documentHash", status, created_at AS "createdAt" FROM asset_documents WHERE asset_id = $1 ORDER BY created_at DESC', [id]),

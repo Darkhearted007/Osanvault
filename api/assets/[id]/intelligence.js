@@ -1,14 +1,13 @@
 import { db } from 'hatchable';
-import { authorizeTenant, tenantError } from 'lib/tenantAuthority.js';
+import { authorizeAssetTenant } from 'lib/assetTenantAuthority.js';
+import { tenantError } from 'lib/tenantAuthority.js';
 export const access='member';
 export const methods=['GET','POST'];
 export default async function(req,res){
   const id=String(req.params?.id||'').trim();
   const asset=await db.query('SELECT id FROM assets WHERE id=$1',[id]);
   if(!asset.rows.length)return res.status(404).json({error:'Asset not found'});
-  const ownership=await db.query('SELECT organization_id FROM gis_organization_assets WHERE asset_id=$1 LIMIT 1',[id]);
-  if(!ownership.rows.length)return res.status(403).json({error:'asset_not_tenant_assigned'});
-  const tenant=await authorizeTenant(req,ownership.rows[0].organization_id,req.method==='POST'?'asset:write':'asset:read');
+  const tenant=await authorizeAssetTenant(req,id,req.method==='POST'?'asset:write':'asset:read');
   if(!tenant.allowed)return tenantError(res,tenant);
   if(req.method==='GET'){const r=await db.query('SELECT * FROM intelligence_assessments WHERE asset_id=$1 ORDER BY created_at DESC LIMIT 10',[id]);return res.json(r.rows);}
   const [evidence,verif,risk,valuation]=await Promise.all([db.query('SELECT COUNT(*)::int AS n,AVG(confidence) AS confidence FROM asset_evidence WHERE asset_id=$1',[id]),db.query("SELECT COUNT(*)::int AS n FROM verification_cases WHERE asset_id=$1 AND status='closed'",[id]),db.query('SELECT overall_score,risk_level FROM asset_risk_assessments WHERE asset_id=$1 ORDER BY assessed_at DESC LIMIT 1',[id]),db.query('SELECT value,confidence FROM asset_valuations WHERE asset_id=$1 ORDER BY valuation_date DESC LIMIT 1',[id])]);

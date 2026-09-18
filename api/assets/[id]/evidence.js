@@ -1,10 +1,11 @@
 import { db } from 'hatchable';
-import { authorizeTenant, tenantError } from '../../../lib/tenantAuthority.js';
+import { authorizeAssetTenant } from 'lib/assetTenantAuthority.js';
+import { tenantError } from '../../../lib/tenantAuthority.js';
 export const access = 'admin';
 export const methods = ['GET','POST'];
 export default async function (req, res) {
   const assetId = req.params.id;
-  const tenant=await authorizeTenant(req,(await db.query('SELECT organization_id FROM gis_organization_assets WHERE asset_id=$1 LIMIT 1',[assetId])).rows[0]?.organization_id,'evidence:read');
+  const tenant=await authorizeAssetTenant(req,assetId,'evidence:read');
   if(!tenant.allowed)return tenantError(res,tenant);
   if (req.method === 'GET') {
     const { rows } = await db.query(`SELECT e.id, e.evidence_type AS "evidenceType", e.source, e.description, e.confidence, e.status, e.created_at AS "createdAt", d.id AS "documentId", d.title AS "documentTitle", d.document_type AS "documentType", d.document_hash AS "documentHash" FROM asset_evidence e LEFT JOIN asset_documents d ON d.id = e.document_id WHERE e.asset_id = $1 ORDER BY e.created_at DESC`, [assetId]);

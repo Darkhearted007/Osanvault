@@ -1,11 +1,12 @@
 import { db, storage } from 'hatchable';
-import { authorizeTenant, tenantError } from '../../../lib/tenantAuthority.js';
+import { authorizeAssetTenant } from '../../../lib/assetTenantAuthority.js';
+import { tenantError } from '../../../lib/tenantAuthority.js';
 export const access = 'admin';
 export const methods = ['GET','POST'];
 async function sha256(buffer) { const digest = await crypto.subtle.digest('SHA-256', buffer); return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2,'0')).join(''); }
 export default async function (req, res) {
   const assetId = req.params.id;
-  const tenant=await authorizeTenant(req,(await db.query('SELECT organization_id FROM gis_organization_assets WHERE asset_id=$1 LIMIT 1',[assetId])).rows[0]?.organization_id,'asset:read');
+  const tenant=await authorizeAssetTenant(req,assetId,'asset:read');
   if(!tenant.allowed)return tenantError(res,tenant);
   if (req.method === 'GET') {
     const { rows } = await db.query('SELECT id, document_type AS "documentType", title, document_hash AS "documentHash", version, status, created_at AS "createdAt" FROM asset_documents WHERE asset_id = $1 ORDER BY created_at DESC', [assetId]);
