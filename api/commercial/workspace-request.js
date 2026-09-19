@@ -1,7 +1,9 @@
 import { db } from 'hatchable';
+import { enforcePublicRateLimit } from 'lib/cac-public-rate-limit.js';
 export const access='public'; export const methods=['POST'];
 export default async function(req,res){
   const b=req.body||{};
+  if(!(await enforcePublicRateLimit(req,res,'commercial-workspace-request','',5)))return res.status(429).json({error:'Too many workspace requests. Try again later.'});
   const name=String(b.name||'').trim(), email=String(b.email||'').trim().toLowerCase();
   const org=String(b.organization||'').trim(), plan=String(b.plan||'enterprise').trim().toLowerCase();
   const organizationType=String(b.organization_type||'').trim();
