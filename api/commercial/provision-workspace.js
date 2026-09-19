@@ -10,7 +10,7 @@ export default async function(req,res){
  try{
   const tx=await db.transaction([
    {sql:"INSERT INTO commercial_workspaces (organization,plan,status,created_from_request) VALUES ($1,$2,'ACTIVE',$3) RETURNING id,organization,plan,status",params:[r.organization,r.plan,r.id]},
-   {sql:"UPDATE commercial_workspace_requests SET status='PROVISIONED',workspace_id=(SELECT id FROM commercial_workspaces WHERE created_from_request=$1 ORDER BY created_at DESC LIMIT 1),reviewed_at=NOW() WHERE id=$1 AND status='PENDING'",params:[r.id]},
+   {sql:"UPDATE commercial_workspace_requests SET status='PROVISIONED',workspace_id=(SELECT id FROM commercial_workspaces WHERE created_from_request=$1 ORDER BY created_at DESC LIMIT 1),reviewed_at=NOW() WHERE id=$1 AND status='APPROVED'",params:[r.id]},
    {sql:"INSERT INTO commercial_workspace_members (workspace_id,email,display_name,role) VALUES ((SELECT id FROM commercial_workspaces WHERE created_from_request=$1 ORDER BY created_at DESC LIMIT 1),$2,$3,'OWNER')",params:[r.id,r.email,r.name]},
    {sql:"INSERT INTO commercial_onboarding_checklists (workspace_id,items) VALUES ((SELECT id FROM commercial_workspaces WHERE created_from_request=$1 ORDER BY created_at DESC LIMIT 1),$2)",params:[r.id,JSON.stringify([{key:'profile',label:'Complete organization profile',done:false},{key:'verification',label:'Complete asset verification',done:false},{key:'dashboard',label:'Review first dashboard',done:false},{key:'support',label:'Confirm support contact',done:false}])]},
    {sql:"INSERT INTO commercial_workspace_audit (workspace_id,action,actor) VALUES ((SELECT id FROM commercial_workspaces WHERE created_from_request=$1 ORDER BY created_at DESC LIMIT 1),'PROVISIONED',$2)",params:[r.id,req.member?.email||'admin']}

@@ -18,7 +18,7 @@ export default async function(req,res){
  const r=q.rows[0];
  if(!t.from.includes(r.status))return res.status(409).json({error:'invalid_status_transition',status:r.status,action});
  if(action==='VERIFY'&&!notes)return res.status(400).json({error:'verification_notes_required'});
- if(action==='VERIFY'){
+ if(action==='VERIFY'||action==='APPROVE'){
   const e=(await db.query("SELECT evidence_type FROM commercial_workspace_request_evidence WHERE request_id=$1 AND verification_status='VERIFIED'",[id])).rows.map(x=>x.evidence_type);
   if(!e.includes('INCORPORATION')||!e.includes('REPRESENTATIVE_AUTHORIZATION'))return res.status(409).json({error:'required_verification_evidence_missing',required:['INCORPORATION','REPRESENTATIVE_AUTHORIZATION']});
  }

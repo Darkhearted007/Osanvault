@@ -6,5 +6,7 @@ export default async function(req,res){
  if(!q.rows.length)return res.status(404).json({error:'request not found'});
  const e=await db.query("SELECT id,evidence_type,title,source_reference,storage_key,content_hash,verification_status,submitted_by,created_at,reviewed_at,review_note FROM commercial_workspace_request_evidence WHERE request_id=$1 ORDER BY created_at DESC",[id]);
  const a=await db.query("SELECT id,action,actor,notes,created_at FROM commercial_workspace_request_audit WHERE request_id=$1 ORDER BY created_at DESC",[id]);
- res.json({request:q.rows[0],evidence:e.rows,audit:a.rows});
+ const types=e.rows.filter(x=>x.verification_status==='VERIFIED').map(x=>x.evidence_type);
+ const readiness={incorporation:types.includes('INCORPORATION'),representative_authorization:types.includes('REPRESENTATIVE_AUTHORIZATION'),ready_for_verification:types.includes('INCORPORATION')&&types.includes('REPRESENTATIVE_AUTHORIZATION')};
+ res.json({request:q.rows[0],evidence:e.rows,audit:a.rows,verification_readiness:readiness});
 }
