@@ -5,7 +5,11 @@ export const methods = ['GET'];
 export default async function(req,res){
   const token=String(req.query?.token||'');
   if(!token) return res.status(400).json({error:'Invite token is required'});
-  const {rows}=await db.query(`SELECT i.id AS "inviteId", i.status, i.expires_at AS "expiresAt", d.id AS "directorId", d.full_name AS "fullName", d.email, d.role_title AS "roleTitle", d.consent_status AS "consentStatus", d.date_of_birth AS "dateOfBirth", d.nationality, d.occupation, d.residential_address AS "residentialAddress", d.service_address AS "serviceAddress", d.phone, d.id_document_status AS "idDocumentStatus" FROM cac_director_invites i JOIN cac_director_profiles d ON d.id=i.director_id WHERE i.token_hash=$1 LIMIT 1`,[await sha256Hex(token)]);
+  res.setHeader('Cache-Control','no-store, no-cache, must-revalidate, private');
+  res.setHeader('Pragma','no-cache');
+  res.setHeader('Referrer-Policy','no-referrer');
+  res.setHeader('X-Content-Type-Options','nosniff');
+  const {rows}=await db.query(`SELECT i.id AS "inviteId", i.status, i.expires_at AS "expiresAt", d.id AS "directorId", d.full_name AS "fullName", d.role_title AS "roleTitle", d.consent_status AS "consentStatus" FROM cac_director_invites i JOIN cac_director_profiles d ON d.id=i.director_id WHERE i.token_hash=$1 LIMIT 1`,[await sha256Hex(token)]);
   if(!rows.length) return res.status(404).json({error:'Invite not found or invalid'});
   const invite=rows[0];
   if(!['pending','opened','sent'].includes(invite.status)) return res.status(409).json({error:'This invitation is no longer active'});
