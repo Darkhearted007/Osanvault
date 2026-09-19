@@ -5,9 +5,10 @@ export const methods = ['POST'];
 export default async function(req,res){
   const b=req.body||{}; const token=String(b.token||'');
   if(!token) return res.status(400).json({error:'Invite token is required'});
-  const {rows}=await db.query(`SELECT i.id AS "inviteId", i.expires_at AS "expiresAt", d.id AS "directorId", d.full_name AS "fullName", d.email FROM cac_director_invites i JOIN cac_director_profiles d ON d.id=i.director_id WHERE i.token_hash=$1 LIMIT 1`,[await sha256Hex(token)]);
+  const {rows}=await db.query(`SELECT i.id AS "inviteId", i.status, i.expires_at AS "expiresAt", d.id AS "directorId", d.full_name AS "fullName", d.email FROM cac_director_invites i JOIN cac_director_profiles d ON d.id=i.director_id WHERE i.token_hash=$1 LIMIT 1`,[await sha256Hex(token)]);
   if(!rows.length) return res.status(404).json({error:'Invite not found'});
   const invite=rows[0];
+  if(!['pending','opened','sent'].includes(invite.status)) return res.status(409).json({error:'This invitation has already been used or is no longer active'});
   if(new Date(invite.expiresAt)<=new Date()) return res.status(410).json({error:'This invitation has expired'});
   if(String(b.decision||'').toLowerCase()!=='accept') return res.status(400).json({error:'This endpoint records acceptance only. Contact the company if you decline.'});
   const consent=`I, ${invite.fullName}, agree to serve as a Director of OSANVAULT AFRICA LTD, subject to completion of the company's CAC registration requirements.`;

@@ -7,8 +7,9 @@ export default async function(req,res){
   const file=req.files?.find(f=>f.field==='document');
   if(!token || !file) return res.status(400).json({error:'Invite token and ID document are required'});
   const tokenHash=await sha256Hex(token);
-  const {rows}=await db.query(`SELECT i.id AS "inviteId", i.expires_at AS "expiresAt", d.id AS "directorId" FROM cac_director_invites i JOIN cac_director_profiles d ON d.id=i.director_id WHERE i.token_hash=$1 LIMIT 1`,[tokenHash]);
+  const {rows}=await db.query(`SELECT i.id AS "inviteId", i.status, i.expires_at AS "expiresAt", d.id AS "directorId" FROM cac_director_invites i JOIN cac_director_profiles d ON d.id=i.director_id WHERE i.token_hash=$1 LIMIT 1`,[tokenHash]);
   if(!rows.length) return res.status(404).json({error:'Invite not found'});
+  if(!['pending','opened','sent'].includes(rows[0].status)) return res.status(409).json({error:'This invitation is no longer active'});
   if(new Date(rows[0].expiresAt)<=new Date()) return res.status(410).json({error:'This invitation has expired'});
   const allowed=['image/jpeg','image/png','application/pdf'];
   if(!allowed.includes(file.contentType)) return res.status(415).json({error:'Upload a PDF, JPG or PNG'});
