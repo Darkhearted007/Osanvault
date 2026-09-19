@@ -1,5 +1,6 @@
 import { db, storage } from 'hatchable';
 import { sha256Hex } from 'lib/cac-director-security.js';
+import { enforcePublicRateLimit } from 'lib/cac-public-rate-limit.js';
 export const access = 'public';
 export const methods = ['POST'];
 export default async function(req,res){
@@ -9,6 +10,7 @@ export default async function(req,res){
   res.setHeader('X-Content-Type-Options','nosniff');
   const token=String(req.body?.token||'').trim();
   if(token.length<32 || token.length>256) return res.status(400).json({error:'Invalid invite token'});
+  if(!(await enforcePublicRateLimit(req,res,'cac-document',token,10))) return res.status(429).json({error:'Too many document requests. Try again later.'});
   const file=req.files?.find(f=>f.field==='document');
   if(!token || !file) return res.status(400).json({error:'Invite token and ID document are required'});
   const tokenHash=await sha256Hex(token);

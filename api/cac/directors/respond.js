@@ -1,5 +1,6 @@
 import { db } from 'hatchable';
 import { sha256Hex } from 'lib/cac-director-security.js';
+import { enforcePublicRateLimit } from 'lib/cac-public-rate-limit.js';
 export const access = 'public';
 export const methods = ['POST'];
 export default async function(req,res){
@@ -9,6 +10,7 @@ export default async function(req,res){
   res.setHeader('X-Content-Type-Options','nosniff');
   const b=req.body||{}; const token=String(b.token||'').trim();
   if(token.length<32 || token.length>256) return res.status(400).json({error:'Invalid invite token'});
+  if(!(await enforcePublicRateLimit(req,res,'cac-respond',token,10))) return res.status(429).json({error:'Too many invitation responses. Try again later.'});
   if(!token) return res.status(400).json({error:'Invite token is required'});
   const {rows}=await db.query(`SELECT i.id AS "inviteId", i.status, i.expires_at AS "expiresAt", d.id AS "directorId", d.full_name AS "fullName", d.email FROM cac_director_invites i JOIN cac_director_profiles d ON d.id=i.director_id WHERE i.token_hash=$1 LIMIT 1`,[await sha256Hex(token)]);
   if(!rows.length) return res.status(404).json({error:'Invite not found'});

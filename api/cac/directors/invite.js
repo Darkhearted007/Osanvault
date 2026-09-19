@@ -1,10 +1,12 @@
 import { db } from 'hatchable';
 import { sha256Hex } from 'lib/cac-director-security.js';
+import { enforcePublicRateLimit } from 'lib/cac-public-rate-limit.js';
 export const access = 'public';
 export const methods = ['GET'];
 export default async function(req,res){
   const token=String(req.query?.token||'');
-  if(!token) return res.status(400).json({error:'Invite token is required'});
+  if(!token || token.length<32 || token.length>256) return res.status(400).json({error:'Invalid invite token'});
+  if(!(await enforcePublicRateLimit(req,res,'cac-invite',token,20))) return res.status(429).json({error:'Too many invitation requests. Try again later.'});
   res.setHeader('Cache-Control','no-store, no-cache, must-revalidate, private');
   res.setHeader('Pragma','no-cache');
   res.setHeader('Referrer-Policy','no-referrer');
