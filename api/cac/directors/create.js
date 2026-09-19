@@ -6,7 +6,8 @@ export default async function(req,res){
   const body=req.body||{};
   const fullName=String(body.fullName||'').trim();
   const email=String(body.email||'').trim().toLowerCase();
-  if(!fullName || !email || !email.includes('@')) return res.status(400).json({error:'Full name and valid email are required'});
+  if(fullName.length<2 || fullName.length>200) return res.status(400).json({error:'Full name must be between 2 and 200 characters'});
+  if(email.length>320 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({error:'Valid email is required'});
   const existing=await db.query('SELECT id FROM cac_director_profiles WHERE lower(email)=lower($1) AND status <> $2 LIMIT 1',[email,'withdrawn']);
   if(existing.rows.length) return res.status(409).json({error:'A director profile already exists for this email',directorId:existing.rows[0].id});
   const profile=await db.query(`INSERT INTO cac_director_profiles (full_name,email,role_title) VALUES ($1,$2,'Director') RETURNING id, full_name AS "fullName", email, role_title AS "roleTitle", status, consent_status AS "consentStatus"`,[fullName,email]);

@@ -26,7 +26,8 @@ export default async function(req,res){
   const jpeg=head.length>=3 && head[0]===255 && head[1]===216 && head[2]===255;
   if((file.contentType==='application/pdf'&&!pdf)||(file.contentType==='image/png'&&!png)||(file.contentType==='image/jpeg'&&!jpeg)) return res.status(415).json({error:'Document content does not match the declared file type'});
   const fileHash=await sha256Hex(file.buffer);
-  const key=`cac/directors/${rows[0].directorId}/${fileHash}-${String(file.filename||'id-document').replace(/[^a-zA-Z0-9._-]/g,'_')}`;
+  const safeName=String(file.filename||'id-document').replace(/[^a-zA-Z0-9._-]/g,'_').slice(0,180) || 'id-document';
+  const key=`cac/directors/${rows[0].directorId}/${fileHash}-${safeName}`;
   const url=await storage.put(key,file.buffer,file.contentType);
   await db.query(`UPDATE cac_director_profiles SET id_document_url=$1,id_document_name=$2,id_document_hash=$3,id_document_status='submitted',updated_at=now() WHERE id=$4`,[url,file.filename,fileHash,rows[0].directorId]);
   await db.query(`INSERT INTO cac_director_audit_events (director_id,invite_id,event_type,actor,metadata) VALUES ($1,$2,'id_document_submitted','invitee',$3)`,[rows[0].directorId,rows[0].inviteId,JSON.stringify({filename:file.filename,contentType:file.contentType,sha256:fileHash})]);

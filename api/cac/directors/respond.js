@@ -16,6 +16,10 @@ export default async function(req,res){
   if(!['pending','opened','sent'].includes(invite.status)) return res.status(409).json({error:'This invitation has already been used or is no longer active'});
   if(new Date(invite.expiresAt)<=new Date()) return res.status(410).json({error:'This invitation has expired'});
   if(String(b.decision||'').toLowerCase()!=='accept') return res.status(400).json({error:'This endpoint records acceptance only. Contact the company if you decline.'});
+  const limits={dateOfBirth:40,nationality:100,occupation:200,residentialAddress:1000,serviceAddress:1000,phone:60};
+  for(const [field,max] of Object.entries(limits)){
+    if(b[field]!=null && String(b[field]).length>max) return res.status(400).json({error:`${field} exceeds the permitted length`});
+  }
   const consent=`I, ${invite.fullName}, agree to serve as a Director of OSANVAULT AFRICA LTD, subject to completion of the company's CAC registration requirements.`;
   const claimed=await db.query(`UPDATE cac_director_invites SET status='responded',responded_at=now(),updated_at=now() WHERE id=$1 AND status IN ('pending','opened','sent') AND expires_at>now() RETURNING id`,[invite.inviteId]);
   if(!claimed.rows.length) return res.status(409).json({error:'This invitation has already been used or is no longer active'});
