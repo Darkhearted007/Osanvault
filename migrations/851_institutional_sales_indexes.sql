@@ -1,0 +1,1 @@
+CREATE INDEX idx_cw_requests_pilot_status ON commercial_workspace_requests (pilot_status)

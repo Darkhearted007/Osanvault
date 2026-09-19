@@ -1,0 +1,1 @@
+ALTER TABLE commercial_workspace_requests ADD COLUMN customer_segment text

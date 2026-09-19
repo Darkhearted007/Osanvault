@@ -1,0 +1,1 @@
+CREATE INDEX idx_cw_requests_sales_stage ON commercial_workspace_requests (sales_stage)

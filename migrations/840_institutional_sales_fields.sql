@@ -1,0 +1,1 @@
+ALTER TABLE commercial_workspace_requests ADD COLUMN expected_contract_value numeric

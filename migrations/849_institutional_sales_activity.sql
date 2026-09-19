@@ -1,0 +1,1 @@
+CREATE TABLE commercial_workspace_request_sales_activity (id uuid PRIMARY KEY DEFAULT gen_random_uuid(),request_id uuid NOT NULL,activity_type text NOT NULL,notes text,actor text NOT NULL,created_at timestamptz NOT NULL DEFAULT NOW())
