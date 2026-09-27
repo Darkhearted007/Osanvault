@@ -11,7 +11,7 @@ export default async function(req,res){
     JOIN gis_organizations o ON o.id=m.organization_id
     LEFT JOIN gis_organization_positions p
       ON p.organization_id=o.id
-     AND p.position_code=CASE WHEN m.role='ADMIN' THEN 'CEO' ELSE p.position_code END
+     AND p.position_code=CASE WHEN m.role='ADMIN' THEN 'CEO' ELSE NULL END
     WHERE m.member_id=$1 AND m.status='ACTIVE' AND o.status='ACTIVE'
     ORDER BY o.created_at ASC`,[userId]);
   const organizations=rows.map(r=>({

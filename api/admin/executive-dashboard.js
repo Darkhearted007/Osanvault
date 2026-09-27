@@ -7,9 +7,10 @@ const q=async(sql,p=[])=>{try{return {rows:(await db.query(sql,p)).rows,availabl
 export default async function(req,res){
   const user=req.user||{};
   if(!user.id)return res.status(401).json({ok:false,error:'unauthorized'});
-  const orgId='d762a7d4-d114-41fa-849e-ce2272e92e71';
-  const membership=await db.query(`SELECT m.role FROM gis_organization_members m WHERE m.organization_id=$1 AND m.member_id=$2 AND m.status='ACTIVE'`,[orgId,String(user.id)]);
+  const requestedOrgId=String(req.query?.organization_id||'').trim();
+  const membership=await db.query(`SELECT m.organization_id,m.role FROM gis_organization_members m JOIN gis_organizations o ON o.id=m.organization_id WHERE m.member_id=$1 AND m.status='ACTIVE' AND o.status='ACTIVE' AND ($2='' OR m.organization_id::text=$2) ORDER BY o.created_at ASC LIMIT 1`,[String(user.id),requestedOrgId]);
   if(!membership.rows[0])return res.status(403).json({ok:false,error:'organization_access_denied'});
+  const orgId=membership.rows[0].organization_id;
   if(membership.rows[0].role!=='ADMIN')return res.status(403).json({ok:false,error:'executive_role_not_authorized'});
   const position=await db.query(`SELECT position_code,position_name,dashboard_key FROM gis_organization_positions WHERE organization_id=$1 AND position_code='CEO' LIMIT 1`,[orgId]);
   if(!position.rows[0])return res.status(403).json({ok:false,error:'executive_position_not_configured'});
@@ -40,7 +41,7 @@ export default async function(req,res){
 
   res.json({
     ok:true,
-    founder:{authenticated:true,email:user.email||null,authorization:'organization_membership_and_role'},
+    authenticatedUser:{authenticated:true,email:user.email||null,authorization:'organization_membership_and_role'},
     organization:{id:orgId,name:'ÒsánVault Africa Ltd',source:'existing production tenant',role:membership.rows[0].role,positionCode:position.rows[0].position_code,positionTitle:position.rows[0].position_name,dashboardKey:position.rows[0].dashboard_key},
     kpis:{
       totalAssets:{value:Number(assetCount.rows[0]?.count||0),available:assetCount.available,source:'gis_organization_assets'},

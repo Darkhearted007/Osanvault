@@ -15,17 +15,7 @@ export default async function (req, res) {
     WHERE m.member_id=$1 AND m.status='ACTIVE' AND o.status='ACTIVE'
     ORDER BY o.created_at ASC`, [user.id]);
 
-  const founder = String(user.email || '').trim().toLowerCase() === 'olugbenga1000@gmail.com';
   const org = membershipResult.rows[0] || null;
-  const founderReconciliation = founder
-    ? (org
-      ? {
-          status:'VERIFIED', organization_id:org.organization_id, organization_name:org.organization_name,
-          member_id:user.id, role:org.role, position_code:org.position_code||null,
-          position_title:org.position_name||null, dashboard_key:org.dashboard_key||null
-        }
-      : {status:'NOT_PROVISIONED', reason:'FOUNDER_HAS_NO_ACTIVE_ORGANIZATION_MEMBERSHIP'})
-    : {status:'NOT_APPLICABLE'};
 
   res.json({
     user,
@@ -33,7 +23,6 @@ export default async function (req, res) {
     organization: org ? {
       id:org.organization_id,name:org.organization_name,slug:org.slug||null,status:org.status,
       role:org.role,positionCode:org.position_code||null,positionTitle:org.position_name||null,dashboardKey:org.dashboard_key||null
-    } : null,
-    founderReconciliation
+    } : null
   });
 }
