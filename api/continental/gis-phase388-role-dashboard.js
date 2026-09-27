@@ -10,9 +10,9 @@ export default async function(req,res){
  const orgId=req.query?.organization_id;
  const requested=(req.query?.dashboard||'').toLowerCase();
  if(!orgId||!requested||!allowed.has(requested)) return res.status(400).json({error:'organization_id and valid dashboard are required'});
- const org=(await db.query("SELECT o.id,o.name,o.organization_type,m.role FROM gis_organization_memberships m JOIN gis_organizations o ON o.id=m.organization_id WHERE o.id=$1 AND m.member_id=$2 AND m.status='ACTIVE'",[orgId,member.id])).rows[0];
+ const org=(await db.query("SELECT o.id,o.name,o.organization_type,m.role FROM gis_organization_members m JOIN gis_organizations o ON o.id=m.organization_id WHERE o.id=$1 AND m.member_id=$2 AND m.status='ACTIVE'",[orgId,member.id])).rows[0];
  if(!org)return res.status(404).json({error:'workspace_not_found'});
- const pos=(await db.query("SELECT id,title,dashboard_key FROM gis_organization_positions WHERE organization_id=$1 AND dashboard_key=$2 ORDER BY title",[orgId,requested])).rows;
+ const pos=(await db.query("SELECT id,position_name,dashboard_key FROM gis_organization_positions WHERE organization_id=$1 AND dashboard_key=$2 ORDER BY position_name",[orgId,requested])).rows;
  const assets=(await db.query("SELECT COUNT(*)::int total FROM gis_organization_assets WHERE organization_id=$1",[orgId])).rows[0].total;
  const alerts=(await db.query("SELECT COUNT(*)::int total FROM gis_organization_alerts WHERE organization_id=$1 AND status IN ('OPEN','ACTIVE','UNREAD')",[orgId])).rows[0].total;
  const critical=(await db.query("SELECT COUNT(*)::int total FROM gis_organization_alerts WHERE organization_id=$1 AND severity IN ('CRITICAL','HIGH') AND status IN ('OPEN','ACTIVE','UNREAD')",[orgId])).rows[0].total;

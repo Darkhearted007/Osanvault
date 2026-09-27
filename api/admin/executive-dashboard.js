@@ -7,9 +7,6 @@ const q=async(sql,p=[])=>{try{return {rows:(await db.query(sql,p)).rows,availabl
 export default async function(req,res){
   const user=req.user||{};
   if(!user.id)return res.status(401).json({ok:false,error:'unauthorized'});
-  const email=String(user.email||'').trim().toLowerCase();
-  if(email!=='olugbenga1000@gmail.com')return res.status(403).json({ok:false,error:'founder_dashboard_not_authorized'});
-
   const orgId='d762a7d4-d114-41fa-849e-ce2272e92e71';
   const membership=await db.query(`SELECT m.role FROM gis_organization_members m WHERE m.organization_id=$1 AND m.member_id=$2 AND m.status='ACTIVE'`,[orgId,String(user.id)]);
   if(!membership.rows[0])return res.status(403).json({ok:false,error:'organization_access_denied'});
@@ -43,7 +40,7 @@ export default async function(req,res){
 
   res.json({
     ok:true,
-    founder:{authenticated:true,email:user.email||null},
+    founder:{authenticated:true,email:user.email||null,authorization:'organization_membership_and_role'},
     organization:{id:orgId,name:'ÒsánVault Africa Ltd',source:'existing production tenant',role:membership.rows[0].role,positionCode:position.rows[0].position_code,positionTitle:position.rows[0].position_name,dashboardKey:position.rows[0].dashboard_key},
     kpis:{
       totalAssets:{value:Number(assetCount.rows[0]?.count||0),available:assetCount.available,source:'gis_organization_assets'},

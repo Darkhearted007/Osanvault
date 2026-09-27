@@ -12,7 +12,6 @@ export default async function(req,res){
     LEFT JOIN gis_organization_positions p
       ON p.organization_id=o.id
      AND p.position_code=CASE WHEN m.role='ADMIN' THEN 'CEO' ELSE p.position_code END
-     AND p.status='ACTIVE'
     WHERE m.member_id=$1 AND m.status='ACTIVE' AND o.status='ACTIVE'
     ORDER BY o.created_at ASC`,[userId]);
   const organizations=rows.map(r=>({
