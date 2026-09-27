@@ -28,7 +28,7 @@ export default async function(req,res){
   const valuations=await q(`SELECT COUNT(DISTINCT av.asset_id)::int AS valued_assets,COALESCE(SUM(av.value),0)::numeric AS total_value
     FROM gis_organization_assets oa JOIN asset_valuations av ON av.asset_id::text=oa.asset_id::text WHERE oa.organization_id=$1 AND av.value IS NOT NULL`,[orgId]);
   const tokenized=await q(`SELECT COUNT(DISTINCT v.asset_id)::int AS count FROM gis_organization_assets oa JOIN asset_investment_vehicles v ON v.asset_id::text=oa.asset_id::text WHERE oa.organization_id=$1`,[orgId]);
-  const evidence=await q(`SELECT COUNT(*)::int AS total,COUNT(*) FILTER (WHERE verification_status='Verified')::int AS verified
+  const evidence=await q(`SELECT COUNT(*)::int AS total,COUNT(*) FILTER (WHERE status='Verified')::int AS verified
     FROM asset_evidence e JOIN gis_organization_assets oa ON oa.asset_id::text=e.asset_id::text WHERE oa.organization_id=$1`,[orgId]);
   const risks=await q(`SELECT COUNT(DISTINCT r.asset_id)::int AS assessed FROM asset_risk_assessments r JOIN gis_organization_assets oa ON oa.asset_id::text=r.asset_id::text WHERE oa.organization_id=$1`,[orgId]);
 
