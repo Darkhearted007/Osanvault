@@ -122,8 +122,14 @@ export default async function(req,res){
   gates.push(gate('crosswalk_authority',lockedCrosswalk>0&&reviewCrosswalk===0?'PASS':'BLOCKED',`${lockedCrosswalk} locked crosswalk(s), ${reviewCrosswalk} review crosswalk(s); crosswalk authority is not equivalent to INEC authority`,null));
   gates.push(gate('candidate_reconciliation',missing39118===0&&missingRec===0&&recFpMismatch===0?'PASS':'BLOCKED',`${missing39118} candidate(s) lack 391.18 lineage; ${missingRec} lack 391.20 reconciliation; ${recFpMismatch} reconciliation fingerprint mismatch(es)`));
   gates.push(gate('review_requirements',missingReview===0?'PASS':'BLOCKED',`${missingReview} candidate(s) have no Phase 391.19 review decision`));
-  gates.push(gate('tenant_isolation','NOT_EVALUATED','Certification-sensitive GIS lineage tables contain no tenant key and this admin-only audit cannot establish cross-tenant isolation without weakening the authorization boundary',null));
+  const securityProof=await q("SELECT checks,decision,observed_at FROM security_authorization_audits WHERE phase='391.6.1' ORDER BY observed_at DESC LIMIT 1");
+  const securityChecks=Array.isArray(securityProof[0]?.checks)?securityProof[0].checks:[];
+  const ownTenantPass=securityChecks.some(x=>x.name==='own_tenant_access'&&x.status==='PASS');
+  const foreignTenantPass=securityChecks.some(x=>x.name==='foreign_tenant_access'&&x.status==='PASS');
+  const secondTenantPass=securityChecks.some(x=>x.name==='second_tenant_fixture'&&x.status==='PASS');
+  gates.push(gate('tenant_isolation',ownTenantPass&&foreignTenantPass&&secondTenantPass?'PASS':'NOT_EVALUATED',ownTenantPass&&foreignTenantPass&&secondTenantPass?'Controlled live tenant proof confirms own-tenant authorization and foreign-tenant denial (HTTP 403).':'No current controlled cross-tenant authorization proof is recorded',securityProof[0]?.observed_at||null));
   gates.push(gate('authorization','PASS','Endpoint is admin-gated by Hatchable edge authorization'));
+  gates.push(gate('security_controls',securityChecks.some(x=>x.name==='tenant_controls'&&x.status==='PASS')?'PASS':'NOT_EVALUATED','Controlled security certification evidence is recorded separately from the optional electoral evidence path',securityProof[0]?.observed_at||null));
   gates.push(gate('audit_integrity',audits.length===recs.length&&recs.every(x=>x.audit_id&&audits.some(a=>a.id===x.audit_id))?'PASS':'BLOCKED',`${audits.length} Phase 391.20 audit records for ${recs.length} reconciliation records`,null));
   gates.push(gate('migration_integrity',migrationStatus,'Phase 391.21 migration lineage is forward-only and tracked',migration39121.map(x=>x.filename)));
   gates.push(gate('data_plane_integrity',phase39117[0]?.blocking_errors?.length?'BLOCKED':'PASS',phase39117[0]?.blocking_errors||'No Phase 391.17 blockers recorded'));
