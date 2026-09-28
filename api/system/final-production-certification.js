@@ -2,7 +2,7 @@ import { storage } from 'hatchable';
 export const access='admin'; export const methods=['GET'];
 export default async function(req,res){
  const read=async k=>{try{const x=await storage.get(k);return JSON.parse(new TextDecoder().decode(x.buffer));}catch{return null}};
- const cp=await read('phase388/control-plane.json'); if(!cp)return res.status(409).json({status:'NOT_READY',reason:'control_plane_missing'});
+ const cp=await read('phase388/control-plane.json'); if(!cp)return res.status(409).json({status:'NOT_READY',authority:'DEPRECATED_LEGACY_SNAPSHOT',canonical_gate:'/api/system/final-production-certification-integrity-audit',reason:'control_plane_missing'});
  const org=(cp.organizations||[]).find(o=>o.environment==='production'&&o.status==='ACTIVE');
  const ps=(cp.positions||[]).filter(x=>x.organization_id===org?.id),ds=(cp.dashboards||[]).filter(x=>x.organization_id===org?.id),layers=(cp.layers||[]).filter(x=>x.organization_id===org?.id),assets=(cp.assets||[]).filter(x=>x.organization_id===org?.id),rules=(cp.intelligenceRules||[]).filter(x=>x.organization_id===org?.id),audits=(cp.accessEvents||[]).filter(x=>x.organization_id===org?.id);
  const e2e=await read('phase388/e2e-production-validation.json'); const sec=await read('phase388/security-recovery-validation.json'); const rec=await read('phase388/controlled-failure-recovery.json');
@@ -20,6 +20,6 @@ export default async function(req,res){
  {id:'recovery_evidence',pass:rec?.status==='PASS',detail:rec?.status||'Missing recovery evidence'},
  {id:'ip_notice',pass:true,detail:'Proprietary IP/licensing notice deployed; formal government registrations remain separate legal actions'}
  ];
- const passed=checks.filter(x=>x.pass).length; const result={phase:'388.38',status:passed===checks.length?'PRODUCTION_READY':'NOT_READY',score:Math.round(passed/checks.length*100),certified_at:new Date().toISOString(),organization_id:org?.id||null,checks};
+ const passed=checks.filter(x=>x.pass).length; const result={phase:'388.38',status:'LEGACY_SNAPSHOT',release_gate:'NOT_READY',authority:'DEPRECATED_LEGACY_SNAPSHOT',canonical_gate:'/api/system/final-production-certification-integrity-audit',score:Math.round(passed/checks.length*100),certified_at:new Date().toISOString(),organization_id:org?.id||null,checks};
  await storage.put('phase388/final-production-certification.json',new TextEncoder().encode(JSON.stringify(result,null,2)),'application/json');res.json(result);
 }

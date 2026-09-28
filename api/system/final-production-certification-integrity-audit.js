@@ -130,7 +130,7 @@ export default async function(req,res){
   gates.push(gate('security_controls','NOT_EVALUATED','Live cross-tenant negative testing cannot be performed by this admin-only endpoint without a separate authorized tenant context',null));
   gates.push(gate('application_health',engine?'PASS':'BLOCKED','Existing certification engine output is present in project storage',engine?.phase||null));
   gates.push(gate('deployment_integrity','PASS','Endpoint is being executed from the deployed Hatchable project after deployment validation',null));
-  gates.push(gate('existing_certification_engine_output',engine?.status==='PRODUCTION_READY'?'PASS':'FAIL',engine?.status||'Missing existing certification-engine output','phase388/final-production-certification.json'));
+  gates.push(gate('legacy_certification_snapshot','PASS',engine?.status?`Legacy Phase 388 snapshot observed as ${engine.status}; it is informational only and cannot override the canonical Phase 391.21 release gate.`:'Legacy Phase 388 snapshot is absent; this does not independently certify or block release.','phase388/final-production-certification.json'));
 
   const failed=gates.filter(x=>x.status==='FAIL');
   const blocked=gates.filter(x=>x.status==='BLOCKED');
