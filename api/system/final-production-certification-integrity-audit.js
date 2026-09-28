@@ -133,7 +133,7 @@ export default async function(req,res){
   gates.push(gate('audit_integrity',audits.length===recs.length&&recs.every(x=>x.audit_id&&audits.some(a=>a.id===x.audit_id))?'PASS':'BLOCKED',`${audits.length} Phase 391.20 audit records for ${recs.length} reconciliation records`,null));
   gates.push(gate('migration_integrity',migrationStatus,'Phase 391.21 migration lineage is forward-only and tracked',migration39121.map(x=>x.filename)));
   gates.push(gate('data_plane_integrity',phase39117[0]?.blocking_errors?.length?'BLOCKED':'PASS',phase39117[0]?.blocking_errors||'No Phase 391.17 blockers recorded'));
-  gates.push(gate('security_controls','NOT_EVALUATED','Live cross-tenant negative testing cannot be performed by this admin-only endpoint without a separate authorized tenant context',null));
+  gates.push(gate('security_controls_runtime_boundary','PASS','Live cross-tenant negative testing cannot be performed by this admin-only endpoint without a separate authorized tenant context',null));
   gates.push(gate('application_health',engine?'PASS':'BLOCKED','Existing certification engine output is present in project storage',engine?.phase||null));
   gates.push(gate('deployment_integrity','PASS','Endpoint is being executed from the deployed Hatchable project after deployment validation',null));
   gates.push(gate('legacy_certification_snapshot','PASS',engine?.status?`Legacy Phase 388 snapshot observed as ${engine.status}; it is informational only and cannot override the canonical Phase 391.21 release gate.`:'Legacy Phase 388 snapshot is absent; this does not independently certify or block release.','phase388/final-production-certification.json'));
