@@ -123,7 +123,7 @@ export default async function(req,res){
   gates.push(gate('candidate_reconciliation',missing39118===0&&missingRec===0&&recFpMismatch===0?'PASS':'BLOCKED',`${missing39118} candidate(s) lack 391.18 lineage; ${missingRec} lack 391.20 reconciliation; ${recFpMismatch} reconciliation fingerprint mismatch(es)`));
   gates.push(gate('review_requirements',missingReview===0?'PASS':'BLOCKED',`${missingReview} candidate(s) have no Phase 391.19 review decision`));
   const securityProof=await q("SELECT checks,decision,observed_at FROM security_authorization_audits WHERE phase='391.6.1' ORDER BY observed_at DESC LIMIT 1");
-  const securityChecks=Array.isArray(securityProof[0]?.checks)?securityProof[0].checks:[];
+  const securityChecks=Array.isArray(securityProof[0]?.checks)?securityProof[0].checks:(typeof securityProof[0]?.checks==='string'?JSON.parse(securityProof[0].checks):[]);
   const ownTenantPass=securityChecks.some(x=>x.name==='own_tenant_access'&&x.status==='PASS');
   const foreignTenantPass=securityChecks.some(x=>x.name==='foreign_tenant_access'&&x.status==='PASS');
   const secondTenantPass=securityChecks.some(x=>x.name==='second_tenant_fixture'&&x.status==='PASS');
