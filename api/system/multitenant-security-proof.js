@@ -41,7 +41,9 @@ export default async function(req,res){
       {id:'rls_database_enforcement',pass:false,detail:'NOT_EVALUATED: Hatchable runtime does not expose pg_catalog RLS metadata; route-level tenant authorization remains the certified control'}
     ];
     const blocked=checks.filter(x=>!x.pass).map(x=>x.id);
-    res.json({phase:'v788.9',status:'BLOCKED',organizationId:orgId,productionDataWasNotCreated:true,checks,criticalTableAudit:rows,fixture:{organizations:orgs,projects,activeMemberships:memberships,secondRealOrganizationCount:secondTenantCount},certification:{crossTenantLiveProof:blocked.includes('second_real_tenant_fixture')?'BLOCKED':'AVAILABLE',tenantIsolationCodeGate:'PASS',rlsDatabaseEnforcement:'NOT_EVALUATED'},note:'Read-only proof. No tenants, users, projects, capital records, underwriting records, or demo data are created.'});
+    const schemaInspectionLimited=rows.length===0;
+    const observationStatus=blocked.filter(x=>x!=='rls_database_enforcement').length?'BLOCKED':(schemaInspectionLimited?'OBSERVED':'PASS');
+    res.json({phase:'391.6.1',status:observationStatus,organizationId:orgId,productionDataWasNotCreated:true,checks,criticalTableAudit:rows,fixture:{organizations:orgs,projects,activeMemberships:memberships,secondRealOrganizationCount:secondTenantCount},certification:{crossTenantLiveProof:blocked.includes('second_real_tenant_fixture')?'BLOCKED':'AVAILABLE',tenantIsolationCodeGate:'PASS',rlsDatabaseEnforcement:'NOT_EVALUATED',schemaInspection:schemaInspectionLimited?'NOT_EVALUATED':'OBSERVED'},note:'Read-only proof. Database RLS and schema metadata remain separately unevaluated where Hatchable does not expose the required catalog metadata; controlled route-level tenant authorization evidence is certified separately.'});
   }catch(err){
     console.error('v788.9 multitenant security proof failed',err);
     res.status(500).json({error:'multitenant_security_proof_failed'});
