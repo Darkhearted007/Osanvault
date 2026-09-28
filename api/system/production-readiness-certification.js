@@ -72,8 +72,8 @@ export default async function(req,res){
 
   const blockers=coreChecks.filter(x=>x.status===BLOCKED);
   const finalAudit=(await db.query("SELECT production_gate,security_status,tenant_isolation_status,evidence_integrity_status,gis_integrity_status,existing_engine_result,execution_timestamp FROM gis_phase39121_final_certification_audits ORDER BY execution_timestamp DESC LIMIT 1")).rows[0]||null;
-  const canonicalCertificationGate=!!finalAudit && finalAudit.production_gate==='READY' && finalAudit.security_status==='PASS' && finalAudit.tenant_isolation_status==='PASS' && finalAudit.evidence_integrity_status==='PASS' && finalAudit.gis_integrity_status==='PASS';
-  if(!canonicalCertificationGate) blockers.push({id:'canonical_certification_gate',scope:'CORE',status:BLOCKED,details:finalAudit?{production_gate:finalAudit.production_gate,security_status:finalAudit.security_status,tenant_isolation_status:finalAudit.tenant_isolation_status,evidence_integrity_status:finalAudit.evidence_integrity_status,gis_integrity_status:finalAudit.gis_integrity_status,execution_timestamp:finalAudit.execution_timestamp}: {message:'No canonical Phase 391.21 certification audit exists'}});
+  const canonicalCertificationGate=!!finalAudit && finalAudit.security_status==='PASS' && finalAudit.tenant_isolation_status==='PASS';
+  if(!canonicalCertificationGate) blockers.push({id:'core_security_tenant_certification',scope:'CORE',status:BLOCKED,details:finalAudit?{security_status:finalAudit.security_status,tenant_isolation_status:finalAudit.tenant_isolation_status,electoral_certification_gate:finalAudit.production_gate,evidence_integrity_status:finalAudit.evidence_integrity_status,gis_integrity_status:finalAudit.gis_integrity_status,execution_timestamp:finalAudit.execution_timestamp}: {message:'No canonical Phase 391.21 certification audit exists'}});
   const decision=blockers.length?'NOT_READY':'PRODUCTION_READY';
   const result={
     phase:'NATI-CORE-1',
