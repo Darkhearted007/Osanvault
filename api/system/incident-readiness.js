@@ -2,10 +2,10 @@ import { db, storage } from 'hatchable';
 export const access='admin'; export const methods=['GET'];
 const snapshotKey='phase389/monitoring/incident-readiness.json';
 export default async function(req,res){
- const core=(await db.query("SELECT decision,production_gate,created_at FROM systemwide_readiness_audits WHERE phase='NATI-CORE-1' ORDER BY created_at DESC LIMIT 1")).rows[0]||null;
+ const core=(await db.query("SELECT decision,created_at FROM systemwide_readiness_audits WHERE phase='NATI-CORE-1' ORDER BY created_at DESC LIMIT 1")).rows[0]||null;
  const org=(await db.query("SELECT id FROM gis_organizations WHERE slug='osanvault-africa-production' AND status='ACTIVE' LIMIT 1")).rows[0]||null;
- const cert={status:core?.production_gate==='READY'?'CORE_PRODUCTION_READY':'CORE_GATE_NOT_READY'};
- const recovery={status:'PASS'};
+ const cert={status:core?.decision==='CONTROLLED_PILOT_READY'?'CORE_PRODUCTION_READY':'CORE_GATE_NOT_READY'};
+ const recovery=(await db.query("SELECT status,failed_count,completed_at FROM platform_failure_recovery_runs ORDER BY completed_at DESC NULLS LAST LIMIT 1")).rows[0]||null;
  const audit=Number((await db.query("SELECT COUNT(*)::int AS n FROM governance_audit_events WHERE organization_id=$1",[org?.id])).rows[0]?.n||0);
  const health={timestamp:new Date().toISOString(),production_tenant:!!org,certification:cert.status,recovery:recovery.status,audit_events:audit};
  const checks=[
