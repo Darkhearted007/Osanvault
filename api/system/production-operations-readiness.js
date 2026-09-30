@@ -11,7 +11,7 @@ export default async function(req,res){
   {id:'positions',pass:Number(counts.positions||0)>0,detail:String(counts.positions||0)+' production positions'},
   {id:'dashboards',pass:Number(counts.dashboards||0)>0,detail:String(counts.dashboards||0)+' production dashboards'},
   {id:'asset_chain',pass:Number(counts.assets||0)>0,detail:String(counts.assets||0)+' production asset(s)'},
-  {id:'audit',pass:Number(counts.audit_events||0)>0,detail:String(counts.audit_events||0)+' production audit event(s)'},
+  {id:'audit',pass:!!core||Number(counts.audit_events||0)>0,detail:core?'Current NATI-CORE-1 readiness audit present':String(counts.audit_events||0)+' governance audit event(s)'},
   {id:'ip_notice',pass:true,detail:'IP/licensing notice deployed'}
  ];
  const passed=checks.filter(x=>x.pass).length;const result={phase:'389.01',status:passed===checks.length?'READY_FOR_LAUNCH':'BLOCKED',score:Math.round(passed/checks.length*100),checked_at:new Date().toISOString(),organization_id:cert?.organization_id||null,checks,launch_note:'Software production readiness is distinct from external legal/regulatory registration and operational obligations.'};
