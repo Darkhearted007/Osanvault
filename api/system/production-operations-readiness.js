@@ -1,11 +1,11 @@
-import { storage } from 'hatchable';
+import { db, storage } from 'hatchable';
 export const access='admin'; export const methods=['GET'];
 export default async function(req,res){
- const read=async k=>{try{const x=await storage.get(k);return JSON.parse(new TextDecoder().decode(x.buffer))}catch{return null}};
- const cert=await read('phase388/final-production-certification.json');
- const cp=await read('phase388/control-plane.json');
+ const core=(await db.query("SELECT decision,production_gate,created_at FROM systemwide_readiness_audits WHERE phase='NATI-CORE-1' ORDER BY created_at DESC LIMIT 1")).rows[0]||null;
+ const cp=(await db.query("SELECT id FROM gis_organizations WHERE slug='osanvault-africa-production' AND status='ACTIVE' LIMIT 1")).rows[0]||null;
+ const cert={organization_id:cp?.id||null,status:core?.production_gate==='READY'?'CORE_PRODUCTION_READY':'CORE_GATE_NOT_READY'};
  const checks=[
-  {id:'certification',pass:cert?.status==='PRODUCTION_READY',detail:cert?.status||'Missing final certification'},
+  {id:'certification',pass:cert?.status==='CORE_PRODUCTION_READY',detail:cert?.status||'Missing current CORE certification'},
   {id:'tenant',pass:!!(cp?.organizations||[]).find(x=>x.environment==='production'&&x.status==='ACTIVE'),detail:'Active production tenant'},
   {id:'positions',pass:(cp?.positions||[]).filter(x=>x.organization_id===(cert?.organization_id)).length===5,detail:'Five production positions'},
   {id:'dashboards',pass:(cp?.dashboards||[]).filter(x=>x.organization_id===(cert?.organization_id)).length===5,detail:'Five production dashboards'},

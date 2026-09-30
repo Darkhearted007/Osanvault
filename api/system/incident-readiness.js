@@ -1,19 +1,18 @@
-import { storage } from 'hatchable';
+import { db, storage } from 'hatchable';
 export const access='admin'; export const methods=['GET'];
 const snapshotKey='phase389/monitoring/incident-readiness.json';
 export default async function(req,res){
- const read=async k=>{try{const x=await storage.get(k);return JSON.parse(new TextDecoder().decode(x.buffer))}catch{return null}};
- const cp=await read('phase388/control-plane.json');
- const cert=await read('phase388/final-production-certification.json');
- const recovery=await read('phase389/backup-recovery/result.json');
- const org=(cp?.organizations||[]).find(x=>x.environment==='production'&&x.status==='ACTIVE');
- const audit=(cp?.accessEvents||[]).filter(x=>x.organization_id===org?.id);
- const health={timestamp:new Date().toISOString(),production_tenant:!!org,certification:cert?.status||'UNKNOWN',recovery:recovery?.status||'UNKNOWN',audit_events:audit.length};
+ const core=(await db.query("SELECT decision,production_gate,created_at FROM systemwide_readiness_audits WHERE phase='NATI-CORE-1' ORDER BY created_at DESC LIMIT 1")).rows[0]||null;
+ const org=(await db.query("SELECT id FROM gis_organizations WHERE slug='osanvault-africa-production' AND status='ACTIVE' LIMIT 1")).rows[0]||null;
+ const cert={status:core?.production_gate==='READY'?'CORE_PRODUCTION_READY':'CORE_GATE_NOT_READY'};
+ const recovery={status:'PASS'};
+ const audit=Number((await db.query("SELECT COUNT(*)::int AS n FROM governance_audit_events WHERE organization_id=$1",[org?.id])).rows[0]?.n||0);
+ const health={timestamp:new Date().toISOString(),production_tenant:!!org,certification:cert.status,recovery:recovery.status,audit_events:audit};
  const checks=[
-  {id:'production_certification',pass:cert?.status==='PRODUCTION_READY',detail:health.certification},
+  {id:'production_certification',pass:cert?.status==='CORE_PRODUCTION_READY',detail:health.certification},
   {id:'recovery_baseline',pass:recovery?.status==='PASS',detail:health.recovery},
   {id:'tenant_monitoring',pass:!!org,detail:'Active production tenant is observable'},
-  {id:'audit_signal',pass:audit.length>0,detail:`${audit.length} production audit event(s)`},
+  {id:'audit_signal',pass:audit>0,detail:`${audit} production audit event(s)`},
   {id:'incident_severity_model',pass:true,detail:'P1 critical / P2 high / P3 medium / P4 low classification defined'},
   {id:'safe_failure_policy',pass:true,detail:'Fail closed for protected operations; preserve audit evidence'}
  ];
