@@ -10,7 +10,7 @@ export default async function(req,res){
  const health={timestamp:new Date().toISOString(),production_tenant:!!org,certification:cert.status,recovery:recovery.status,audit_events:audit};
  const checks=[
   {id:'production_certification',pass:cert?.status==='CORE_PRODUCTION_READY',detail:health.certification},
-  {id:'recovery_baseline',pass:recovery?.status==='PASS',detail:health.recovery},
+  {id:'recovery_baseline',pass:recovery?.status==='PASS'||recovery?.status==='passed',detail:health.recovery},
   {id:'tenant_monitoring',pass:!!org,detail:'Active production tenant is observable'},
   {id:'audit_signal',pass:audit>0||!!core,detail:core?'Current NATI-CORE-1 readiness audit present':String(audit)+' governance audit event(s)'},
   {id:'incident_severity_model',pass:true,detail:'P1 critical / P2 high / P3 medium / P4 low classification defined'},
