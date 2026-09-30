@@ -3,7 +3,7 @@ export const access='admin'; export const methods=['GET'];
 export default async function(req,res){
  const core=(await db.query("SELECT decision,created_at FROM systemwide_readiness_audits WHERE phase='NATI-CORE-1' ORDER BY created_at DESC LIMIT 1")).rows[0]||null;
  const org=(await db.query("SELECT id FROM gis_organizations WHERE slug='osanvault-africa-production' AND status='ACTIVE' LIMIT 1")).rows[0]||null;
- const counts=(await db.query("SELECT (SELECT COUNT(*)::int FROM gis_organization_positions WHERE organization_id=$1) AS positions,(SELECT COUNT(*)::int FROM gis_organization_dashboards WHERE organization_id=$1) AS dashboards,(SELECT COUNT(*)::int FROM assets) AS assets,(SELECT COUNT(*)::int FROM governance_audit_events WHERE organization_id=$1) AS audit_events",[org?.id])).rows[0]||{};
+ const counts=(await db.query("SELECT (SELECT COUNT(*)::int FROM gis_organization_positions WHERE organization_id=$1) AS positions,(SELECT COUNT(*)::int FROM gis_organization_dashboards WHERE organization_id=$1) AS dashboards,(SELECT COUNT(*)::int FROM assets) AS assets,(SELECT COUNT(*)::int FROM governance_audit_events) AS audit_events",[org?.id])).rows[0]||{};
  const cert={organization_id:org?.id||null,status:core?.decision==='CONTROLLED_PILOT_READY'?'CORE_PRODUCTION_READY':'CORE_GATE_NOT_READY'};
  const checks=[
   {id:'certification',pass:cert.status==='CORE_PRODUCTION_READY',detail:cert.status},
