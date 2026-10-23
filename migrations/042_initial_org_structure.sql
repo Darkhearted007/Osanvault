@@ -1,3 +1,4 @@
+ALTER TABLE org_positions ADD COLUMN IF NOT EXISTS description text;
 ALTER TABLE org_departments ADD COLUMN IF NOT EXISTS description text;
 ALTER TABLE org_departments ADD COLUMN IF NOT EXISTS jurisdiction text NOT NULL DEFAULT 'Continental';
 
