@@ -1,4 +1,4 @@
 import { db } from "hatchable";
-export const access="public";
+export const access = "admin";
 export const methods=["GET"];
 export default async function(req,res){const version=req.query?.certification_version||'phase361-v1';const q=await db.query(`SELECT certification_version,features_expected,features_verified,certified_count,revoked_count,missing_event_count,broken_chain_count,hash_mismatch_count,integrity_status,report,created_at FROM gis_phase364_integrity_runs WHERE certification_version=$1 ORDER BY created_at DESC LIMIT 1`,[version]);if(!q.rows.length)return res.status(404).json({status:'NO_INTEGRITY_RUN'});const r=q.rows[0];return res.json({phase:364,certificationVersion:r.certification_version,status:r.integrity_status,metrics:{featuresExpected:r.features_expected,featuresVerified:r.features_verified,certifiedCount:r.certified_count,revokedCount:r.revoked_count,missingEventCount:r.missing_event_count,brokenChainCount:r.broken_chain_count,hashMismatchCount:r.hash_mismatch_count},checkedAt:r.created_at});}
