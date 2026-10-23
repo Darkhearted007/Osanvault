@@ -9,11 +9,13 @@ CREATE TABLE IF NOT EXISTS commercial_workspace_request_evidence (
   source_reference text,
   storage_key text,
   content_hash text,
-  verification_status text NOT NULL DEFAULT 'SUBMITTED',
+  verification_status text NOT NULL DEFAULT 'PENDING',
   submitted_by text NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now(),
   reviewed_at timestamptz,
-  review_note text
+  reviewed_by text,
+  review_note text,
+  storage_url text
 );
 CREATE INDEX IF NOT EXISTS idx_commercial_request_evidence_request_created
   ON commercial_workspace_request_evidence(request_id, created_at DESC);
