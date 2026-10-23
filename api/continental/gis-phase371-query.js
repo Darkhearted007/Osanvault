@@ -1,4 +1,4 @@
 import { db } from "hatchable";
-export const access="public";
+export const access = "admin";
 export const methods=["GET"];
 export default async function(req,res){const version=req.query?.certification_version||'phase361-v1';const feature=req.query?.feature_id;if(!feature)return res.status(400).json({error:'feature_id_required'});const q=await db.query(`SELECT certification_version,feature_id,boundary_level,boundary_id,intersection_status,overlap_ratio,confidence,evidence,created_at FROM gis_phase371_boundary_intersections WHERE certification_version=$1 AND feature_id=$2 ORDER BY CASE boundary_level WHEN 'STATE' THEN 1 WHEN 'LGA' THEN 2 WHEN 'WARD' THEN 3 ELSE 4 END`,[version,feature]);if(!q.rows.length)return res.status(404).json({status:'NOT_FOUND'});return res.json({phase:371,featureId:feature,intersections:q.rows,trust:{certification:'phase361',integrity:'phase362',registry:'phase366',hierarchy:'phase368',boundaryValidation:'phase370',spatialIntersection:'phase371'}});}

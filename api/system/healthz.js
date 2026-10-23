@@ -1,4 +1,13 @@
 import { db } from 'hatchable';
-export const access='public';
-export const methods=['GET'];
-export default async function(req,res){const checks=[];try{await db.query('SELECT 1');checks.push({name:'database',status:'ok'});}catch(e){checks.push({name:'database',status:'error'});}for(const table of ['assets','asset_evidence','verification_cases','projects','intelligence_assessments','institutional_profiles','project_capital_requests','economic_entities','economic_graph_relationships','intelligence_remediation_items','institutional_data_rooms']){try{await db.query(`SELECT 1 FROM ${table} LIMIT 1`);checks.push({name:table,status:'ok'});}catch(e){checks.push({name:table,status:'error'});}}const ok=checks.every(x=>x.status==='ok');res.status(ok?200:503).json({status:ok?'ok':'degraded',version:'OV-15.9',checks});}
+export const access = 'public';
+export const methods = ['GET'];
+
+export default async function(req,res) {
+  res.setHeader('Cache-Control','no-store');
+  try {
+    await db.query('SELECT 1');
+    return res.json({status:'ok',service:'osanvault',version:'OV-15.9'});
+  } catch (error) {
+    return res.status(503).json({status:'degraded',service:'osanvault'});
+  }
+}

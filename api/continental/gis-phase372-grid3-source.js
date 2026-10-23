@@ -1,3 +1,3 @@
-export const access="public";
+export const access = "admin";
 export const methods=["GET"];
 export default async function(req,res){const sources=[{layer:'Nigeria operational states',provider:'GRID3',url:'https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/NGA_Operational_States/FeatureServer',hierarchy:'STATE'},{layer:'Nigeria operational LGAs',provider:'GRID3',url:'https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/NGA_Operational_LGAs/FeatureServer',hierarchy:'LGA'},{layer:'Nigeria operational wards',provider:'GRID3',url:'https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/NGA_Operational_Wards/FeatureServer',hierarchy:'WARD'}];return res.json({phase:372,provider:'GRID3',sources,provenance:{sourceCatalogue:'https://grid3.org/geospatial-data-nigeria',retrieval:'live ArcGIS REST service metadata',assertionsEnabled:false}});}

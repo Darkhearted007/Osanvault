@@ -1,4 +1,4 @@
 import { db } from "hatchable";
-export const access="public";
+export const access = "admin";
 export const methods=["GET"];
 export default async function(req,res){const version=req.query?.certification_version||'phase361-v1';const q=await db.query(`SELECT COUNT(*)::bigint total,COUNT(*) FILTER (WHERE status='CERTIFIED')::bigint certified,COUNT(DISTINCT state_code)::bigint states FROM gis_phase366_certification_registry WHERE certification_version=$1`,[version]);const r=q.rows[0];return res.json({phase:367,certificationVersion:version,registry:{total:Number(r.total),certified:Number(r.certified),states:Number(r.states)},status:Number(r.total)===774&&Number(r.certified)===774?'READY':'REVIEW',readOnly:true});}

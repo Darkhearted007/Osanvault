@@ -12,7 +12,7 @@ export default async function(req,res){
  const file=req.files?.find(f=>f.field==='file');if(!file&&!ref)return res.status(400).json({error:'file or source_reference is required'});if(file&&file.buffer.length>15*1024*1024)return res.status(413).json({error:'file exceeds 15 MB limit'});
  let key=null,h=null,url=null;if(file){h=await hash(file.buffer);const safe=(file.filename||'evidence').replace(/[^a-zA-Z0-9._-]/g,'_');key='commercial-request-evidence/'+id+'/'+crypto.randomUUID()+'-'+safe;url=await storage.put(key,file.buffer,file.contentType||'application/octet-stream');}
  const actor=String(req.member?.email||'admin').slice(0,200);
- const r=await db.query("INSERT INTO commercial_workspace_request_evidence(request_id,evidence_type,title,source_reference,storage_key,content_hash,storage_url,submitted_by) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING id,evidence_type,title,source_reference,storage_key,content_hash,verification_status,created_at",[id,type,title,ref||null,key,h,url,actor]);
+ const r=await db.query("INSERT INTO commercial_workspace_request_evidence(request_id,evidence_type,title,source_reference,storage_key,content_hash,storage_url,submitted_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id,evidence_type,title,source_reference,storage_key,content_hash,verification_status,created_at",[id,type,title,ref||null,key,h,url,actor]);
  await db.query("INSERT INTO commercial_workspace_request_audit(request_id,action,actor,notes) VALUES($1,'EVIDENCE_ADDED',$2,$3)",[id,actor,title]);
  res.status(201).json({evidence:r.rows[0],publicExposure:false});
 }

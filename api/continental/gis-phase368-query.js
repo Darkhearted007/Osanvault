@@ -1,4 +1,4 @@
 import { db } from "hatchable";
-export const access="public";
+export const access = "admin";
 export const methods=["GET"];
 export default async function(req,res){const version=req.query?.certification_version||'phase361-v1';const feature=req.query?.feature_id;const state=req.query?.state_code;const lga=req.query?.lga_code;const ward=req.query?.ward_code;if(!feature&&!state&&!lga&&!ward)return res.status(400).json({error:'feature_id_or_state_code_or_lga_code_or_ward_code_required'});let sql=`SELECT certification_version,feature_id,state_code,lga_code,ward_code,resolution_status,confidence,evidence FROM gis_phase368_hierarchy_resolution WHERE certification_version=$1`;const p=[version];if(feature){sql+=' AND feature_id=$2';p.push(feature);}else if(ward){sql+=' AND ward_code=$2';p.push(ward);}else if(lga){sql+=' AND lga_code=$2';p.push(lga);}else{sql+=' AND state_code=$2';p.push(state);}sql+=' ORDER BY feature_id LIMIT 100';const q=await db.query(sql,p);return res.json({phase:368,count:q.rows.length,records:q.rows,trust:{certification:'phase361',integrity:'phase362',registry:'phase366',spatial:'phase367',hierarchy:'phase368'}});}
