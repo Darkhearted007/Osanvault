@@ -1,3 +1,17 @@
+CREATE TABLE IF NOT EXISTS continental_business_modules (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  module_key text NOT NULL UNIQUE,
+  name text NOT NULL,
+  customer_segments jsonb NOT NULL DEFAULT '[]'::jsonb,
+  value_proposition text NOT NULL,
+  revenue_model text NOT NULL,
+  maturity text NOT NULL DEFAULT 'planned',
+  regulatory_boundary text NOT NULL,
+  dependency_modules jsonb NOT NULL DEFAULT '[]'::jsonb,
+  active boolean NOT NULL DEFAULT true,
+  display_order integer NOT NULL DEFAULT 100,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
 INSERT INTO continental_business_modules (id,module_key,name,customer_segments,value_proposition,revenue_model,maturity,regulatory_boundary,dependency_modules,active,display_order)
 SELECT gen_random_uuid(),'energy-utilities-intelligence','Energy, Utilities & Critical Infrastructure Intelligence',to_jsonb(ARRAY['utilities','infrastructure operators','governments','developers','DFIs']::text[]),'Structure evidence around power, water, telecoms and other critical infrastructure assets, service context, territory dependencies and project readiness.','Enterprise subscription; infrastructure intelligence programmes; API/data licensing.','planned','Decision-support infrastructure only. No utility operation, engineering certification, tariff determination or financing guarantee.',to_jsonb(ARRAY['asset-intelligence','GIS','corridor-intelligence','risk']::text[]),true,80
 WHERE NOT EXISTS (SELECT 1 FROM continental_business_modules WHERE module_key='energy-utilities-intelligence');
