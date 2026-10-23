@@ -1,4 +1,4 @@
 import { db } from "hatchable";
-export const access="public";
+export const access = "admin";
 export const methods=["GET"];
 export default async function(req,res){const version=req.query?.certification_version||'phase361-v1';const q=await db.query(`SELECT candidate_id,source_identity_pass,feature_inventory_pass,state_coverage_pass,geometry_evidence_pass,feature_relationship_pass,evidence_score,lga_ward_assertions_enabled,validation_status,evidence,created_at FROM gis_phase370_boundary_validation WHERE certification_version=$1 ORDER BY created_at DESC LIMIT 1`,[version]);if(!q.rows.length)return res.status(404).json({status:'NO_VALIDATION_RUN'});return res.json({phase:370,certificationVersion:version,validation:q.rows[0],decision:q.rows[0].lga_ward_assertions_enabled?'LGA_WARD_ENABLED':'LGA_WARD_NOT_ASSERTED'});}
